@@ -1,7 +1,7 @@
 <mujoco model="XSensStyleModel_template">
   <compiler angle="radian"/>
   <worldbody>
-    <body name="humanoid" pos="0 0 3">
+    <body name="humanoid" pos="0 0 1">
       <joint name="humanoid_free" type="free"/>
       <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="10" diaginertia="1e-06 1e-06 1e-06"/>
       <body name="L5_f1" pos="-0.000206 0 0.098478">
