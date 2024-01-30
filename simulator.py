@@ -3,57 +3,7 @@ import cv2
 import numpy as np
 import random
 import quaternion
-
-# DOMAIN RANDOMIZATION TECHNIQUES FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
-
-# Specifically, we randomized the floor friction (0.5 to
-# 1.0), joint angular offsets (±2.9°), and varied the orientation (up to 2°) and position (up to 5 mm)
-# of the IMU, and attached a random external mass (up to 0.5 kg) to a randomly chosen location on
-# the robot torso. We also added random time delays (10 ms to 50 ms) to the observations to emulate
-# latency in the control loop. The values were resampled in the beginning of each episode, and then
-# kept constant for the whole episode. In addition to domain randomization, we found that applying
-# random perturbations to the robot during training substantially improved the robustness of the agent,
-# leading to better transfer. Specifically, we applied an external impulse force 5 N m to 15 N m lasting
-# for 0.05 s to 0.15 s to a randomly selected point on the torso every 1 s to 3 s
-
-# MUJOCO REF FRAME: ENU
-
-### PARAMETERS
-FLOOR_FRICTION_MIN_MULTIPLIER = 0.5
-FLOOR_FRICTION_MAX_MULTIPLIER = 1.0
-MIN_DELAY = 0.01 #s, applies to observations and actions
-MAX_DELAY = 0.05 #s, applies to observations and actions
-MAX_MASS_CHANGE_PER_LIMB = 0.05 #kg
-MAX_EXTERNAL_MASS_ADDED = 0.1 #kg
-MIN_EXTERNAL_FORCE_DURATION = 0.05 #s
-MAX_EXTERNAL_FORCE_DURATION = 0.15 #s
-MIN_EXTERNAL_FORCE_MAGNITUDE = 5 #N m ?
-MAX_EXTERNAL_FORCE_MAGNITUDE = 15 #N m ?
-MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
-MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
-JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
-IMU_ORIENTATION_OFFSET_MAX = 10 # degrees
-IMU_POS_OFFSET_MAX = 0.05 # meters
-PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
-JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
-GYRO_NOISE_STDDEV = 0 # degrees
-ACCELEROMETER_NOISE_STDDEV = 0.05 # G
-PRESSURE_SENSOR_NOISE_STDDEV = 0.1 #N m ?
-VELOCIMETER_NOISE_STDDEV = 0.05 # m/s
-JOINT_DAMPING_MAX_CHANGE = 0.1 # Nm/(rad/s) ?
-JOINT_ARMATURE_MAX_CHANGE = 0.05 # kg m2 ?
-JOINT_FRICTION_MAX_CHANGE = 0.05 # ?
-JOINT_RANGE_MAX_CHANGE = 1 # degrees
-JOINT_STIFFNESS_MAX_CHANGE = 0.05
-JOINT_MARGIN_MAX_CHANGE = 0.5 # degrees ?
-
-JOINT_NAMES = ['jL5S1_rotx', 'jL5S1_roty', 'jL5S1_rotz', 'jL4L3_rotx', 'jL4L3_roty', 'jL4L3_rotz', 'jL1T12_rotx', 'jL1T12_roty', 'jL1T12_rotz', 'jT9T8_rotx', 'jT9T8_roty', 'jT9T8_rotz', 'jT1C7_rotx', 'jT1C7_roty', 'jT1C7_rotz', 'jC1Head_rotx', 'jC1Head_roty', 'jC1Head_rotz', 'jRightC7Shoulder_rotx', 'jRightC7Shoulder_roty', 'jRightC7Shoulder_rotz', 'jRightShoulder_rotx', 'jRightShoulder_roty', 'jRightShoulder_rotz', 'jRightElbow_rotx', 'jRightElbow_roty', 'jRightElbow_rotz', 'jRightWrist_rotx', 'jRightWrist_roty', 'jRightWrist_rotz', 'jLeftC7Shoulder_rotx', 'jLeftC7Shoulder_roty', 'jLeftC7Shoulder_rotz', 'jLeftShoulder_rotx', 'jLeftShoulder_roty', 'jLeftShoulder_rotz', 'jLeftElbow_rotx', 'jLeftElbow_roty', 'jLeftElbow_rotz', 'jLeftWrist_rotx', 'jLeftWrist_roty', 'jLeftWrist_rotz', 'jRightHip_rotx', 'jRightHip_roty', 'jRightHip_rotz', 'jRightKnee_rotx', 'jRightKnee_roty', 'jRightKnee_rotz', 'jRightAnkle_rotx', 'jRightAnkle_roty', 'jRightAnkle_rotz', 'jRightBallFoot_rotx', 'jRightBallFoot_roty', 'jRightBallFoot_rotz', 'jLeftHip_rotx', 'jLeftHip_roty', 'jLeftHip_rotz', 'jLeftKnee_rotx', 'jLeftKnee_roty', 'jLeftKnee_rotz', 'jLeftAnkle_rotx', 'jLeftAnkle_roty', 'jLeftAnkle_rotz', 'jLeftBallFoot_rotx', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotz', 'jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz']
-
-JOINT_SENSOR_NAMES = ['jLeftBallFoot_rotz'] # TODO -> can be replaced by JOINT_SENSOR_NAMES = JOINT_NAMES when robot URDF is complete
-
-PRESSURE_SENSOR_SITE_NAMES = ["foot_LLB"] # TODO
-
-PRESSURE_SENSOR_NAMES = ["pressure_LLB"] # TODO
+from simulation_parameters import *
 
 class Simulator:
   def __init__(self, xml_path, timestep=0.001, randomization_factor=0):
@@ -110,8 +60,8 @@ class Simulator:
     # randomize IMU X/Y/Z/Quat
     for i in range(len(self.model.site("IMU").pos)):
       self.model.site("IMU").pos[i] += random.uniform(-IMU_POS_OFFSET_MAX*self.randomization_factor, IMU_POS_OFFSET_MAX*self.randomization_factor)
-    random_quat = np.quaternion(*self.model.site("IMU").quat) * quaternion.from_euler_angles([random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor), random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor), random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor)])
-    self.model.site("IMU").quat = quaternion.as_float_array(random_quat)
+    self.IMU_offset_quat = np.quaternion(*self.model.site("IMU").quat) * quaternion.from_euler_angles([random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor), random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor), random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor)])
+    self.model.site("IMU").quat = quaternion.as_float_array(self.IMU_offset_quat)
     #add sensor noise
     self.model.sensor("gyro").noise = random.uniform(0, (GYRO_NOISE_STDDEV/180.0*np.pi)*self.randomization_factor)
     self.model.sensor("accelerometer").noise = random.uniform(0, ACCELEROMETER_NOISE_STDDEV*self.randomization_factor)
@@ -121,7 +71,7 @@ class Simulator:
     for joint in JOINT_SENSOR_NAMES:
       self.model.sensor(joint).noise = random.uniform(0, (JOINT_ANGLE_NOISE_STDDEV/180.0*np.pi)*self.randomization_factor)
     # randomize foot sensor X/Y positions
-    for pressure_site in PRESSURE_SENSOR_SITE_NAMES:
+    for pressure_site in PRESSURE_SENSOR_NAMES:
       self.model.site(pressure_site).pos[0] += random.uniform(-PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor, PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor)
       self.model.site(pressure_site).pos[1] += random.uniform(-PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor, PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor)
     # randomize joint properties  
@@ -133,7 +83,15 @@ class Simulator:
       self.model.joint(joint).margin[0] += random.uniform(0, JOINT_MARGIN_MAX_CHANGE)*self.randomization_factor
       self.model.joint(joint).range[0] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
       self.model.joint(joint).range[1] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
-    
+    for joint in JOINT_ACTUATOR_NAMES:
+      self.model.actuator(joint).forcerange[0] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
+      self.model.actuator(joint).forcerange[1] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
+      kp = max(0, JOINT_PID_P_GAIN + random.uniform(-JOINT_PID_GAIN_MAX_CHANGE, JOINT_PID_GAIN_MAX_CHANGE)*self.randomization_factor)
+      kv = max(0, JOINT_PID_V_GAIN + random.uniform(-JOINT_PID_GAIN_MAX_CHANGE, JOINT_PID_GAIN_MAX_CHANGE)*self.randomization_factor)
+      self.model.actuator(joint).gainprm[0] = kp
+      self.model.actuator(joint).biasprm[1] = -kp
+      self.model.actuator(joint).biasprm[2] = -kv
+
     # create data from model
     self.data = mujoco.MjData(self.model)
     mujoco.mj_kinematics(self.model, self.data)
@@ -143,28 +101,65 @@ class Simulator:
       for i in range(len(self.data.joint(joint).qpos)):
         self.data.joint(joint).qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
     
+  def computeReward(self):
+    reward = 0
+    # Velocity The magnitude of the player’s forward velocity. - 0.1
+    delta_pos = self.data.sensor("IMU_vel").data.copy() # LOCAL FRAME
+    reward += X_VELOCITY_REWARD_WEIGHT * delta_pos[0]
+    reward += Y_VELOCITY_REWARD_WEIGHT * delta_pos[1]
+    reward += Z_VELOCITY_REWARD_WEIGHT * delta_pos[2]
     
-  def getState(self): # TODO: verify reference frames are global and NWU
+    # Termination A penalty, equal to −1 if the player is on the ground - 0.5
+    isTouchingGround = self.data.body('humanoid').xpos[2] < 0
+    if isTouchingGround:
+      reward += -1 * GROUNDED_PENALTY_WEIGHT
+      
+    # Upright 0 if the robot is upside down or if the tilt angle is greater
+        # than 0.4 radians. Increases linearly, and is equal to +1 if the
+        # tilt angle is less than 0.2 radians. - 0.02
+    IMU_quat = np.quaternion(*self.data.sensor("IMU_quat").data.copy()) * self.IMU_offset_quat.inverse()
+    tilt_angle = abs(2 * np.arccos(IMU_quat.w))
+    if tilt_angle < MIN_TILT_FOR_REWARD:
+      reward += UPRIGHT_REWARD_WEIGHT
+    elif tilt_angle < MAX_TILT_FOR_REWARD:
+      tilt_reward = (MAX_TILT_FOR_REWARD - tilt_angle) / (MAX_TILT_FOR_REWARD-MIN_TILT_FOR_REWARD)
+      reward += tilt_reward * UPRIGHT_REWARD_WEIGHT
+      
+    # Joint torque A penalty, equal to the magnitude of the torque measured at
+        # the player’s knees. This discourages the player from learning
+        # gaits which cause high forces on the knees, for example
+        # during ground impacts, which can damage a physical robot. - 0.01
+    total_joint_torque = 0
+    for joint in JOINT_ACTUATOR_NAMES:
+      joint_torque = np.linalg.norm(np.array(self.data.joint(joint).qfrc_constraint + self.data.joint(joint).qfrc_smooth))
+      total_joint_torque = max(total_joint_torque, joint_torque)
+    reward += -total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
+    
+    return reward
+    
+  def getState(self):
     state = []
     # joint positions     20          Joint positions in radians
     for joint in JOINT_SENSOR_NAMES:
-      state.append(self.data.sensor(joint).data.copy()[0])
+      state.append(self.data.sensor(joint).data.copy()[0]) # LOCAL FRAME (PER-JOINT)
     # linear acceleration 3           Linear acceleration from IMU
-    state.extend(self.data.sensor('accelerometer').data.copy())
+    state.extend(self.data.sensor('accelerometer').data.copy()) # LOCAL FRAME (IMU)
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
-    state.extend(self.data.sensor('gyro').data.copy())
+    state.extend(self.data.sensor('gyro').data.copy()) # LOCAL FRAME (IMU)
     # foot pressure       8           Pressure values from foot sensors
     for pressure_sensor in PRESSURE_SENSOR_NAMES:
       state.append(self.data.sensor(pressure_sensor).data.copy()[0])
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-    # TODO
+    global_gravity_vector = self.model.opt.gravity
+    world_IMU_quat_world = self.data.sensor("IMU_quat").data.copy()
+    local_gravity_vector_IMU = quaternion.rotate_vectors(np.quaternion(*world_IMU_quat_world).inverse(), global_gravity_vector)
+    state.extend(local_gravity_vector_IMU) # LOCAL FRAME (IMU)
     # agent velocity      2           X and Y velocity of robot torso
-    state.extend(self.data.sensor('velocimeter').data.copy())
+    state.extend(self.data.sensor('velocimeter').data.copy()) # LOCAL FRAME (IMU)
 
     # cycle state through observation buffer
     self.observation_buffer.append(state)
     observed_state = self.observation_buffer.pop(0)
-    print(observed_state)
     return observed_state
     
   def step(self, action):
@@ -191,6 +186,7 @@ class Simulator:
     
     # step simulation
     mujoco.mj_step(self.model, self.data)
+    return self.computeReward()
     
   def render(self):
     self.renderer.update_scene(self.data, camera="track", scene_option=self.scene_option)
@@ -203,7 +199,9 @@ if __name__ == "__main__":
     while True:
       print("reset")
       sim.initialize()
+      action = [0]*4
       while sim.data.time < 2:
         sim.getState()
-        sim.step([0]*4)
+        reward = sim.step(action)
+        # print(reward)
         sim.render()

@@ -1,8 +1,10 @@
 <mujoco model="XSensStyleModel_template">
   <compiler angle="radian"/>
   <worldbody>
+    <!-- CUSTOM -->
     <body name="humanoid" pos="0 0 0.4">
       <joint name="humanoid_free" type="free"/>
+    <!-- CUSTOM -->
       <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="10" diaginertia="1e-06 1e-06 1e-06"/>
       <body name="L5_f1" pos="-0.000206 0 0.098478">
         <geom size="0.069075 0.12457 0.0487345" pos="0 0 0.049743" type="box" rgba="0 1 1 1"/>
@@ -35,7 +37,9 @@
                         <inertial pos="0 0 0.042958" quat="0.5 0.5 -0.5 0.5" mass="6.3444" diaginertia="0.024177 0.017989 0.013993"/>
                         <joint name="jL1T12_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
                         <geom size="0.069075 0.081615 0.042958" pos="0 0 0.042958" type="box" rgba="0 1 1 1"/>
+                        <!-- CUSTOM -->
                         <site name="IMU" pos="0 0 0.042958" type="box" rgba="0 1 0 1" size=".05 .05 .05"/>
+                        <!-- CUSTOM -->
                         <body name="T8_f1" pos="0 0 0.085916">
                           <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                           <joint name="jT9T8_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -270,7 +274,9 @@
                         <inertial pos="0.054652 0 -0.039254" quat="0.5 0.5 0.5 0.5" mass="0.8086" diaginertia="0.0025944 0.0025558 0.00079209"/>
                         <joint name="jLeftAnkle_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
                         <geom size="0.089915 0.0373875 0.0392545" pos="0.054652 0 -0.039254" type="box" rgba="0 1 1 1"/>
-                        <site name="foot_LLB" pos="0.054652 0 -0.08" type="box" rgba="0 1 0 1" size="0.08 0.0275 0.02"/>
+                        <!-- CUSTOM -->
+                        <site name="pressure_LLB" pos="0.054652 0 -0.08" type="box" rgba="0 1 0 1" size="0.08 0.0275 0.02"/>
+                        <!-- CUSTOM -->
                         <body name="LeftToe_f1" pos="0.14456 0 -0.064752">
                           <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                           <joint name="jLeftBallFoot_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -296,20 +302,23 @@
     </body>
   </worldbody>
   
+  <!-- CUSTOM -->
   <actuator>
-    <motor name="jL5S1_roty" joint="jLeftBallFoot_rotz" gear="10"/>
-    <motor name="jLeftBallFoot_roty" joint="jLeftBallFoot_roty" gear="10"/>
-    <motor name="jLeftBallFoot_rotx" joint="jLeftBallFoot_rotx" gear="10"/>
-    <motor name="jLeftAnkle_rotz" joint="jLeftAnkle_rotz" gear="10"/>
+    <position name="jLeftBallFoot_rotz" joint="jLeftBallFoot_rotz" forcelimited="true" forcerange="-3 3"/>
+    <position name="jLeftBallFoot_roty" joint="jLeftBallFoot_roty" forcelimited="true" forcerange="-3 3"/>
+    <position name="jLeftBallFoot_rotx" joint="jLeftBallFoot_rotx" forcelimited="true" forcerange="-3 3"/>
+    <position name="jLeftAnkle_rotz" joint="jLeftAnkle_rotz" forcelimited="true" forcerange="-3 3"/>
   </actuator>
 
   <sensor>
+    <framelinvel name="IMU_vel" objtype="site" objname="IMU" />
+    <framequat name="IMU_quat" objtype="site" objname="IMU" />
     <accelerometer name="accelerometer" site="IMU"/>
     <velocimeter name="velocimeter" site="IMU"/>
     <gyro name="gyro" site="IMU"/>
-    <touch name="pressure_LLB" site="foot_LLB"/>
+    <touch name="pressure_LLB" site="pressure_LLB"/>
     <jointpos name="jLeftBallFoot_rotz" joint="jLeftBallFoot_rotz"/>
   </sensor>
-  
+  <!-- CUSTOM -->
 
 </mujoco>
