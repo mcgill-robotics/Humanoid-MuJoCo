@@ -56,8 +56,12 @@ PRESSURE_SENSOR_NAMES = ["pressure_LLB"] # TODO
 ### REWARD PARAMETERS
 # Velocity The magnitude of the player’s forward velocity. - 0.1
 X_VELOCITY_REWARD_WEIGHT = 0.1
-Y_VELOCITY_REWARD_WEIGHT = 0
+Y_VELOCITY_REWARD_WEIGHT = -0.05
 Z_VELOCITY_REWARD_WEIGHT = 0
+# For Velocity: set these to true to reward/penalize movement any movement on the axis (by applying abs() to velocity)
+ABS_X_VELOCITY = False
+ABS_Y_VELOCITY = True
+ABS_Z_VELOCITY = False
 # Termination A penalty, equal to −1 if the player is on the ground - 0.5
 GROUNDED_PENALTY_WEIGHT = 0.5
 # Upright 0 if the robot is upside down or if the tilt angle is greater

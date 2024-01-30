@@ -105,6 +105,9 @@ class Simulator:
     reward = 0
     # Velocity The magnitude of the player’s forward velocity. - 0.1
     delta_pos = self.data.sensor("IMU_vel").data.copy() # LOCAL FRAME
+    if ABS_X_VELOCITY: delta_pos[0] = abs(delta_pos[0])
+    if ABS_X_VELOCITY: delta_pos[1] = abs(delta_pos[1])
+    if ABS_Z_VELOCITY: delta_pos[2] = abs(delta_pos[2])
     reward += X_VELOCITY_REWARD_WEIGHT * delta_pos[0]
     reward += Y_VELOCITY_REWARD_WEIGHT * delta_pos[1]
     reward += Z_VELOCITY_REWARD_WEIGHT * delta_pos[2]
