@@ -1,5 +1,7 @@
 #TODO -> implement RL model here
 
+# STATE/REWARD INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
     # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)

@@ -4,25 +4,38 @@ import numpy as np
 import random
 import quaternion
 
-# STATE INFO/DOMAIN RANDOMIZATION TECHNIQUES FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+# DOMAIN RANDOMIZATION TECHNIQUES FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+
+# Specifically, we randomized the floor friction (0.5 to
+# 1.0), joint angular offsets (±2.9°), and varied the orientation (up to 2°) and position (up to 5 mm)
+# of the IMU, and attached a random external mass (up to 0.5 kg) to a randomly chosen location on
+# the robot torso. We also added random time delays (10 ms to 50 ms) to the observations to emulate
+# latency in the control loop. The values were resampled in the beginning of each episode, and then
+# kept constant for the whole episode. In addition to domain randomization, we found that applying
+# random perturbations to the robot during training substantially improved the robustness of the agent,
+# leading to better transfer. Specifically, we applied an external impulse force 5 N m to 15 N m lasting
+# for 0.05 s to 0.15 s to a randomly selected point on the torso every 1 s to 3 s
 
 # MUJOCO REF FRAME: ENU
 
 ### PARAMETERS
 FLOOR_FRICTION_MIN_MULTIPLIER = 0.5
 FLOOR_FRICTION_MAX_MULTIPLIER = 1.0
-JOINT_ANGLE_SENSOR_OFFSET_MAX = 2 # degrees
-JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
 MIN_DELAY = 0.01 #s, applies to observations and actions
 MAX_DELAY = 0.05 #s, applies to observations and actions
 MAX_MASS_CHANGE_PER_LIMB = 0.05 #kg
 MAX_EXTERNAL_MASS_ADDED = 0.1 #kg
 MIN_EXTERNAL_FORCE_DURATION = 0.05 #s
 MAX_EXTERNAL_FORCE_DURATION = 0.15 #s
-MIN_EXTERNAL_FORCE_MAGNITUDE = 2.5 #N m ?
-MAX_EXTERNAL_FORCE_MAGNITUDE = 7.5 #N m ?
+MIN_EXTERNAL_FORCE_MAGNITUDE = 5 #N m ?
+MAX_EXTERNAL_FORCE_MAGNITUDE = 15 #N m ?
+MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
+MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
+JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
 IMU_ORIENTATION_OFFSET_MAX = 10 # degrees
 IMU_POS_OFFSET_MAX = 0.05 # meters
+PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
+JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
 GYRO_NOISE_STDDEV = 0 # degrees
 ACCELEROMETER_NOISE_STDDEV = 0.05 # G
 PRESSURE_SENSOR_NOISE_STDDEV = 0.1 #N m ?
@@ -33,7 +46,6 @@ JOINT_FRICTION_MAX_CHANGE = 0.05 # ?
 JOINT_RANGE_MAX_CHANGE = 1 # degrees
 JOINT_STIFFNESS_MAX_CHANGE = 0.05
 JOINT_MARGIN_MAX_CHANGE = 0.5 # degrees ?
-PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
 
 JOINT_NAMES = ['jL5S1_rotx', 'jL5S1_roty', 'jL5S1_rotz', 'jL4L3_rotx', 'jL4L3_roty', 'jL4L3_rotz', 'jL1T12_rotx', 'jL1T12_roty', 'jL1T12_rotz', 'jT9T8_rotx', 'jT9T8_roty', 'jT9T8_rotz', 'jT1C7_rotx', 'jT1C7_roty', 'jT1C7_rotz', 'jC1Head_rotx', 'jC1Head_roty', 'jC1Head_rotz', 'jRightC7Shoulder_rotx', 'jRightC7Shoulder_roty', 'jRightC7Shoulder_rotz', 'jRightShoulder_rotx', 'jRightShoulder_roty', 'jRightShoulder_rotz', 'jRightElbow_rotx', 'jRightElbow_roty', 'jRightElbow_rotz', 'jRightWrist_rotx', 'jRightWrist_roty', 'jRightWrist_rotz', 'jLeftC7Shoulder_rotx', 'jLeftC7Shoulder_roty', 'jLeftC7Shoulder_rotz', 'jLeftShoulder_rotx', 'jLeftShoulder_roty', 'jLeftShoulder_rotz', 'jLeftElbow_rotx', 'jLeftElbow_roty', 'jLeftElbow_rotz', 'jLeftWrist_rotx', 'jLeftWrist_roty', 'jLeftWrist_rotz', 'jRightHip_rotx', 'jRightHip_roty', 'jRightHip_rotz', 'jRightKnee_rotx', 'jRightKnee_roty', 'jRightKnee_rotz', 'jRightAnkle_rotx', 'jRightAnkle_roty', 'jRightAnkle_rotz', 'jRightBallFoot_rotx', 'jRightBallFoot_roty', 'jRightBallFoot_rotz', 'jLeftHip_rotx', 'jLeftHip_roty', 'jLeftHip_rotz', 'jLeftKnee_rotx', 'jLeftKnee_roty', 'jLeftKnee_rotz', 'jLeftAnkle_rotx', 'jLeftAnkle_roty', 'jLeftAnkle_rotz', 'jLeftBallFoot_rotx', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotz', 'jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz']
 
@@ -107,7 +119,7 @@ class Simulator:
     for pressure_sensor in PRESSURE_SENSOR_NAMES:
       self.model.sensor(pressure_sensor).noise = random.uniform(0, PRESSURE_SENSOR_NOISE_STDDEV*self.randomization_factor)
     for joint in JOINT_SENSOR_NAMES:
-      self.model.sensor(joint).noise = random.uniform(0, (JOINT_ANGLE_SENSOR_OFFSET_MAX/180.0*np.pi)*self.randomization_factor)
+      self.model.sensor(joint).noise = random.uniform(0, (JOINT_ANGLE_NOISE_STDDEV/180.0*np.pi)*self.randomization_factor)
     # randomize foot sensor X/Y positions
     for pressure_site in PRESSURE_SENSOR_SITE_NAMES:
       self.model.site(pressure_site).pos[0] += random.uniform(-PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor, PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor)
@@ -132,25 +144,27 @@ class Simulator:
         self.data.joint(joint).qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
     
     
-  def getState(self): #TODO
-
-    # joint positions     20          Joint positions in radians
-    # linear acceleration 3           Linear acceleration from IMU
-    # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
-    # foot pressure       8           Pressure values from foot sensors
-    # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-    # agent velocity      2           X and Y velocity of robot torso
-    
+  def getState(self): # TODO: verify reference frames are global and NWU
     state = []
-    # print(self.data.sensor('accelerometer').data.copy())
-    # print(self.data.sensor('velocimeter').data.copy())
-    # print(self.data.sensor('gyro').data.copy())
-    # print(self.data.sensor('pressure_LLB').data.copy())
-    # print(self.data.sensor('jLeftBallFoot_rotz').data.copy())
-    
+    # joint positions     20          Joint positions in radians
+    for joint in JOINT_SENSOR_NAMES:
+      state.append(self.data.sensor(joint).data.copy()[0])
+    # linear acceleration 3           Linear acceleration from IMU
+    state.extend(self.data.sensor('accelerometer').data.copy())
+    # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
+    state.extend(self.data.sensor('gyro').data.copy())
+    # foot pressure       8           Pressure values from foot sensors
+    for pressure_sensor in PRESSURE_SENSOR_NAMES:
+      state.append(self.data.sensor(pressure_sensor).data.copy()[0])
+    # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
+    # TODO
+    # agent velocity      2           X and Y velocity of robot torso
+    state.extend(self.data.sensor('velocimeter').data.copy())
+
     # cycle state through observation buffer
     self.observation_buffer.append(state)
     observed_state = self.observation_buffer.pop(0)
+    print(observed_state)
     return observed_state
     
   def step(self, action):
@@ -162,7 +176,7 @@ class Simulator:
         
     # apply forces to the robot to destabilise it
     if self.data.time > self.next_force_start_time + self.next_force_duration:
-      self.next_force_start_time = self.data.time + random.uniform(1, 3)
+      self.next_force_start_time = self.data.time + random.uniform(MIN_EXTERNAL_FORCE_INTERVAL, MAX_EXTERNAL_FORCE_INTERVAL)
       self.next_force_duration = random.uniform(MIN_EXTERNAL_FORCE_DURATION*self.randomization_factor, MAX_EXTERNAL_FORCE_DURATION*self.randomization_factor)
       self.next_force_magnitude = random.uniform(MIN_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor, MAX_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor)
       self.data.xfrc_applied[self.next_force_body][0] = 0
@@ -187,6 +201,7 @@ class Simulator:
 if __name__ == "__main__":
     sim = Simulator("assets/flat.xml", timestep=0.005, randomization_factor=1)
     while True:
+      print("reset")
       sim.initialize()
       while sim.data.time < 2:
         sim.getState()
