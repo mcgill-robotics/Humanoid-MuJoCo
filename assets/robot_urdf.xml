@@ -59,7 +59,7 @@
                                   <body name="Neck">
                                     <inertial pos="0 0 0.044626" mass="0.7464" diaginertia="0.0006461 0.0006461 0.00030124"/>
                                     <joint name="jT1C7_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                    <geom size="0.014205 0.044626" pos="0 0 0.044626" type="cylinder" rgba="0 1 1 1"/>
+                                    <geom size="0.014205 0.044626" pos="0 0 0.044626" type="capsule" rgba="0 1 1 1"/>
                                     <body name="Head_f1" pos="0.000152 0 0.089252">
                                       <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                       <joint name="jC1Head_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -85,7 +85,7 @@
                                   <body name="RightShoulder">
                                     <inertial pos="0 -0.065233 0" quat="0.707107 0.707107 0 0" mass="1.9282" diaginertia="0.0030029 0.0030029 0.00053578"/>
                                     <joint name="jRightC7Shoulder_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                    <geom size="0.023574 0.065235" pos="0 -0.065233 0" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0 1 1 1"/>
+                                    <geom size="0.023574 0.065235" pos="0 -0.065233 0" quat="0.707105 0.707108 0 0" type="capsule" rgba="0 1 1 1"/>
                                     <body name="RightUpperArm_f1" pos="0 -0.13047 0">
                                       <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                       <joint name="jRightShoulder_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -95,7 +95,7 @@
                                         <body name="RightUpperArm">
                                           <inertial pos="0 -0.13497 0" quat="0.707107 0.707107 0 0" mass="1.866" diaginertia="0.011736 0.011736 0.00080917"/>
                                           <joint name="jRightShoulder_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                          <geom size="0.029449 0.13497" pos="0 -0.13497 0" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0 1 1 1"/>
+                                          <geom size="0.029449 0.13497" pos="0 -0.13497 0" quat="0.707105 0.707108 0 0" type="capsule" rgba="0 1 1 1"/>
                                           <body name="RightForeArm_f1" pos="0 -0.26994 0">
                                             <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                             <joint name="jRightElbow_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -105,7 +105,7 @@
                                               <body name="RightForeArm">
                                                 <inertial pos="0 -0.11124 0" quat="0.707107 0.707107 0 0" mass="1.244" diaginertia="0.0052508 0.0052508 0.00023975"/>
                                                 <joint name="jRightElbow_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                                <geom size="0.019633 0.111235" pos="0 -0.11124 0" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0 1 1 1"/>
+                                                <geom size="0.019633 0.111235" pos="0 -0.11124 0" quat="0.707105 0.707108 0 0" type="capsule" rgba="0 1 1 1"/>
                                                 <body name="RightHand_f1" pos="7.7e-05 -0.22247 0">
                                                   <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                                   <joint name="jRightWrist_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -137,7 +137,7 @@
                                   <body name="LeftShoulder">
                                     <inertial pos="0 0.065233 0" quat="0.707107 0.707107 0 0" mass="1.9282" diaginertia="0.0030029 0.0030029 0.00053578"/>
                                     <joint name="jLeftC7Shoulder_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                    <geom size="0.023574 0.065235" pos="0 0.065233 0" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0 1 1 1"/>
+                                    <geom size="0.023574 0.065235" pos="0 0.065233 0" quat="0.707105 0.707108 0 0" type="capsule" rgba="0 1 1 1"/>
                                     <body name="LeftUpperArm_f1" pos="0 0.13047 0">
                                       <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                       <joint name="jLeftShoulder_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -147,7 +147,7 @@
                                         <body name="LeftUpperArm">
                                           <inertial pos="0 0.13497 0" quat="0.707107 0.707107 0 0" mass="1.866" diaginertia="0.011736 0.011736 0.00080917"/>
                                           <joint name="jLeftShoulder_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                          <geom size="0.029449 0.13497" pos="0 0.13497 0" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0 1 1 1"/>
+                                          <geom size="0.029449 0.13497" pos="0 0.13497 0" quat="0.707105 0.707108 0 0" type="capsule" rgba="0 1 1 1"/>
                                           <body name="LeftForeArm_f1" pos="0 0.26994 0">
                                             <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                             <joint name="jLeftElbow_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -157,7 +157,7 @@
                                               <body name="LeftForeArm">
                                                 <inertial pos="0 0.11124 0" quat="0.707107 0.707107 0 0" mass="1.244" diaginertia="0.0052508 0.0052508 0.00023975"/>
                                                 <joint name="jLeftElbow_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                                                <geom size="0.019633 0.111235" pos="0 0.11124 0" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0 1 1 1"/>
+                                                <geom size="0.019633 0.111235" pos="0 0.11124 0" quat="0.707105 0.707108 0 0" type="capsule" rgba="0 1 1 1"/>
                                                 <body name="LeftHand_f1" pos="7.7e-05 0.22247 0">
                                                   <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                                                   <joint name="jLeftWrist_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -201,7 +201,7 @@
           <body name="RightUpperLeg">
             <inertial pos="0 0 -0.22449" mass="7.775" diaginertia="0.13681 0.13681 0.01241"/>
             <joint name="jRightHip_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-            <geom size="0.0565 0.22449" pos="0 0 -0.22449" type="cylinder" rgba="0 1 1 1"/>
+            <geom size="0.0565 0.22449" pos="0 0 -0.22449" type="capsule" rgba="0 1 1 1"/>
             <body name="RightLowerLeg_f1" pos="3.6e-05 0 -0.44898">
               <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
               <joint name="jRightKnee_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -211,7 +211,7 @@
                 <body name="RightLowerLeg">
                   <inertial pos="0 0 -0.20304" mass="2.2703" diaginertia="0.031992 0.031992 0.0015867"/>
                   <joint name="jRightKnee_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                  <geom size="0.037388 0.20304" pos="0 0 -0.20304" type="cylinder" rgba="0 1 1 1"/>
+                  <geom size="0.037388 0.20304" pos="0 0 -0.20304" type="capsule" rgba="0 1 1 1"/>
                   <body name="RightFoot_f1" pos="0.000205 0 -0.40608">
                     <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                     <joint name="jRightAnkle_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -253,7 +253,7 @@
           <body name="LeftUpperLeg">
             <inertial pos="0 0 -0.22449" mass="7.775" diaginertia="0.13681 0.13681 0.01241"/>
             <joint name="jLeftHip_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-            <geom size="0.0565 0.22449" pos="0 0 -0.22449" type="cylinder" rgba="0 1 1 1"/>
+            <geom size="0.0565 0.22449" pos="0 0 -0.22449" type="capsule" rgba="0 1 1 1"/>
             <body name="LeftLowerLeg_f1" pos="3.6e-05 0 -0.44898">
               <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
               <joint name="jLeftKnee_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -263,7 +263,7 @@
                 <body name="LeftLowerLeg">
                   <inertial pos="0 0 -0.20304" mass="2.2703" diaginertia="0.031992 0.031992 0.0015867"/>
                   <joint name="jLeftKnee_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                  <geom size="0.037388 0.20304" pos="0 0 -0.20304" type="cylinder" rgba="0 1 1 1"/>
+                  <geom size="0.037388 0.20304" pos="0 0 -0.20304" type="capsule" rgba="0 1 1 1"/>
                   <body name="LeftFoot_f1" pos="0.000205 0 -0.40608">
                     <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                     <joint name="jLeftAnkle_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -319,6 +319,8 @@
     <touch name="pressure_LLB" site="pressure_LLB"/>
     <jointpos name="jLeftBallFoot_rotz" joint="jLeftBallFoot_rotz"/>
   </sensor>
+  <!-- CUSTOM -->
+  <!-- MAKE SURE ALL CYLINDERS ARE CAPSULES (CTRL-F + CTRL-H) TO MAKE COMPATIBLE WITH JAX -->
   <!-- CUSTOM -->
 
 </mujoco>

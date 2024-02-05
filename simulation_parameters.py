@@ -30,7 +30,8 @@ IMU_ORIENTATION_OFFSET_MAX = 10 # degrees
 IMU_POS_OFFSET_MAX = 0.05 # meters
 PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
 JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
-GYRO_NOISE_STDDEV = 0 # degrees
+IMU_NOISE_STDDEV = 2 # degrees
+GYRO_NOISE_STDDEV = 1 # degrees
 ACCELEROMETER_NOISE_STDDEV = 0.05 # G
 PRESSURE_SENSOR_NOISE_STDDEV = 0.1 #N m ? TODO
 VELOCIMETER_NOISE_STDDEV = 0.05 # m/s ? TODO
@@ -56,11 +57,11 @@ PRESSURE_SENSOR_NAMES = ["pressure_LLB"] # TODO
 ### REWARD PARAMETERS
 # Velocity The magnitude of the player’s forward velocity. - 0.1
 X_VELOCITY_REWARD_WEIGHT = 0.1
-Y_VELOCITY_REWARD_WEIGHT = -0.05
+Y_VELOCITY_REWARD_WEIGHT = 0
 Z_VELOCITY_REWARD_WEIGHT = 0
 # For Velocity: set these to true to reward/penalize movement any movement on the axis (by applying abs() to velocity)
 ABS_X_VELOCITY = False
-ABS_Y_VELOCITY = True
+ABS_Y_VELOCITY = False
 ABS_Z_VELOCITY = False
 # Termination A penalty, equal to −1 if the player is on the ground - 0.5
 GROUNDED_PENALTY_WEIGHT = 0.5

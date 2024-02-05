@@ -8,8 +8,8 @@
     # angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
     # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
     # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
-    # previous action     5 · 20          Action filter state (stacked)
     # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
+    # previous action     5 · 20          Action filter state (stacked)
     
 # REWARD
 # Velocity The magnitude of the player’s forward velocity. - 0.1
