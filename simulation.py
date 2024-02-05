@@ -10,7 +10,7 @@ from simulation_parameters import *
 import gc
 
 class Simulation:
-  def __init__(self, xml_path, timestep=0.001, randomization_factor=0, run_on_gpu=False):
+  def __init__(self, xml_path, timestep=0.001, randomization_factor=0, run_on_gpu=True):
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
@@ -18,15 +18,13 @@ class Simulation:
     if run_on_gpu != self.run_on_gpu:
       print("WARN: failed to find GPU device. Running simulation with CPU.")
     
-    # TODO: remove this line when done testing GPU functionality
-    self.run_on_gpu = run_on_gpu
-    
   def reset(self):
     try:
       del self.model
       del self.data
       del self.renderer
       del self.cpu_model
+      del self.cpu_data
     except: pass
     gc.collect()
     #load model from XML
@@ -54,7 +52,6 @@ class Simulation:
     self.next_force_body = 0
     
     # RANDOMIZATION
-    # TODO: ensure changes are reflected when running on GPU
     # floor friction (0.5 to 1.0)
     self.model.geom('floor').friction = [coef * (1.0*(1.0-self.randomization_factor) + random.uniform(FLOOR_FRICTION_MIN_MULTIPLIER, FLOOR_FRICTION_MAX_MULTIPLIER)*self.randomization_factor) for coef in self.model.geom('floor').friction]    
     #delays in actions and observations (10ms to 50ms)
@@ -102,6 +99,10 @@ class Simulation:
       self.cpu_model = self.model
       self.cpu_data = mujoco.MjData(self.cpu_model)
       mujoco.mj_kinematics(self.cpu_model, self.cpu_data)
+      # randomize joint initial states (GPU)
+      for i in range(len(self.cpu_data.qpos)):
+        self.cpu_data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
+
       self.model = mjx.put_model(self.cpu_model)
       self.jax_step = jax.jit(mjx.step)
       self.data = mjx.put_data(self.cpu_model, self.cpu_data)
@@ -109,13 +110,8 @@ class Simulation:
       self.cpu_model = None
       self.data = mujoco.MjData(self.model)
       mujoco.mj_kinematics(self.model, self.data)
-
-    # TODO: doesn't reflect when running on GPU
-    # randomize joint initial states
-    for i in range(len(self.data.qpos)):
-      if self.run_on_gpu:
-        self.data.qpos.at[i].set(self.data.qpos[i] + random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor)
-      else:
+      # randomize joint initial states (CPU)
+      for i in range(len(self.data.qpos)):
         self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
 
   def computeReward(self):
@@ -252,12 +248,12 @@ if __name__ == "__main__":
     sim = Simulation("assets/world.xml",
                      timestep=0.005,
                      randomization_factor=1,
-                     run_on_gpu=True)
+                     run_on_gpu=False)
     while True:
       sim.reset()
       action = [0]*4
       while sim.data.time < 2:
-        print(sim.getState())
+        sim.getState()
         reward = sim.step(action)
         # print(reward)
         sim.render()
