@@ -17,5 +17,3 @@ RUN pip3 install --no-cache-dir --upgrade numpy \
 RUN apt-get autoremove -y  \
     && apt-get clean && rm -rf /var/lib/apt/lists/*  \
     && rm -rf /root/.cache/pip
-
-ENV RENDER_SIM "false"

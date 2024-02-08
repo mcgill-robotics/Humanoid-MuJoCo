@@ -6,6 +6,8 @@ services:
       - ../../Humanoid-Mujoco-Sim:/root/Humanoid-Mujoco-Sim
     image: "mcgillrobotics/mujoco:latest"
     command: bash -c "tail -f /dev/null"
+    environment:
+      - RENDER_SIM="false"
     deploy:
       resources:
         reservations:

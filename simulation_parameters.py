@@ -37,7 +37,6 @@ PRESSURE_SENSOR_NOISE_STDDEV = 0.1 #N m ? TODO
 VELOCIMETER_NOISE_STDDEV = 0.05 # m/s ? TODO
 JOINT_DAMPING_MAX_CHANGE = 0.1 # Nm/(rad/s) ? TODO
 JOINT_ARMATURE_MAX_CHANGE = 0.05 # kg m2 ? TODO
-JOINT_FRICTION_MAX_CHANGE = 0.05 # ? TODO
 JOINT_RANGE_MAX_CHANGE = 1 # degrees
 JOINT_STIFFNESS_MAX_CHANGE = 0.05 # unit ? TODO
 JOINT_MARGIN_MAX_CHANGE = 0.5 # degrees ? TODO
@@ -51,7 +50,6 @@ JOINT_NAMES = ['jL5S1_rotx', 'jL5S1_roty', 'jL5S1_rotz', 'jL4L3_rotx', 'jL4L3_ro
 # gotten from print([name for name in str(self.model.names).split('\\x00') if 'rot' in name])
 JOINT_SENSOR_NAMES = ['jLeftBallFoot_rotz'] # TODO -> can be replaced by JOINT_NAMES when robot URDF is complete
 JOINT_ACTUATOR_NAMES = ['jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz'] # TODO -> can be replaced by JOINT_SENSOR_NAMES = JOINT_NAMES when robot URDF is complete
-PRESSURE_SENSOR_SITE_NAMES = ["foot_LLB"] # TODO
 PRESSURE_SENSOR_NAMES = ["pressure_LLB"] # TODO
 
 ### REWARD PARAMETERS

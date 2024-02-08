@@ -15,7 +15,6 @@ class Simulation:
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
-    print(jax.default_backend())
     self.run_on_gpu = run_on_gpu if jax.default_backend() == 'gpu' else False
     if run_on_gpu != self.run_on_gpu:
       print("WARN: failed to find GPU device. Running simulation with CPU.")
@@ -85,7 +84,6 @@ class Simulation:
     for joint in JOINT_NAMES:
       self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
       self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
-      self.model.joint(joint).frictionloss[0] += random.uniform(0, JOINT_FRICTION_MAX_CHANGE)*self.randomization_factor
       self.model.joint(joint).stiffness[0] += random.uniform(0, JOINT_STIFFNESS_MAX_CHANGE)*self.randomization_factor
       self.model.joint(joint).margin[0] += random.uniform(0, JOINT_MARGIN_MAX_CHANGE)*self.randomization_factor
       self.model.joint(joint).range[0] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
@@ -129,7 +127,7 @@ class Simulation:
     # Velocity The magnitude of the player’s forward velocity. - 0.1
     delta_pos = self.cpu_data.sensor("IMU_vel").data.copy() # LOCAL FRAME
     if ABS_X_VELOCITY: delta_pos[0] = abs(delta_pos[0])
-    if ABS_X_VELOCITY: delta_pos[1] = abs(delta_pos[1])
+    if ABS_Y_VELOCITY: delta_pos[1] = abs(delta_pos[1])
     if ABS_Z_VELOCITY: delta_pos[2] = abs(delta_pos[2])
     reward += X_VELOCITY_REWARD_WEIGHT * delta_pos[0]
     reward += Y_VELOCITY_REWARD_WEIGHT * delta_pos[1]
