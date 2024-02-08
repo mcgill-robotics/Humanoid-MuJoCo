@@ -124,7 +124,7 @@ class Simulation:
       self.cpu_data = self.data
     
     reward = 0
-    # Velocity The magnitude of the player’s forward velocity. - 0.1
+    # Velocity The magnitude of the player's forward velocity. - 0.1
     delta_pos = self.cpu_data.sensor("IMU_vel").data.copy() # LOCAL FRAME
     if ABS_X_VELOCITY: delta_pos[0] = abs(delta_pos[0])
     if ABS_Y_VELOCITY: delta_pos[1] = abs(delta_pos[1])
@@ -150,7 +150,7 @@ class Simulation:
       reward += tilt_reward * UPRIGHT_REWARD_WEIGHT
       
     # Joint torque A penalty, equal to the magnitude of the torque measured at
-        # the player’s knees. This discourages the player from learning
+        # the player's knees. This discourages the player from learning
         # gaits which cause high forces on the knees, for example
         # during ground impacts, which can damage a physical robot. - 0.01
     total_joint_torque = 0
@@ -249,7 +249,7 @@ class Simulation:
 
     
 if __name__ == "__main__":
-    sim = Simulation("assets/world.xml",
+    sim = Simulation(xml_path="assets/world.xml",
                      timestep=0.005,
                      randomization_factor=1,
                      run_on_gpu=True)

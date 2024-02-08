@@ -2,12 +2,11 @@ services:
   mujoco:
     environment:
       - DISPLAY=novnc:0.0 
+      - RENDER_SIM=false # change if using novnc
     volumes:
       - ../../Humanoid-Mujoco-Sim:/root/Humanoid-Mujoco-Sim
     image: "mcgillrobotics/mujoco:latest"
     command: bash -c "tail -f /dev/null"
-    environment:
-      - RENDER_SIM="false"
     deploy:
       resources:
         reservations:
