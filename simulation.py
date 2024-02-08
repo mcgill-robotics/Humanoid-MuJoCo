@@ -8,28 +8,33 @@ import random
 import quaternion
 from simulation_parameters import *
 import gc
+import os
 
 class Simulation:
   def __init__(self, xml_path, timestep=0.001, randomization_factor=0, run_on_gpu=True):
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
+    print(jax.default_backend())
     self.run_on_gpu = run_on_gpu if jax.default_backend() == 'gpu' else False
     if run_on_gpu != self.run_on_gpu:
       print("WARN: failed to find GPU device. Running simulation with CPU.")
     
   def reset(self):
-    try:
-      del self.model
-      del self.data
-      del self.renderer
-      del self.cpu_model
-      del self.cpu_data
+    try: del self.model
+    except: pass
+    try: del self.data
+    except: pass
+    try: del self.renderer
+    except: pass
+    try: del self.cpu_model
+    except: pass
+    try: del self.cpu_data
     except: pass
     gc.collect()
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
-    self.renderer = mujoco.Renderer(self.model, 720, 1080)
+    if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
    
     # Visualization Options:
@@ -233,6 +238,7 @@ class Simulation:
     return self.computeReward()
     
   def render(self, display=True):
+    if not os.environ.get('RENDER_SIM', "True") == "True": return np.zeros((100,100))
     if self.run_on_gpu:
       self.renderer.update_scene(mjx.get_data(self.cpu_model, self.data), scene_option=self.scene_option)
     else:
@@ -248,12 +254,12 @@ if __name__ == "__main__":
     sim = Simulation("assets/world.xml",
                      timestep=0.005,
                      randomization_factor=1,
-                     run_on_gpu=False)
+                     run_on_gpu=True)
     while True:
       sim.reset()
       action = [0]*4
       while sim.data.time < 2:
         sim.getState()
         reward = sim.step(action)
-        # print(reward)
+        print(reward)
         sim.render()
