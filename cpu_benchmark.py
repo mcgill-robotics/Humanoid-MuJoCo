@@ -23,7 +23,7 @@ while sim_time_executed < simulation_time:
         
 end_time = time.time()
 
-sim_per_wall_clock = simulation_time / (end_time - start_time)
+sim_per_wall_clock = sim_time_executed / (end_time - start_time)
 
 print("{} sim seconds per wall clock seconds".format(sim_per_wall_clock))
 

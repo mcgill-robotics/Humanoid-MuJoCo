@@ -10,7 +10,7 @@ import random
 import quaternion
 
 class GPUBatchSimulation:
-  def __init__(self, count, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0):
+  def __init__(self, count, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
     if jax.default_backend() != 'gpu':
       print("ERROR: failed to find GPU device.")
       exit()
@@ -23,6 +23,7 @@ class GPUBatchSimulation:
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
     self.rng = jax.random.split(self.rng_key, self.count)
+    self.verbose = verbose
     
     self.reset()
     
@@ -37,7 +38,7 @@ class GPUBatchSimulation:
     except: pass
     gc.collect()
     
-    print("Creating new simulations...")
+    if self.verbose: print("Creating new simulations...")
     
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
@@ -104,11 +105,11 @@ class GPUBatchSimulation:
     # randomize joint initial states (GPU)
     self.data_batch = jax.vmap(lambda rng: mjx_data.replace(qpos=jax.random.uniform(rng, mjx_data.qpos.shape, minval=-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, maxval=JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)))(self.rng)
     
-    print("Simulations initialized.")
+    if self.verbose: print("Simulations initialized.")
 
   def computeReward(self):
     
-    print("Computing rewards...")
+    if self.verbose: print("Computing rewards...")
     
     self.batch_cpu_data = mjx.get_data(self.cpu_model, self.data_batch)
     rewards = np.zeros((self.count))
@@ -116,13 +117,13 @@ class GPUBatchSimulation:
     for i in range(self.count):
       rewards[i] = self.reward_fn(self.batch_cpu_data[i])
         
-    print("Rewards computed.")
+    if self.verbose: print("Rewards computed.")
 
     return rewards
     
   def getObs(self):
     
-    print("Collecting observations...")
+    if self.verbose: print("Collecting observations...")
     
     self.batch_cpu_data = mjx.get_data(self.cpu_model, self.data_batch)
   
@@ -155,13 +156,13 @@ class GPUBatchSimulation:
     self.observation_buffer.append(np.array(observations))
     delayed_observations = self.observation_buffer.pop(0)
     
-    print("Observations collected.")
+    if self.verbose: print("Observations collected.")
     
     return delayed_observations
   
   def step(self, action=None):
     
-    print("Stepping simulations...")
+    if self.verbose: print("Stepping simulations...")
     
     # cycle action through action buffer
     self.action_buffer.append(action)
@@ -194,11 +195,8 @@ class GPUBatchSimulation:
     
     if jp.any(should_apply_force):
       xfrc_applied = jp.zeros(self.data_batch.xfrc_applied.shape)
-      print(xfrc_applied[should_apply_force][self.next_force_bodies[should_apply_force]][0:2].shape)
       applied_forces_x = self.next_force_directions[should_apply_force][0] * self.next_force_magnitudes[should_apply_force]
       applied_forces_y = self.next_force_directions[should_apply_force][1] * self.next_force_magnitudes[should_apply_force]
-      print(applied_forces_x.shape)
-      print(applied_forces_y.shape)
       xfrc_applied.at[should_apply_force][self.next_force_bodies[should_apply_force]][0].set(applied_forces_x)
       xfrc_applied.at[should_apply_force][self.next_force_bodies[should_apply_force]][1].set(applied_forces_y)
     
@@ -207,14 +205,14 @@ class GPUBatchSimulation:
     # step simulation
     for s in range(self.physics_steps_per_control_step):
       self.data_batch = self.jax_step(self.model, self.data_batch)
-      print("{}%".format((s+1)/self.physics_steps_per_control_step), end='\r')
+      if self.verbose: print("{}%".format((s+1)/self.physics_steps_per_control_step), end='\r')
     
-    print("Simulations stepped.               ")
+    if self.verbose: print("Simulations stepped.               ")
     
     return self.computeReward()
 
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=1000, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=5, timestep=0.005, randomization_factor=1)
+    sim_batch = GPUBatchSimulation(count=1000, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=5, timestep=0.005, randomization_factor=1, verbose=True)
 
     while True:
       while all(sim_batch.data_batch.time < 2):

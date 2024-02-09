@@ -12,7 +12,8 @@ RUN pip3 install --no-cache-dir --upgrade numpy \
     && pip3 install mujoco \
     && pip3 install mujoco_mjx \
     && pip3 install brax \
-    && pip3 install opencv-python
+    && pip3 install opencv-python \
+    && pip3 install matplotlib
 
 RUN apt-get autoremove -y  \
     && apt-get clean && rm -rf /var/lib/apt/lists/*  \

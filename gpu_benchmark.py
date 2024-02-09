@@ -1,15 +1,16 @@
 from gpu_batch_simulation import GPUBatchSimulation
 import time
 from reward_functions import *
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 timestep = 0.005
 simulation_time = 500 #seconds
 upper_bound_training_time = 50112000
 physics_steps_per_control_step = 5
-sim_batch_sizes = [1, 10, 100, 250, 500]
+sim_batch_sizes = [128, 256, 512, 1024]
 # for reference, DeepMind's longest training took approximately 50,112,000 Seconds (580 days) simulation time
 
+plot_x = [7,8,9,10]
 gpu_plot_y = []
 
 for sim_batch_size in sim_batch_sizes:
@@ -32,7 +33,7 @@ for sim_batch_size in sim_batch_sizes:
             
     end_time = time.time()
 
-    sim_per_wall_clock = simulation_time / (end_time - start_time)
+    sim_per_wall_clock = sim_time_executed / (end_time - start_time)
     gpu_plot_y.append(sim_per_wall_clock)
 
     print("{} sim seconds per wall clock seconds".format(sim_per_wall_clock))
@@ -43,9 +44,9 @@ for sim_batch_size in sim_batch_sizes:
 sim_per_wall_clock = 13.193907058713098 # gotten by running cpu_benchmark.py
 cpu_plot_y = [sim_per_wall_clock] * len(gpu_plot_y)
 
-plt.plot(sim_batch_sizes, gpu_plot_y, label='GPU')
-plt.plot(sim_batch_sizes, cpu_plot_y, label='CPU')
-plt.xlabel('Batch Size (always 1 for CPU)')
+plt.plot(plot_x, gpu_plot_y, label='GPU')
+plt.plot(plot_x, cpu_plot_y, label='CPU')
+plt.xlabel('Batch Size (2^N)')
 plt.ylabel('Seconds simulated per. wall clock seconds')
 plt.legend()
-plt.show()
+plt.savefig("data/sim_benchmark.png")
