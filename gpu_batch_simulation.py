@@ -8,6 +8,7 @@ from reward_functions import *
 import gc
 import random
 import quaternion
+import multiprocessing
 
 class GPUBatchSimulation:
   def __init__(self, count, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
@@ -109,13 +110,13 @@ class GPUBatchSimulation:
     
     if self.verbose: print("Simulations initialized.")
 
-  def computeReward(self):
+  def computeReward(self): #TODO - improve speed
     
     if self.verbose: print("Computing rewards...")
     
     self.batch_cpu_data = mjx.get_data(self.cpu_model, self.data_batch)
     rewards = np.zeros((self.count))
-    
+
     for i in range(self.count):
       rewards[i] = self.reward_fn(self.batch_cpu_data[i])
         
@@ -123,7 +124,7 @@ class GPUBatchSimulation:
 
     return rewards
     
-  def getObs(self):
+  def getObs(self): #TODO - improve speed
     
     if self.verbose: print("Collecting observations...")
     
@@ -212,11 +213,12 @@ class GPUBatchSimulation:
     if self.verbose: print("Simulations stepped.               ")
 
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=1024, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=5, timestep=0.005, randomization_factor=1, verbose=True)
+    sim_batch = GPUBatchSimulation(count=512, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=5, timestep=0.005, randomization_factor=1, verbose=True)
 
     while True:
       while all(sim_batch.data_batch.time < 2):
         observations = sim_batch.getObs()
         actions = [[0]*4]*sim_batch.count
-        rewards = sim_batch.step(actions)
+        sim_batch.step(actions)
+        rewards = sim_batch.computeReward()
       sim_batch.reset()

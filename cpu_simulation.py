@@ -182,7 +182,8 @@ if __name__ == "__main__":
       while sim.data.time < 2:
         observation = sim.getObs()
         action = [0]*4
-        reward = sim.step(action)
+        sim.step(action)
+        reward = sim.computeReward()
         print(reward)
         sim.render()
       sim.reset()
