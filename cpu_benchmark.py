@@ -2,7 +2,7 @@ from cpu_simulation import CPUSimulation
 import time
 from reward_functions import *
 
-timestep = 0.01
+timestep = 0.005
 simulation_time = 500 #seconds
 upper_bound_training_time = 50112000
 physics_steps_per_control_step = 5
