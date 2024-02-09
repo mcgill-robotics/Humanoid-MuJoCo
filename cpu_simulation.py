@@ -34,6 +34,10 @@ class CPUSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
+    self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
+    self.model.opt.iterations = 3
+    self.model.opt.ls_iterations = 5
+    self.model.opt.jacobian = mujoco.mjtJacobian.mjJAC_DENSE
    
     # Visualization Options:
     self.scene_option = mujoco.MjvOption()
@@ -132,6 +136,9 @@ class CPUSimulation:
     
     return delayed_observation
     
+  def computeReward(self):
+    return self.reward_fn(self.data)
+    
   def step(self, action=None):
     # cycle action through action buffer
     self.action_buffer.append(action)
@@ -158,7 +165,6 @@ class CPUSimulation:
     # step simulation
     for _ in range(self.physics_steps_per_control_step):
       mujoco.mj_step(self.model, self.data)
-    return self.reward_fn(self.data)
     
   def render(self, display=True):
     if not os.environ.get('RENDER_SIM', "True") == "True": return np.zeros((100,100))
@@ -170,7 +176,7 @@ class CPUSimulation:
     return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path="assets/world.xml", reward_fn=standingRewardFn, timestep=0.01, randomization_factor=1)
+    sim = CPUSimulation(xml_path="assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
     
     while True:
       while sim.data.time < 2:

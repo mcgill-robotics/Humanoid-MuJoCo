@@ -43,9 +43,10 @@ class GPUBatchSimulation:
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     self.model.opt.timestep = self.timestep
-    self.model.opt.solver = mujoco.mjtSolver.mjSOL_CG
-    self.model.opt.iterations = 6
-    self.model.opt.ls_iterations = 6
+    self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
+    self.model.opt.iterations = 3
+    self.model.opt.ls_iterations = 5
+    self.model.opt.jacobian = mujoco.mjtJacobian.mjJAC_DENSE
    
     #initialize instance parameters
     self.next_force_start_times = jp.zeros((self.count))
@@ -99,7 +100,8 @@ class GPUBatchSimulation:
 
     self.cpu_model = self.model
     self.model = mjx.put_model(self.cpu_model)
-    self.jax_step = jax.vmap(jax.jit(mjx.step), in_axes=(None, 0))
+    mjx_step = jax.jit(mjx.step)
+    self.jax_step = jax.vmap(mjx_step, in_axes=(None, 0))
     mjx_data = mjx.put_data(self.cpu_model, mujoco.MjData(self.cpu_model))
     
     # randomize joint initial states (GPU)
@@ -208,11 +210,9 @@ class GPUBatchSimulation:
       if self.verbose: print("{}%".format((s+1)/self.physics_steps_per_control_step), end='\r')
     
     if self.verbose: print("Simulations stepped.               ")
-    
-    return self.computeReward()
 
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=1000, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=5, timestep=0.005, randomization_factor=1, verbose=True)
+    sim_batch = GPUBatchSimulation(count=1024, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=5, timestep=0.005, randomization_factor=1, verbose=True)
 
     while True:
       while all(sim_batch.data_batch.time < 2):

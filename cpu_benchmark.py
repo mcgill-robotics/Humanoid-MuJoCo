@@ -16,7 +16,8 @@ start_time = time.time()
 while sim_time_executed < simulation_time:
     while sim.data.time < 2:
         sim.getObs()
-        reward = sim.step()
+        sim.step()
+        sim.computeReward()
         sim_time_executed += timestep * physics_steps_per_control_step
         print("{}%".format(100 * sim_time_executed / simulation_time))
     sim.reset()

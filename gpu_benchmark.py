@@ -7,10 +7,9 @@ timestep = 0.005
 simulation_time = 500 #seconds
 upper_bound_training_time = 50112000
 physics_steps_per_control_step = 5
-sim_batch_sizes = [128, 256, 512, 1024]
+sim_batch_sizes = [100, 200, 300, 400, 500]
 # for reference, DeepMind's longest training took approximately 50,112,000 Seconds (580 days) simulation time
 
-plot_x = [7,8,9,10]
 gpu_plot_y = []
 
 for sim_batch_size in sim_batch_sizes:
@@ -26,7 +25,8 @@ for sim_batch_size in sim_batch_sizes:
     while sim_time_executed < simulation_time:
         while all(sim_batch.data_batch.time < 2):
             observations = sim_batch.getObs()
-            rewards = sim_batch.step()
+            sim_batch.step()
+            rewards = sim_batch.computeReward()
             sim_time_executed += timestep * sim_batch_size * physics_steps_per_control_step
             print("{}%".format(100 * sim_time_executed / simulation_time))
         sim_batch.reset()
@@ -41,12 +41,12 @@ for sim_batch_size in sim_batch_sizes:
     print("Would take (upper bound) {} seconds ({} days) to finish training RL agent. (not including policy updates)".format(upper_bound_training_time / sim_per_wall_clock, (upper_bound_training_time / sim_per_wall_clock) / 86400))
     
     
-sim_per_wall_clock = 13.193907058713098 # gotten by running cpu_benchmark.py
+sim_per_wall_clock = 12.867241185856098 # gotten by running cpu_benchmark.py
 cpu_plot_y = [sim_per_wall_clock] * len(gpu_plot_y)
 
-plt.plot(plot_x, gpu_plot_y, label='GPU')
-plt.plot(plot_x, cpu_plot_y, label='CPU')
-plt.xlabel('Batch Size (2^N)')
+plt.plot(sim_batch_sizes, gpu_plot_y, label='GPU')
+plt.plot(sim_batch_sizes, cpu_plot_y, label='CPU')
+plt.xlabel('Batch Size')
 plt.ylabel('Seconds simulated per. wall clock seconds')
 plt.legend()
 plt.savefig("data/sim_benchmark.png")
