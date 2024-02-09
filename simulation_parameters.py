@@ -51,26 +51,3 @@ JOINT_NAMES = ['jL5S1_rotx', 'jL5S1_roty', 'jL5S1_rotz', 'jL4L3_rotx', 'jL4L3_ro
 JOINT_SENSOR_NAMES = ['jLeftBallFoot_rotz'] # TODO -> can be replaced by JOINT_NAMES when robot URDF is complete
 JOINT_ACTUATOR_NAMES = ['jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz'] # TODO -> can be replaced by JOINT_SENSOR_NAMES = JOINT_NAMES when robot URDF is complete
 PRESSURE_SENSOR_NAMES = ["pressure_LLB"] # TODO
-
-### REWARD PARAMETERS
-# Velocity The magnitude of the player’s forward velocity. - 0.1
-X_VELOCITY_REWARD_WEIGHT = 0.1
-Y_VELOCITY_REWARD_WEIGHT = 0
-Z_VELOCITY_REWARD_WEIGHT = 0
-# For Velocity: set these to true to reward/penalize movement any movement on the axis (by applying abs() to velocity)
-ABS_X_VELOCITY = False
-ABS_Y_VELOCITY = False
-ABS_Z_VELOCITY = False
-# Termination A penalty, equal to −1 if the player is on the ground - 0.5
-GROUNDED_PENALTY_WEIGHT = 0.5
-# Upright 0 if the robot is upside down or if the tilt angle is greater
-    # than 0.4 radians. Increases linearly, and is equal to +1 if the
-    # tilt angle is less than 0.2 radians. - 0.02
-UPRIGHT_REWARD_WEIGHT = 0.02
-MIN_TILT_FOR_REWARD = 0.2
-MAX_TILT_FOR_REWARD = 0.4
-# Joint torque A penalty, equal to the magnitude of the torque measured at
-    # the player’s knees. This discourages the player from learning
-    # gaits which cause high forces on the knees, for example
-    # during ground impacts, which can damage a physical robot. - 0.01
-JOINT_TORQUE_PENALTY_WEIGHT = 0.01

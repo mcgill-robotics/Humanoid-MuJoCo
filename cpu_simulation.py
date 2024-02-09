@@ -7,17 +7,19 @@ import cv2
 import random
 import quaternion
 from simulation_parameters import *
+from reward_functions import *
 import gc
 import os
 
-class Simulation:
-  def __init__(self, xml_path, timestep=0.001, randomization_factor=0, run_on_gpu=True):
+class CPUSimulation:
+  def __init__(self, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0):
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
-    self.run_on_gpu = run_on_gpu if jax.default_backend() == 'gpu' else False
-    if run_on_gpu != self.run_on_gpu:
-      print("WARN: failed to find GPU device. Running simulation with CPU.")
+    self.reward_fn = reward_fn
+    self.physics_steps_per_control_step = physics_steps_per_control_step
+    
+    self.reset()
     
   def reset(self):
     try: del self.model
@@ -26,10 +28,7 @@ class Simulation:
     except: pass
     try: del self.renderer
     except: pass
-    try: del self.cpu_model
-    except: pass
-    try: del self.cpu_data
-    except: pass
+    
     gc.collect()
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
@@ -62,11 +61,12 @@ class Simulation:
     self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     #round delays to be multiples of the timestep
-    self.observation_delay = round(self.observation_delay / self.timestep) * self.timestep
-    self.action_delay = round(self.action_delay / self.timestep) * self.timestep
+    actual_timestep = self.physics_steps_per_control_step * self.timestep
+    self.observation_delay = round(self.observation_delay / actual_timestep) * actual_timestep
+    self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
     #make buffers for observations and actions
-    self.observation_buffer = [None] * (int)(self.observation_delay/self.timestep)
-    self.action_buffer = [None] * (int)(self.action_delay/self.timestep)
+    self.observation_buffer = [None] * (int)(self.observation_delay/actual_timestep)
+    self.action_buffer = [None] * (int)(self.action_delay/actual_timestep)
     # vary the mass of all limbs randomly
     for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
@@ -98,111 +98,46 @@ class Simulation:
       self.model.actuator(joint).biasprm[2] = -kv
       
     # create data from model
-    if self.run_on_gpu:
-      self.cpu_model = self.model
-      self.cpu_data = mujoco.MjData(self.cpu_model)
-      mujoco.mj_kinematics(self.cpu_model, self.cpu_data)
-      # randomize joint initial states (GPU)
-      for i in range(len(self.cpu_data.qpos)):
-        self.cpu_data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
-
-      self.model = mjx.put_model(self.cpu_model)
-      self.jax_step = jax.jit(mjx.step)
-      self.data = mjx.put_data(self.cpu_model, self.cpu_data)
-    else:
-      self.cpu_model = None
-      self.data = mujoco.MjData(self.model)
-      mujoco.mj_kinematics(self.model, self.data)
-      # randomize joint initial states (CPU)
-      for i in range(len(self.data.qpos)):
-        self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
-
-  def computeReward(self):
-    if self.run_on_gpu:
-      self.cpu_data = mjx.get_data(self.cpu_model, self.data)
-    else:
-      self.cpu_data = self.data
-    
-    reward = 0
-    # Velocity The magnitude of the player's forward velocity. - 0.1
-    delta_pos = self.cpu_data.sensor("IMU_vel").data.copy() # LOCAL FRAME
-    if ABS_X_VELOCITY: delta_pos[0] = abs(delta_pos[0])
-    if ABS_Y_VELOCITY: delta_pos[1] = abs(delta_pos[1])
-    if ABS_Z_VELOCITY: delta_pos[2] = abs(delta_pos[2])
-    reward += X_VELOCITY_REWARD_WEIGHT * delta_pos[0]
-    reward += Y_VELOCITY_REWARD_WEIGHT * delta_pos[1]
-    reward += Z_VELOCITY_REWARD_WEIGHT * delta_pos[2]
-    
-    # Termination A penalty, equal to −1 if the player is on the ground - 0.5
-    isTouchingGround = self.cpu_data.body('humanoid').xpos[2] < 0
-    if isTouchingGround:
-      reward += -1 * GROUNDED_PENALTY_WEIGHT
+    self.cpu_model = None
+    self.data = mujoco.MjData(self.model)
+    mujoco.mj_kinematics(self.model, self.data)
+    # randomize joint initial states (CPU)
+    for i in range(len(self.data.qpos)):
+      self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
       
-    # Upright 0 if the robot is upside down or if the tilt angle is greater
-        # than 0.4 radians. Increases linearly, and is equal to +1 if the
-        # tilt angle is less than 0.2 radians. - 0.02
-    IMU_quat = np.quaternion(*self.cpu_data.sensor("IMU_quat").data.copy()) * self.IMU_offset_quat.inverse()
-    tilt_angle = abs(2 * np.arccos(IMU_quat.w))
-    if tilt_angle < MIN_TILT_FOR_REWARD:
-      reward += UPRIGHT_REWARD_WEIGHT
-    elif tilt_angle < MAX_TILT_FOR_REWARD:
-      tilt_reward = (MAX_TILT_FOR_REWARD - tilt_angle) / (MAX_TILT_FOR_REWARD-MIN_TILT_FOR_REWARD)
-      reward += tilt_reward * UPRIGHT_REWARD_WEIGHT
-      
-    # Joint torque A penalty, equal to the magnitude of the torque measured at
-        # the player's knees. This discourages the player from learning
-        # gaits which cause high forces on the knees, for example
-        # during ground impacts, which can damage a physical robot. - 0.01
-    total_joint_torque = 0
-    for joint in JOINT_ACTUATOR_NAMES:
-      joint_torque = np.linalg.norm(np.array(self.cpu_data.joint(joint).qfrc_constraint + self.cpu_data.joint(joint).qfrc_smooth))
-      total_joint_torque = max(total_joint_torque, joint_torque)
-    reward += -total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
-    
-    return reward
-    
-  def getState(self):
-    if self.run_on_gpu:
-      self.cpu_data = mjx.get_data(self.cpu_model, self.data)
-    else:
-      self.cpu_data = self.data
-    
-    state = []
+  def getObs(self):
+    observations = []
 
     # joint positions     20          Joint positions in radians
     for joint in JOINT_SENSOR_NAMES:
-      state.append(self.cpu_data.sensor(joint).data.copy()[0] + random.gauss(0, JOINT_ANGLE_NOISE_STDDEV/180.0*np.pi)) # LOCAL FRAME (PER-JOINT)
+      observations.append(self.data.sensor(joint).data.copy()[0] + random.gauss(0, JOINT_ANGLE_NOISE_STDDEV/180.0*np.pi)) # LOCAL FRAME (PER-JOINT)
     # linear acceleration 3           Linear acceleration from IMU
-    state.extend([val + random.gauss(0, ACCELEROMETER_NOISE_STDDEV) for val in self.cpu_data.sensor('accelerometer').data.copy()]) # LOCAL FRAME (IMU)
+    observations.extend([val + random.gauss(0, ACCELEROMETER_NOISE_STDDEV) for val in self.data.sensor('accelerometer').data.copy()]) # LOCAL FRAME (IMU)
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
-    state.extend([val + random.gauss(0, GYRO_NOISE_STDDEV) for val in self.cpu_data.sensor('gyro').data.copy()]) # LOCAL FRAME (IMU)
+    observations.extend([val + random.gauss(0, GYRO_NOISE_STDDEV) for val in self.data.sensor('gyro').data.copy()]) # LOCAL FRAME (IMU)
     # foot pressure       8           Pressure values from foot sensors
     for pressure_sensor in PRESSURE_SENSOR_NAMES:
-      state.append(self.cpu_data.sensor(pressure_sensor).data.copy()[0] + random.gauss(0, PRESSURE_SENSOR_NOISE_STDDEV))
+      observations.append(self.data.sensor(pressure_sensor).data.copy()[0] + random.gauss(0, PRESSURE_SENSOR_NOISE_STDDEV))
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     global_gravity_vector = self.model.opt.gravity
-    world_IMU_quat_world = [val + random.gauss(0, IMU_NOISE_STDDEV/180.0*np.pi) for val in self.cpu_data.sensor("IMU_quat").data.copy()]
+    world_IMU_quat_world = [val + random.gauss(0, IMU_NOISE_STDDEV/180.0*np.pi) for val in self.data.sensor("IMU_quat").data.copy()]
     local_gravity_vector_IMU = quaternion.rotate_vectors(np.quaternion(*world_IMU_quat_world).inverse(), global_gravity_vector)
-    state.extend(local_gravity_vector_IMU) # LOCAL FRAME (IMU)
+    observations.extend(local_gravity_vector_IMU) # LOCAL FRAME (IMU)
     # agent velocity      2           X and Y velocity of robot torso
-    state.extend([val + random.gauss(0, VELOCIMETER_NOISE_STDDEV) for val in self.cpu_data.sensor('velocimeter').data.copy()]) # LOCAL FRAME (IMU)
+    observations.extend([val + random.gauss(0, VELOCIMETER_NOISE_STDDEV) for val in self.data.sensor('velocimeter').data.copy()]) # LOCAL FRAME (IMU)
 
-    # cycle state through observation buffer
-    self.observation_buffer.append(state)
-    observed_state = self.observation_buffer.pop(0)
+    # cycle observation through observation buffer
+    self.observation_buffer.append(observations)
+    delayed_observation = self.observation_buffer.pop(0)
     
-    return observed_state
+    return delayed_observation
     
-  def step(self, action):
+  def step(self, action=None):
     # cycle action through action buffer
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
     if action_to_take is not None:
-      if self.run_on_gpu:
-        for i in range(len(action_to_take)):
-          self.data.ctrl.at[i].set(action_to_take[i])
-      else:
-        self.data.ctrl = action_to_take
+      self.data.ctrl = action_to_take
         
     # apply forces to the robot to destabilise it
     if self.data.time > self.next_force_start_time + self.next_force_duration:
@@ -211,53 +146,37 @@ class Simulation:
       self.next_force_magnitude = random.uniform(MIN_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor, MAX_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor)
       self.next_force_body = random.randint(1, len(self.data.xfrc_applied) - 1)
       self.next_force_direction = np.array([random.uniform(-1, 1), random.uniform(-1, 1)])
-      if self.run_on_gpu:
-        self.data.xfrc_applied.at[self.next_force_body,0].set(0)
-        self.data.xfrc_applied.at[self.next_force_body,1].set(0)
-      else:
-        self.data.xfrc_applied[self.next_force_body][0] = 0
-        self.data.xfrc_applied[self.next_force_body][1] = 0
+      self.data.xfrc_applied[self.next_force_body][0] = 0
+      self.data.xfrc_applied[self.next_force_body][1] = 0
       
       while np.linalg.norm(self.next_force_direction) == 0: self.next_force_direction = np.array([random.uniform(-1, 1), random.uniform(-1, 1)])
       self.next_force_direction = self.next_force_direction / np.linalg.norm(self.next_force_direction)
     if self.data.time > self.next_force_start_time and self.data.time < self.next_force_start_time + self.next_force_duration:
-      if self.run_on_gpu:
-        self.data.xfrc_applied.at[self.next_force_body,0].set(self.next_force_direction[0] * self.next_force_magnitude)
-        self.data.xfrc_applied.at[self.next_force_body,1].set(self.next_force_direction[1] * self.next_force_magnitude)
-      else:
-        self.data.xfrc_applied[self.next_force_body][0] = self.next_force_direction[0] * self.next_force_magnitude
-        self.data.xfrc_applied[self.next_force_body][1] = self.next_force_direction[1] * self.next_force_magnitude
+      self.data.xfrc_applied[self.next_force_body][0] = self.next_force_direction[0] * self.next_force_magnitude
+      self.data.xfrc_applied[self.next_force_body][1] = self.next_force_direction[1] * self.next_force_magnitude
     
     # step simulation
-    if self.run_on_gpu:
-      self.data = self.jax_step(self.model, self.data)
-    else:
+    for _ in range(self.physics_steps_per_control_step):
       mujoco.mj_step(self.model, self.data)
-    return self.computeReward()
+    return self.reward_fn(self.data)
     
   def render(self, display=True):
     if not os.environ.get('RENDER_SIM', "True") == "True": return np.zeros((100,100))
-    if self.run_on_gpu:
-      self.renderer.update_scene(mjx.get_data(self.cpu_model, self.data), scene_option=self.scene_option)
-    else:
-      self.renderer.update_scene(self.data, camera="track", scene_option=self.scene_option)
+    self.renderer.update_scene(self.data, camera="track", scene_option=self.scene_option)
     frame = self.renderer.render()
     if display:
       cv2.imshow("Sim View", frame)
       cv2.waitKey(1)
     return frame
-
     
 if __name__ == "__main__":
-    sim = Simulation(xml_path="assets/world.xml",
-                     timestep=0.005,
-                     randomization_factor=1,
-                     run_on_gpu=True)
+    sim = CPUSimulation(xml_path="assets/world.xml", reward_fn=standingRewardFn, timestep=0.01, randomization_factor=1)
+    
     while True:
-      sim.reset()
-      action = [0]*4
       while sim.data.time < 2:
-        sim.getState()
+        observation = sim.getObs()
+        action = [0]*4
         reward = sim.step(action)
         print(reward)
         sim.render()
+      sim.reset()
