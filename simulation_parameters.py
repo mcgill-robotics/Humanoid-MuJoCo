@@ -26,8 +26,7 @@ MAX_EXTERNAL_FORCE_MAGNITUDE = 150 #N m ? TODO
 MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
 MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
 JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
-IMU_ORIENTATION_OFFSET_MAX = 10 # degrees
-IMU_POS_OFFSET_MAX = 0.05 # meters
+IMU_Z_OFFSET_MAX = 0.05 # meters
 PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
 JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
 IMU_NOISE_STDDEV = 2 # degrees
@@ -51,5 +50,5 @@ JOINT_NAMES = ['jL5S1_rotx', 'jL5S1_roty', 'jL5S1_rotz', 'jL4L3_rotx', 'jL4L3_ro
 # gotten from print([name for name in str(self.model.names).split('\\x00') if 'rot' in name])
 JOINT_SENSOR_NAMES = ['jLeftBallFoot_rotz'] # TODO -> can be replaced by JOINT_NAMES when robot URDF is complete
 JOINT_ACTUATOR_NAMES = ['jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz'] # TODO -> can be replaced by JOINT_SENSOR_NAMES = JOINT_NAMES when robot URDF is complete
-PRESSURE_SENSOR_NAMES = ["pressure_LLB"] # TODO
+PRESSURE_GEOM_NAMES = ["pressure_LLB"] # TODO
 TORSO_BODY_NAME = 'T12'

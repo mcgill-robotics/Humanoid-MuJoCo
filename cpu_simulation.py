@@ -8,28 +8,27 @@ import random
 import quaternion
 from simulation_parameters import *
 from reward_functions import *
+from jax.scipy.spatial.transform import Rotation
 import gc
 import os
 
+inverseRotateVectors = lambda q, v : Rotation.from_quat(q).inv().apply(v)
+
 class CPUSimulation:
-  def __init__(self, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0):
+  def __init__(self, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
     self.reward_fn = reward_fn
     self.physics_steps_per_control_step = physics_steps_per_control_step
+    self.rng_key = jax.random.PRNGKey(42)
+    self.verbose = verbose
     
     self.reset()
     
   def reset(self):
-    try: del self.model
-    except: pass
-    try: del self.data
-    except: pass
-    try: del self.renderer
-    except: pass
+    if self.verbose: print("Creating new simulation...")
     
-    gc.collect()
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
@@ -53,10 +52,20 @@ class CPUSimulation:
     
     #initialize instance parameters
     self.next_force_start_time = 0
-    self.next_force_direction = [0,0]
+    self.next_force_direction = jp.zeros((2))
     self.next_force_magnitude = 0
     self.next_force_duration = 0
     self.next_force_body = 0
+    self.previous_torso_local_velocity = jp.zeros((3))
+    # save gravity vector
+    self.gravity_vector = self.model.opt.gravity
+    # save torso body index
+    self.torso_idx = self.model.body(TORSO_BODY_NAME).id
+    # save joint addresses in data.qpos
+    self.joint_qpos_idx = []
+    for joint in JOINT_NAMES:
+      self.joint_qpos_idx.append(self.model.jnt_qposadr[self.model.joint(joint).id])
+    self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
     
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
@@ -65,7 +74,7 @@ class CPUSimulation:
     self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     #round delays to be multiples of the timestep
-    actual_timestep = self.physics_steps_per_control_step * self.timestep
+    actual_timestep = self.timestep * self.physics_steps_per_control_step
     self.observation_delay = round(self.observation_delay / actual_timestep) * actual_timestep
     self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
     #make buffers for observations and actions
@@ -74,16 +83,9 @@ class CPUSimulation:
     # vary the mass of all limbs randomly
     for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
-    self.model.body(random.randint(0, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
-    # randomize IMU X/Y/Z/Quat
-    for i in range(len(self.model.site("IMU").pos)):
-      self.model.site("IMU").pos[i] += random.uniform(-IMU_POS_OFFSET_MAX*self.randomization_factor, IMU_POS_OFFSET_MAX*self.randomization_factor)
-    self.IMU_offset_quat = np.quaternion(*self.model.site("IMU").quat) * quaternion.from_euler_angles([random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor), random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor), random.uniform((-IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor, (IMU_ORIENTATION_OFFSET_MAX/180.0*np.pi)*self.randomization_factor)])
-    self.model.site("IMU").quat = quaternion.as_float_array(self.IMU_offset_quat)    
-    # randomize foot sensor X/Y positions
-    for pressure_site in PRESSURE_SENSOR_NAMES:
-      self.model.site(pressure_site).pos[0] += random.uniform(-PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor, PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor)
-      self.model.site(pressure_site).pos[1] += random.uniform(-PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor, PRESSURE_SENSOR_POS_OFFSET_MAX*self.randomization_factor)
+    self.model.body(random.randint(1, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
+    # randomize IMU Z
+    self.imu_z_offset = jax.random.uniform(key=self.rng_key, minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
     for joint in JOINT_NAMES:
       self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
@@ -108,38 +110,67 @@ class CPUSimulation:
     # randomize joint initial states (CPU)
     for i in range(len(self.data.qpos)):
       self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
+
+    self.step()      
+
+    # clean up any unreferenced variables
+    gc.collect()
+    
+    if self.verbose: print("Simulation initialized.")
       
   def getObs(self):
-    observations = []
-
+    if self.verbose: print("Collecting observations...")
+    
+    torso_quat = self.data.xquat[self.torso_idx]
+    torso_global_vel = self.data.cvel[self.torso_idx]
+    
     # joint positions     20          Joint positions in radians
-    for joint in JOINT_SENSOR_NAMES:
-      observations.append(self.data.sensor(joint).data.copy()[0] + random.gauss(0, JOINT_ANGLE_NOISE_STDDEV/180.0*np.pi)) # LOCAL FRAME (PER-JOINT)
-    # linear acceleration 3           Linear acceleration from IMU
-    observations.extend([val + random.gauss(0, ACCELEROMETER_NOISE_STDDEV) for val in self.data.sensor('accelerometer').data.copy()]) # LOCAL FRAME (IMU)
+    joint_angles = self.data.qpos[self.joint_qpos_idx] + ((JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
+    
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
-    observations.extend([val + random.gauss(0, GYRO_NOISE_STDDEV) for val in self.data.sensor('gyro').data.copy()]) # LOCAL FRAME (IMU)
-    # foot pressure       8           Pressure values from foot sensors
-    for pressure_sensor in PRESSURE_SENSOR_NAMES:
-      observations.append(self.data.sensor(pressure_sensor).data.copy()[0] + random.gauss(0, PRESSURE_SENSOR_NOISE_STDDEV))
-    # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-    global_gravity_vector = self.model.opt.gravity
-    world_IMU_quat_world = [val + random.gauss(0, IMU_NOISE_STDDEV/180.0*np.pi) for val in self.data.sensor("IMU_quat").data.copy()]
-    local_gravity_vector_IMU = quaternion.rotate_vectors(np.quaternion(*world_IMU_quat_world).inverse(), global_gravity_vector)
-    observations.extend(local_gravity_vector_IMU) # LOCAL FRAME (IMU)
+    torso_global_ang_vel = torso_global_vel[0:3]
+    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     # agent velocity      2           X and Y velocity of robot torso
-    observations.extend([val + random.gauss(0, VELOCIMETER_NOISE_STDDEV) for val in self.data.sensor('velocimeter').data.copy()]) # LOCAL FRAME (IMU)
-
+    torso_global_velocity = torso_global_vel[3:] + (VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
+    # linear acceleration 3           Linear acceleration from IMU
+    torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
+    torso_local_accel = (torso_local_velocity - self.previous_torso_local_velocity) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
+    self.previous_torso_local_velocity = torso_local_velocity
+    # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
+    noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*np.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
+    local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector)
+    # foot pressure       8           Pressure values from foot sensors
+    # TODO
+    # efc_addresses = self.get_efc_addresses(self.data)
+    # pressure_values = computeFootForces(self.data, efc_addresses)
+    
+    observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity[0:2], torso_local_accel, local_gravity_vector)) # , pressure_values
+  
     # cycle observation through observation buffer
     self.observation_buffer.append(observations)
-    delayed_observation = self.observation_buffer.pop(0)
+    delayed_observations = self.observation_buffer.pop(0)
     
-    return delayed_observation
+    if self.verbose: print("Observations collected.")
+    
+    return delayed_observations
     
   def computeReward(self):
-    return self.reward_fn(self.data)
+    if self.verbose: print("Computing reward...")
+    
+    torso_global_velocity = self.data.cvel[self.torso_idx][3:]
+    torso_z_pos = self.data.xpos[self.torso_idx, 2]
+    torso_z_pos += self.imu_z_offset
+    torso_quat = self.data.xquat[self.torso_idx]
+    joint_torques = self.data.qfrc_constraint + self.data.qfrc_smooth
+    
+    rewards = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques)
+    
+    if self.verbose: print("Reward computed.")
+
+    return rewards
     
   def step(self, action=None):
+    if self.verbose: print("Stepping simulation...")
     # cycle action through action buffer
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
@@ -165,6 +196,8 @@ class CPUSimulation:
     # step simulation
     for _ in range(self.physics_steps_per_control_step):
       mujoco.mj_step(self.model, self.data)
+      
+    if self.verbose: print("Simulation stepped.")
     
   def render(self, display=True):
     if not os.environ.get('RENDER_SIM', "True") == "True": return np.zeros((100,100))
