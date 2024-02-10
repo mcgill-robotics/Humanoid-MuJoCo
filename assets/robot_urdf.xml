@@ -37,9 +37,6 @@
                         <inertial pos="0 0 0.042958" quat="0.5 0.5 -0.5 0.5" mass="6.3444" diaginertia="0.024177 0.017989 0.013993"/>
                         <joint name="jL1T12_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
                         <geom size="0.069075 0.081615 0.042958" pos="0 0 0.042958" type="box" rgba="0 1 1 1"/>
-                        <!-- CUSTOM -->
-                        <site name="IMU" pos="0 0 0.042958" type="box" rgba="0 1 0 1" size=".05 .05 .05"/>
-                        <!-- CUSTOM -->
                         <body name="T8_f1" pos="0 0 0.085916">
                           <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                           <joint name="jT9T8_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -222,6 +219,12 @@
                         <inertial pos="0.054652 0 -0.039254" quat="0.5 0.5 0.5 0.5" mass="0.8086" diaginertia="0.0025944 0.0025558 0.00079209"/>
                         <joint name="jRightAnkle_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
                         <geom size="0.089915 0.0373875 0.0392545" pos="0.054652 0 -0.039254" type="box" rgba="0 1 1 1"/>
+                        <!-- CUSTOM -->
+                        <geom name="pressure_geom_RLB" pos="0 0.0186937 -0.07" type="box" rgba="0 1 0 1" size="0.04 0.015 0.02"/>
+                        <geom name="pressure_geom_RRB" pos="0 -0.0186937 -0.07" type="box" rgba="0 0 1 1" size="0.04 0.015 0.02"/>
+                        <geom name="pressure_geom_RRF" pos="0.109304 -0.0186937 -0.07" type="box" rgba="0 1 0 1" size="0.04 0.015 0.02"/>
+                        <geom name="pressure_geom_RLF" pos="0.109304 0.0186937 -0.07" type="box" rgba="0 0 1 1" size="0.04 0.015 0.02"/>
+                        <!-- CUSTOM -->
                         <body name="RightToe_f1" pos="0.14456 0 -0.064752">
                           <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
                           <joint name="jRightBallFoot_rotx" pos="0 0 0" axis="1 0 0" range="-10 10" damping="0.1"/>
@@ -231,7 +234,7 @@
                             <body name="RightToe">
                               <inertial pos="0.030086 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0933" diaginertia="7.1624e-05 4.5038e-05 2.9717e-05"/>
                               <joint name="jRightBallFoot_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                              <geom size="0.0300865 0.0373875 0.0070955" pos="0.030086 0 0" type="box" rgba="0 1 1 1"/>
+                              <!-- <geom size="0.0300865 0.0373875 0.0070955" pos="0.030086 0 0" type="box" rgba="0 1 1 1"/> -->
                             </body>
                           </body>
                         </body>
@@ -275,7 +278,10 @@
                         <joint name="jLeftAnkle_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
                         <geom size="0.089915 0.0373875 0.0392545" pos="0.054652 0 -0.039254" type="box" rgba="0 1 1 1"/>
                         <!-- CUSTOM -->
-                        <site name="pressure_LLB" pos="0.054652 0 -0.08" type="box" rgba="0 1 0 1" size="0.08 0.0275 0.02"/>
+                        <geom name="pressure_geom_LLB" pos="0 0.0186937 -0.07" type="box" rgba="0 1 0 1" size="0.04 0.015 0.02"/>
+                        <geom name="pressure_geom_LRB" pos="0 -0.0186937 -0.07" type="box" rgba="0 0 1 1" size="0.04 0.015 0.02"/>
+                        <geom name="pressure_geom_LRF" pos="0.109304 -0.0186937 -0.07" type="box" rgba="0 1 0 1" size="0.04 0.015 0.02"/>
+                        <geom name="pressure_geom_LLF" pos="0.109304 0.0186937 -0.07" type="box" rgba="0 0 1 1" size="0.04 0.015 0.02"/>
                         <!-- CUSTOM -->
                         <body name="LeftToe_f1" pos="0.14456 0 -0.064752">
                           <inertial pos="0 0 0" quat="0.820473 0.339851 -0.17592 0.424708" mass="1e-06" diaginertia="1e-06 1e-06 1e-06"/>
@@ -286,7 +292,7 @@
                             <body name="LeftToe">
                               <inertial pos="0.030086 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.0933" diaginertia="7.1624e-05 4.5038e-05 2.9717e-05"/>
                               <joint name="jLeftBallFoot_rotz" pos="0 0 0" axis="0 0 1" range="-10 10" damping="0.1"/>
-                              <geom size="0.0300865 0.0373875 0.0070955" pos="0.030086 0 0" type="box" rgba="0 1 1 1"/>
+                              <!-- <geom size="0.0300865 0.0373875 0.0070955" pos="0.030086 0 0" type="box" rgba="0 1 1 1"/> -->
                             </body>
                           </body>
                         </body>
@@ -310,15 +316,6 @@
     <position name="jLeftAnkle_rotz" joint="jLeftAnkle_rotz" forcelimited="true" forcerange="-3 3"/>
   </actuator>
 
-  <sensor>
-    <framelinvel name="IMU_vel" objtype="site" objname="IMU" />
-    <framequat name="IMU_quat" objtype="site" objname="IMU" />
-    <accelerometer name="accelerometer" site="IMU"/>
-    <velocimeter name="velocimeter" site="IMU"/>
-    <gyro name="gyro" site="IMU"/>
-    <touch name="pressure_LLB" site="pressure_LLB"/>
-    <jointpos name="jLeftBallFoot_rotz" joint="jLeftBallFoot_rotz"/>
-  </sensor>
   <!-- CUSTOM -->
   <!-- MAKE SURE ALL CYLINDERS ARE CAPSULES (CTRL-F + CTRL-H) TO MAKE COMPATIBLE WITH JAX -->
   <!-- CUSTOM -->

@@ -1,5 +1,5 @@
 from gpu_batch_simulation import GPUBatchSimulation
-from cpu_benchmark import estimateSimSpeed
+from cpu_benchmark import estimateCPUSimSpeed
 import time
 from reward_functions import *
 import matplotlib.pyplot as plt

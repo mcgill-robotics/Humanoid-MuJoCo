@@ -40,7 +40,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     reward += tilt_reward
       
     # Joint torque
-    total_joint_torque = jp.sum(joint_torques)
+    total_joint_torque = jp.sum(jp.abs(joint_torques))
     reward += total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
     
     return reward #TODO , isTouchingGround

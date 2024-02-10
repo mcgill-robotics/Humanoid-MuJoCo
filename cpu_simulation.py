@@ -5,7 +5,6 @@ import mujoco
 from mujoco import mjx
 import cv2
 import random
-import quaternion
 from simulation_parameters import *
 from reward_functions import *
 from jax.scipy.spatial.transform import Rotation
@@ -27,6 +26,10 @@ class CPUSimulation:
     self.reset()
     
   def reset(self):
+    try:
+      del self.renderer
+    except: pass
+    
     if self.verbose: print("Creating new simulation...")
     
     #load model from XML
@@ -66,6 +69,8 @@ class CPUSimulation:
     for joint in JOINT_NAMES:
       self.joint_qpos_idx.append(self.model.jnt_qposadr[self.model.joint(joint).id])
     self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
+    # get pressure sensor geometries
+    self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
     
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
@@ -109,7 +114,7 @@ class CPUSimulation:
     mujoco.mj_kinematics(self.model, self.data)
     # randomize joint initial states (CPU)
     for i in range(len(self.data.qpos)):
-      self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*np.pi)*self.randomization_factor
+      self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)*self.randomization_factor
 
     self.step()      
 
@@ -137,14 +142,16 @@ class CPUSimulation:
     torso_local_accel = (torso_local_velocity - self.previous_torso_local_velocity) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     self.previous_torso_local_velocity = torso_local_velocity
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-    noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*np.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
+    noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector)
     # foot pressure       8           Pressure values from foot sensors
-    # TODO
-    # efc_addresses = self.get_efc_addresses(self.data)
-    # pressure_values = computeFootForces(self.data, efc_addresses)
+    pressure_values = np.zeros((8))
+    for i in range(len(self.pressure_sensor_ids)):
+      for ci in range(len(self.data.contact.geom1)):
+        if self.data.contact.geom1[ci] == self.pressure_sensor_ids[i]: pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
+        if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]: pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
     
-    observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity[0:2], torso_local_accel, local_gravity_vector)) # , pressure_values
+    observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity[0:2], torso_local_accel, local_gravity_vector, pressure_values))
   
     # cycle observation through observation buffer
     self.observation_buffer.append(observations)
