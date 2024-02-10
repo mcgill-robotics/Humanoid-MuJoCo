@@ -1,6 +1,5 @@
 import jax
 from jax import numpy as jp
-import numpy as np
 import mujoco
 from mujoco import mjx
 from simulation_parameters import *
@@ -8,27 +7,25 @@ from reward_functions import *
 from jax.scipy.spatial.transform import Rotation
 import gc
 import random
-import quaternion
-import time
 
 ### TAKEN FROM MUJOCO SOURCE CODE
 ### ALLOWS US TO AVOID HAVING TO CALL get_data WHICH IS VERY SLOW
-def compute_efc_address(m, d):
+def compute_efc_start(m, d):
     """Returns equality, friction, limit, and contact constraint counts."""
-    if m.opt.disableflags & DisableBit.CONSTRAINT:
+    if m.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_CONSTRAINT:
         return 0, 0, 0, 0
 
-    if m.opt.disableflags & DisableBit.EQUALITY:
+    if m.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_EQUALITY:
         ne = 0
     else:
-        ne_connect = (m.eq_type == EqType.CONNECT).sum()
-        ne_weld = (m.eq_type == EqType.WELD).sum()
-        ne_joint = (m.eq_type == EqType.JOINT).sum()
+        ne_connect = (m.eq_type == mujoco.mjtEq.mjEQ_CONNECT).sum()
+        ne_weld = (m.eq_type == mujoco.mjtEq.mjEQ_WELD).sum()
+        ne_joint = (m.eq_type == mujoco.mjtEq.mjEQ_JOINT).sum()
         ne = ne_connect * 3 + ne_weld * 6 + ne_joint
 
     nf = 0
 
-    if m.opt.disableflags & DisableBit.LIMIT:
+    if m.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_LIMIT:
         nl = 0
     else:
         nl = int(m.jnt_limited.sum())
@@ -36,26 +33,97 @@ def compute_efc_address(m, d):
     nc = d.efc_J.shape[-2] - ne - nf - nl
     
     efc_type = jp.array([
-        mujoco.mjtConstraint.mjCNSTR_EQUALITY,
-        mujoco.mjtConstraint.mjCNSTR_FRICTION_DOF,
-        mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT,
-        mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL,
-    ]).repeat([ne, nf, nl, nc])
+        0,#mujoco.mjtConstraint.mjCNSTR_EQUALITY,
+        1,#mujoco.mjtConstraint.mjCNSTR_FRICTION_DOF,
+        2,#mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT,
+        3,#mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL,
+    ]).repeat(jp.array([ne, nf, nl, nc]))
     
     efc_active = (d.efc_J != 0).any(axis=1)
     
-    efc_con = efc_type == mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL
+    efc_con = efc_type == 3#mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL
     
-    nefc, nc = int(efc_active.sum()), int((efc_active & efc_con).sum())
+    nefc, nc = efc_active.sum(), (efc_active & efc_con).sum()
     
     efc_start = nefc - nc
     
-    con_id = np.nonzero(d.contact.dist <= 0)[0]
+    # con_id = jp.nonzero(dist <= 0)[0]
+    # ncon = dist.shape[0]
+    # return jp.arange(efc_start, efc_start + ncon * 4, 4)[con_id]
+    
+    return efc_start
+    
+def compute_efc_address(dist, efc_start, out):
+    # dist is data.contact.dist i.e. data_batch.contact.dist[i]
+    con_id = jp.nonzero(dist <= 0)[0]
+    ncon = dist.shape[0]
+    
+    result = jp.arange(efc_start, efc_start + ncon * 4, 4)[con_id]
+    out.at[:len(result)].set(result)
 
-    ncon = d.contact.dist.shape[0]
+def computeFootForces(pressure_sensor_ids, data, efc_address):
+    pressure_values = jp.zeros((8))
+    for i in range(len(pressure_sensor_ids)):
+        pressure_contacts_a = efc_address[jp.where(data.contact.geom1 == pressure_sensor_ids[i], True, False)]
+        pressure_contacts_b = efc_address[jp.where(data.contact.geom2 == pressure_sensor_ids[i], True, False)]
+        pressure_values[i] = jp.sum(jp.abs(data.efc_force[pressure_contacts_a])) + jp.sum(jp.abs(data.efc_force[pressure_contacts_b]))
+        
+    return pressure_values
 
-    return np.arange(efc_start, efc_start + ncon * 4, 4)[con_id]
 
+def getFootForces(m, pressure_sensor_ids, d):
+    """Returns equality, friction, limit, and contact constraint counts."""
+    ##### All code below is to calculate efc_address array
+    if m.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_CONSTRAINT:
+        efc_address = jp.array([0, 0, 0, 0])
+    else:
+        if m.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_EQUALITY:
+            ne = 0
+        else:
+            ne_connect = (m.eq_type == mujoco.mjtEq.mjEQ_CONNECT).sum()
+            ne_weld = (m.eq_type == mujoco.mjtEq.mjEQ_WELD).sum()
+            ne_joint = (m.eq_type == mujoco.mjtEq.mjEQ_JOINT).sum()
+            ne = ne_connect * 3 + ne_weld * 6 + ne_joint
+
+        nf = 0
+
+        if m.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_LIMIT:
+            nl = 0
+        else:
+            nl = int(m.jnt_limited.sum())
+
+        nc = d.efc_J.shape[-2] - ne - nf - nl
+        
+        efc_type = jp.array([
+            0,#mujoco.mjtConstraint.mjCNSTR_EQUALITY,
+            1,#mujoco.mjtConstraint.mjCNSTR_FRICTION_DOF,
+            2,#mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT,
+            3,#mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL,
+        ]).repeat(jp.array([ne, nf, nl, nc]))
+        
+        efc_active = (d.efc_J != 0).any(axis=1)
+        
+        efc_con = efc_type == 3#mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL
+        
+        nefc, nc = efc_active.sum(), (efc_active & efc_con).sum()
+        
+        efc_start = nefc - nc
+        
+        con_id = jp.nonzero(d.contact.dist <= 0)[0]
+        ncon = d.contact.dist.shape[0]
+        efc_address = jp.arange(efc_start, efc_start + ncon * 4, 4)[con_id]
+    #####
+    
+    ##### using efc_address, we can count up the forces on the different pressure sensor geometries
+    pressure_values = jp.zeros((8))
+    for i in range(len(pressure_sensor_ids)):
+        pressure_contacts_a = efc_address[jp.where(d.contact.geom1 == pressure_sensor_ids[i], True, False)]
+        pressure_contacts_b = efc_address[jp.where(d.contact.geom2 == pressure_sensor_ids[i], True, False)]
+        pressure_values[i] = jp.sum(jp.abs(d.efc_force[pressure_contacts_a])) + jp.sum(jp.abs(d.efc_force[pressure_contacts_b]))
+    #####
+    
+    return pressure_values
+    
 
 def applyExternalForces(sim_batch):
     # check which simulations need new random force times/durations/magnitudes/directions/target bodies
@@ -87,16 +155,6 @@ def applyExternalForces(sim_batch):
       xfrc_applied.at[should_apply_force][sim_batch.next_force_bodies[should_apply_force]][1].set(applied_forces_y)
     
       sim_batch.data_batch.replace(xfrc_applied=xfrc_applied)
-
-def computeFootForces(pressure_sensor_ids, data, efc_address):
-    pressure_values = jp.zeros((8))
-    for i in range(len(pressure_sensor_ids)):
-        pressure_contacts_a = efc_address[data.contact.geom1 == pressure_sensor_ids[i]]
-        pressure_contacts_b = efc_address[data.contact.geom2 == pressure_sensor_ids[i]]
-        pressure_values[i] = jp.sum(jp.abs(data.efc_force[pressure_contacts_a])) + jp.sum(jp.abs(data.efc_force[pressure_contacts_b]))
-        
-    return pressure_values
-
 
 inverseRotateVectors = jax.jit(jax.vmap(lambda q, v : Rotation.from_quat(q).inv().apply(v)))
 
@@ -146,8 +204,8 @@ class GPUBatchSimulation:
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # get pressure sensor geom ids
-    pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
-    computeFootForces = jax.vmap(lambda d, efc_addr : jax.jit(computeFootForces(pressure_sensor_ids, d, efc_addr), static_argnames=('pressure_sensor_ids')))
+    self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
+    self.computeFootForces = jax.vmap(lambda d, efc_addr : jax.jit(computeFootForces(self.pressure_sensor_ids, d, efc_addr), static_argnames=('pressure_sensor_ids')))
     
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
@@ -167,7 +225,7 @@ class GPUBatchSimulation:
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
     self.model.body(random.randint(1, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
     # randomize IMU Z
-    self.imu_z_offset = jax.random.uniform(key=self.rng_key, shape=(self.count), minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
+    self.imu_z_offset = jax.random.uniform(key=self.rng_key, shape=(self.count,), minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
     for joint in JOINT_NAMES:
       self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
@@ -191,7 +249,7 @@ class GPUBatchSimulation:
     mjx_data = mjx.put_data(self.cpu_model, mujoco.MjData(self.cpu_model))
     
     #define contact force address function
-    self.get_efc_addresses = jax.vmap(lambda d : compute_efc_address(self.cpu_model,d))
+    self.get_efc_starts = jax.vmap(lambda d : compute_efc_start(self.cpu_model,d))
     
     # define step function (rollout)
     def rollout(m, d):
@@ -246,11 +304,19 @@ class GPUBatchSimulation:
     torso_local_accel = (torso_local_velocity - self.previous_torso_local_velocity) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
     self.previous_torso_local_velocity = torso_local_velocity
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-    noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*np.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, 4)))
+    noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, 4)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, jp.array([self.gravity_vector]*self.count))
     # foot pressure       8           Pressure values from foot sensors
-    efc_addresses = self.get_efc_addresses(self.data_batch)
-    pressure_values = computeFootForces(self.data_batch, efc_addresses)
+    efc_starts = self.get_efc_starts(self.data_batch)
+    
+    # TODO -> extremely slow
+    efc_addresses = jp.zeros((self.data_batch.contact.dist.shape))
+    for i in range(len(efc_starts)):
+        print(i)
+        compute_efc_address(self.data_batch.contact.dist[i], efc_starts[i], efc_addresses[i])
+    pressure_values = self.computeFootForces(self.data_batch, efc_addresses)
+    
+    print(pressure_values[0])
     
     observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity[:, 0:2], torso_local_accel, local_gravity_vector, pressure_values))
   
@@ -280,7 +346,7 @@ class GPUBatchSimulation:
     if self.verbose: print("Simulations stepped.")
 
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=512,
+    sim_batch = GPUBatchSimulation(count=4,
                                    xml_path="assets/world.xml",
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,
