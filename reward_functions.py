@@ -1,13 +1,15 @@
 from simulation_parameters import *
-import numpy as np
+import math
+from jax import numpy as jp
 
-def standingRewardFn(data):
+def standingRewardFn(velocity, z_pos, quat, joint_torques):
     ### REWARD PARAMETERS
     # Velocity The magnitude of the player’s velocity. - 0.1
     HORIZONTAL_VELOCITY_REWARD_WEIGHT = -0.1
     VERTICAL_VELOCITY_REWARD_WEIGHT = -0.05
     # Termination A penalty, equal to −1 if the player is on the ground - 0.5
     GROUNDED_PENALTY_WEIGHT = -0.5
+    MIN_Z_BEFORE_GROUNDED = 0
     # Upright 0 if the robot is upside down or if the tilt angle is greater
         # than 0.4 radians. Increases linearly, and is equal to +1 if the
         # tilt angle is less than 0.2 radians. - 0.02
@@ -20,41 +22,25 @@ def standingRewardFn(data):
         # during ground impacts, which can damage a physical robot. - 0.01
     JOINT_TORQUE_PENALTY_WEIGHT = -0.01
     
-    
+    ### COMPUTE REWARD
     reward = 0
     
-    # Velocity The magnitude of the player's forward velocity. - 0.1
-    delta_pos = data.sensor("IMU_vel").data.copy() # LOCAL FRAME
-    delta_pos[0] = abs(delta_pos[0])
-    delta_pos[1] = abs(delta_pos[1])
-    delta_pos[2] = abs(delta_pos[2])
-    reward += HORIZONTAL_VELOCITY_REWARD_WEIGHT * np.sqrt(delta_pos[0]**2 + delta_pos[1]**2)
-    reward += HORIZONTAL_VELOCITY_REWARD_WEIGHT
-    reward += VERTICAL_VELOCITY_REWARD_WEIGHT * delta_pos[2]
+    # Velocity
+    abs_velocity = jp.abs(velocity)
+    reward += HORIZONTAL_VELOCITY_REWARD_WEIGHT * jp.linalg.norm(abs_velocity[0:2])
+    reward += VERTICAL_VELOCITY_REWARD_WEIGHT * abs_velocity[2]
     
-    # Termination A penalty, equal to −1 if the player is on the ground - 0.5
-    isTouchingGround = data.body('humanoid').xpos[2] < 0
-    if isTouchingGround: reward += GROUNDED_PENALTY_WEIGHT
+    # Termination
+    grounded_penalty = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, 0, GROUNDED_PENALTY_WEIGHT)
+    reward += grounded_penalty
       
-    # Upright 0 if the robot is upside down or if the tilt angle is greater
-        # than 0.4 radians. Increases linearly, and is equal to +1 if the
-        # tilt angle is less than 0.2 radians. - 0.02
-    IMU_quat = np.quaternion(*data.sensor("IMU_quat").data.copy())
-    tilt_angle = abs(2 * np.arccos(IMU_quat.w))
-    if tilt_angle < MIN_TILT_FOR_REWARD:
-      reward += UPRIGHT_REWARD_WEIGHT
-    elif tilt_angle < MAX_TILT_FOR_REWARD:
-      tilt_reward = (MAX_TILT_FOR_REWARD - tilt_angle) / (MAX_TILT_FOR_REWARD-MIN_TILT_FOR_REWARD)
-      reward += tilt_reward * UPRIGHT_REWARD_WEIGHT
+    # Upright
+    tilt_angle = jp.abs(2 * jp.arccos(quat[0]))
+    tilt_reward = jp.interp(tilt_angle, jp.array([MIN_TILT_FOR_REWARD, MAX_TILT_FOR_REWARD]), jp.array([0, UPRIGHT_REWARD_WEIGHT]))
+    reward += tilt_reward
       
-    # Joint torque A penalty, equal to the magnitude of the torque measured at
-        # the player's knees. This discourages the player from learning
-        # gaits which cause high forces on the knees, for example
-        # during ground impacts, which can damage a physical robot. - 0.01
-    total_joint_torque = 0
-    for joint in JOINT_ACTUATOR_NAMES:
-      joint_torque = np.linalg.norm(np.array(data.joint(joint).qfrc_constraint + data.joint(joint).qfrc_smooth))
-      total_joint_torque = max(total_joint_torque, joint_torque)
+    # Joint torque
+    total_joint_torque = jp.sum(joint_torques)
     reward += total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
     
-    return reward
+    return reward #TODO , isTouchingGround
