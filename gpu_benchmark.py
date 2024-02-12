@@ -17,9 +17,6 @@ gpu_plot_y = []
 for sim_batch_size in sim_batch_sizes:
 
     sim_batch = GPUBatchSimulation(count=sim_batch_size, xml_path="assets/world.xml", reward_fn=standingRewardFn, physics_steps_per_control_step=physics_steps_per_control_step, timestep=timestep, randomization_factor=1)
-
-    # step once because the first one takes significantly longer than the rest
-    rewards = sim_batch.step()
             
     sim_time_executed = 0
     start_time = time.time()

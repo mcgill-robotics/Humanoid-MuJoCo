@@ -20,7 +20,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
         # the player’s knees. This discourages the player from learning
         # gaits which cause high forces on the knees, for example
         # during ground impacts, which can damage a physical robot. - 0.01
-    JOINT_TORQUE_PENALTY_WEIGHT = -0.01
+    JOINT_TORQUE_PENALTY_WEIGHT = -0.01 / 20 # divide by 20 since there are 20 joints and we consider the sum of joint torques
     
     ### COMPUTE REWARD
     reward = 0

@@ -64,11 +64,14 @@ class CPUSimulation:
     self.gravity_vector = self.model.opt.gravity
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
-    # save joint addresses in data.qpos
+    # save joint addresses
     self.joint_qpos_idx = []
+    self.joint_torque_idx = []
     for joint in JOINT_NAMES:
+      self.joint_torque_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
       self.joint_qpos_idx.append(self.model.jnt_qposadr[self.model.joint(joint).id])
     self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
+    self.joint_torque_idx = jp.array(self.joint_torque_idx)
     # get pressure sensor geometries
     self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
     
@@ -139,7 +142,7 @@ class CPUSimulation:
     torso_global_velocity = torso_global_vel[3:] + (VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     # linear acceleration 3           Linear acceleration from IMU
     torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
-    torso_local_accel = (torso_local_velocity - self.previous_torso_local_velocity) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
+    torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/(self.timestep * self.physics_steps_per_control_step)) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     self.previous_torso_local_velocity = torso_local_velocity
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
@@ -148,9 +151,10 @@ class CPUSimulation:
     pressure_values = np.zeros((8))
     for i in range(len(self.pressure_sensor_ids)):
       for ci in range(len(self.data.contact.geom1)):
-        if self.data.contact.geom1[ci] == self.pressure_sensor_ids[i]: pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
-        if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]: pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
-    
+        if self.data.contact.geom1[ci] == self.pressure_sensor_ids[i]:
+          pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
+        if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
+          pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
     observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity[0:2], torso_local_accel, local_gravity_vector, pressure_values))
   
     # cycle observation through observation buffer
@@ -168,7 +172,7 @@ class CPUSimulation:
     torso_z_pos = self.data.xpos[self.torso_idx, 2]
     torso_z_pos += self.imu_z_offset
     torso_quat = self.data.xquat[self.torso_idx]
-    joint_torques = self.data.qfrc_constraint + self.data.qfrc_smooth
+    joint_torques = self.data.qfrc_constraint[self.joint_torque_idx] + self.data.qfrc_smooth[self.joint_torque_idx]
     
     rewards = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques)
     
