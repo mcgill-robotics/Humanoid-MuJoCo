@@ -16,7 +16,6 @@ services:
               count: 1
               capabilities: [gpu]
 
-
   # novnc:
   #   image: theasp/novnc:latest
   #   ports:

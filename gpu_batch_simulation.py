@@ -28,9 +28,6 @@ class GPUBatchSimulation:
     self.reset()
     
   def reset(self):
-    try:
-      del self.renderer
-    except: pass
     if self.verbose: print("\nInitializing new simulations...")
     
     #load model from XML
@@ -43,18 +40,6 @@ class GPUBatchSimulation:
     # self.model.opt.iterations = 10
     # self.model.opt.ls_iterations = 10
     # self.model.opt.jacobian = mujoco.mjtJacobian.mjJAC_DENSE
-    if os.environ.get('RENDER_SIM', "True") == "True":
-      self.renderer = mujoco.Renderer(self.model, 720, 1080)
-      self.scene_option = mujoco.MjvOption()
-      mujoco.mjv_defaultOption(self.scene_option)
-      self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
-      self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
-      self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-      self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
-      self.model.vis.scale.contactwidth = 0.1
-      self.model.vis.scale.contactheight = 0.03
-      self.model.vis.scale.forcewidth = 0.05
-      self.model.vis.map.force = 0.3
 
     #initialize instance parameters
     self.next_force_start_times = jp.zeros((self.count))
@@ -132,7 +117,7 @@ class GPUBatchSimulation:
     
     # randomize joint initial states (GPU)
     self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, maxval=JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)))(self.rng)
-    
+  
     # step sim (to populate self.data)
     self.step()
     
@@ -146,8 +131,6 @@ class GPUBatchSimulation:
     
     torso_global_velocity = self.data_batch.cvel[:, self.torso_idx][:, 3:]
     torso_z_pos = self.data_batch.xpos[:, self.torso_idx, 2] + self.imu_z_offset
-    print(self.data_batch.xpos[0][self.torso_idx][2])
-    print(jp.mean(torso_z_pos))
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
     joint_torques = self.data_batch.qfrc_constraint[:, self.joint_torque_idx] + self.data_batch.qfrc_smooth[:, self.joint_torque_idx]
     
@@ -208,18 +191,9 @@ class GPUBatchSimulation:
     self.data_batch = self.jax_step(self.model, self.data_batch)
     
     if self.verbose: print("Simulations stepped.")
-
-  def render(self, display=True):
-    if not os.environ.get('RENDER_SIM', "True") == "True": return None
-    self.renderer.update_scene(mjx.get_data(self.cpu_model, self.data_batch)[0], camera="track", scene_option=self.scene_option)
-    frame = self.renderer.render()
-    if display:
-      cv2.imshow("Sim View", frame)
-      cv2.waitKey(1)
-    return frame
   
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=512,
+    sim_batch = GPUBatchSimulation(count=10,
                                    xml_path="assets/world.xml",
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,
@@ -236,5 +210,4 @@ if __name__ == "__main__":
         actions = None
         sim_batch.step(actions)
         rewards, areTerminal = sim_batch.computeReward()
-        sim_batch.render()
       sim_batch.reset()
