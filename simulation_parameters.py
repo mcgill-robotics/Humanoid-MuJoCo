@@ -21,8 +21,8 @@ MAX_MASS_CHANGE_PER_LIMB = 0.05 #kg
 MAX_EXTERNAL_MASS_ADDED = 0.1 #kg
 MIN_EXTERNAL_FORCE_DURATION = 0.05 #s
 MAX_EXTERNAL_FORCE_DURATION = 0.15 #s
-MIN_EXTERNAL_FORCE_MAGNITUDE = 50 #N m ? TODO
-MAX_EXTERNAL_FORCE_MAGNITUDE = 150 #N m ? TODO
+MIN_EXTERNAL_FORCE_MAGNITUDE = 5 #N m ? TODO
+MAX_EXTERNAL_FORCE_MAGNITUDE = 15 #N m ? TODO
 MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
 MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
 JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
@@ -40,14 +40,13 @@ JOINT_RANGE_MAX_CHANGE = 1 # degrees
 JOINT_STIFFNESS_MAX_CHANGE = 0.05 # unit ? TODO
 JOINT_MARGIN_MAX_CHANGE = 0.5 # degrees ? TODO
 JOINT_FORCE_LIMIT_MAX_CHANGE = 0.05 # N m ? TODO
-JOINT_PID_P_GAIN = 20 # PID gain
-JOINT_PID_V_GAIN = 2 # PID gain
-JOINT_PID_GAIN_MAX_CHANGE = 0.5 # PID gain delta
+JOINT_PID_P_GAIN = 2
+JOINT_PID_V_GAIN = 1
+JOINT_PID_GAIN_MAX_CHANGE = 0.1 # PID gain delta
 
-# TODO
 ### URDF REFERENCE NAMES
-JOINT_NAMES = ['jL5S1_rotx', 'jL5S1_roty', 'jL5S1_rotz', 'jL4L3_rotx', 'jL4L3_roty', 'jL4L3_rotz', 'jL1T12_rotx', 'jL1T12_roty', 'jL1T12_rotz', 'jT9T8_rotx', 'jT9T8_roty', 'jT9T8_rotz', 'jT1C7_rotx', 'jT1C7_roty', 'jT1C7_rotz', 'jC1Head_rotx', 'jC1Head_roty', 'jC1Head_rotz', 'jRightC7Shoulder_rotx', 'jRightC7Shoulder_roty', 'jRightC7Shoulder_rotz', 'jRightShoulder_rotx', 'jRightShoulder_roty', 'jRightShoulder_rotz', 'jRightElbow_rotx', 'jRightElbow_roty', 'jRightElbow_rotz', 'jRightWrist_rotx', 'jRightWrist_roty', 'jRightWrist_rotz', 'jLeftC7Shoulder_rotx', 'jLeftC7Shoulder_roty', 'jLeftC7Shoulder_rotz', 'jLeftShoulder_rotx', 'jLeftShoulder_roty', 'jLeftShoulder_rotz', 'jLeftElbow_rotx', 'jLeftElbow_roty', 'jLeftElbow_rotz', 'jLeftWrist_rotx', 'jLeftWrist_roty', 'jLeftWrist_rotz', 'jRightHip_rotx', 'jRightHip_roty', 'jRightHip_rotz', 'jRightKnee_rotx', 'jRightKnee_roty', 'jRightKnee_rotz', 'jRightAnkle_rotx', 'jRightAnkle_roty', 'jRightAnkle_rotz', 'jRightBallFoot_rotx', 'jRightBallFoot_roty', 'jRightBallFoot_rotz', 'jLeftHip_rotx', 'jLeftHip_roty', 'jLeftHip_rotz', 'jLeftKnee_rotx', 'jLeftKnee_roty', 'jLeftKnee_rotz', 'jLeftAnkle_rotx', 'jLeftAnkle_roty', 'jLeftAnkle_rotz', 'jLeftBallFoot_rotx', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotz', 'jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz']
-# gotten from print([name for name in str(self.model.names).split('\\x00') if 'rot' in name])
-JOINT_ACTUATOR_NAMES = ['jLeftBallFoot_rotz', 'jLeftBallFoot_roty', 'jLeftBallFoot_rotx', 'jLeftAnkle_rotz'] # TODO -> can be replaced by JOINT_SENSOR_NAMES = JOINT_NAMES when robot URDF is complete
+
+JOINT_NAMES = ["right_shoulder_pitch", "right_shoulder_roll", "right_elbow", "left_shoulder_pitch", "left_shoulder_roll", "left_elbow", "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle_pitch", "left_ankle_roll", "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle_pitch", "right_ankle_roll", "head_yaw", "head_pitch"]
+JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = ["pressure_geom_LLB", "pressure_geom_LRB", "pressure_geom_LRF", "pressure_geom_LLF", "pressure_geom_RLB", "pressure_geom_RRB", "pressure_geom_RRF", "pressure_geom_RLF"]
-TORSO_BODY_NAME = 'T12'
+TORSO_BODY_NAME = 'humanoid'

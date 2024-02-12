@@ -2,7 +2,6 @@ import jax
 from jax import numpy as jp
 import numpy as np
 import mujoco
-from mujoco import mjx
 import cv2
 import random
 from simulation_parameters import *
@@ -36,10 +35,13 @@ class CPUSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
-    self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    self.model.opt.iterations = 3
-    self.model.opt.ls_iterations = 5
-    self.model.opt.jacobian = mujoco.mjtJacobian.mjJAC_DENSE
+    self.model.opt.solver = mujoco.mjtSolver.mjSOL_CG
+    self.model.opt.iterations = 10
+    self.model.opt.ls_iterations = 10
+    # self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
+    # self.model.opt.iterations = 5
+    # self.model.opt.ls_iterations = 5
+    # self.model.opt.jacobian = mujoco.mjtJacobian.mjJAC_DENSE
    
     # Visualization Options:
     self.scene_option = mujoco.MjvOption()
@@ -47,7 +49,7 @@ class CPUSimulation:
     self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
     self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
     self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-    self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = True
+    self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
     self.model.vis.scale.contactwidth = 0.1
     self.model.vis.scale.contactheight = 0.03
     self.model.vis.scale.forcewidth = 0.05
@@ -95,13 +97,13 @@ class CPUSimulation:
     # randomize IMU Z
     self.imu_z_offset = jax.random.uniform(key=self.rng_key, minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
-    for joint in JOINT_NAMES:
-      self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
-      self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
-      self.model.joint(joint).stiffness[0] += random.uniform(0, JOINT_STIFFNESS_MAX_CHANGE)*self.randomization_factor
-      self.model.joint(joint).margin[0] += random.uniform(0, JOINT_MARGIN_MAX_CHANGE)*self.randomization_factor
-      self.model.joint(joint).range[0] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
-      self.model.joint(joint).range[1] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
+    # for joint in JOINT_NAMES:
+    #   self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
+    #   self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
+    #   self.model.joint(joint).stiffness[0] += random.uniform(0, JOINT_STIFFNESS_MAX_CHANGE)*self.randomization_factor
+    #   self.model.joint(joint).margin[0] += random.uniform(0, JOINT_MARGIN_MAX_CHANGE)*self.randomization_factor
+    #   self.model.joint(joint).range[0] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
+    #   self.model.joint(joint).range[1] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
     for joint in JOINT_ACTUATOR_NAMES:
       self.model.actuator(joint).forcerange[0] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
       self.model.actuator(joint).forcerange[1] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
@@ -174,11 +176,11 @@ class CPUSimulation:
     torso_quat = self.data.xquat[self.torso_idx]
     joint_torques = self.data.qfrc_constraint[self.joint_torque_idx] + self.data.qfrc_smooth[self.joint_torque_idx]
     
-    rewards = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques)
+    reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques)
     
     if self.verbose: print("Reward computed.")
 
-    return rewards
+    return reward, isTerminal
     
   def step(self, action=None):
     if self.verbose: print("Stepping simulation...")
@@ -189,14 +191,14 @@ class CPUSimulation:
       self.data.ctrl = action_to_take
         
     # apply forces to the robot to destabilise it
-    if self.data.time > self.next_force_start_time + self.next_force_duration:
+    if self.data.time >= self.next_force_start_time + self.next_force_duration:
       self.next_force_start_time = self.data.time + random.uniform(MIN_EXTERNAL_FORCE_INTERVAL, MAX_EXTERNAL_FORCE_INTERVAL)
       self.next_force_duration = random.uniform(MIN_EXTERNAL_FORCE_DURATION*self.randomization_factor, MAX_EXTERNAL_FORCE_DURATION*self.randomization_factor)
       self.next_force_magnitude = random.uniform(MIN_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor, MAX_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor)
-      self.next_force_body = random.randint(1, len(self.data.xfrc_applied) - 1)
       self.next_force_direction = np.array([random.uniform(-1, 1), random.uniform(-1, 1)])
       self.data.xfrc_applied[self.next_force_body][0] = 0
       self.data.xfrc_applied[self.next_force_body][1] = 0
+      self.next_force_body = random.randint(1, len(self.data.xfrc_applied) - 1)
       
       while np.linalg.norm(self.next_force_direction) == 0: self.next_force_direction = np.array([random.uniform(-1, 1), random.uniform(-1, 1)])
       self.next_force_direction = self.next_force_direction / np.linalg.norm(self.next_force_direction)
@@ -211,7 +213,7 @@ class CPUSimulation:
     if self.verbose: print("Simulation stepped.")
     
   def render(self, display=True):
-    if not os.environ.get('RENDER_SIM', "True") == "True": return np.zeros((100,100))
+    if not os.environ.get('RENDER_SIM', "True") == "True": return None
     self.renderer.update_scene(self.data, camera="track", scene_option=self.scene_option)
     frame = self.renderer.render()
     if display:
@@ -223,11 +225,12 @@ if __name__ == "__main__":
     sim = CPUSimulation(xml_path="assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
     
     while True:
-      while sim.data.time < 2:
+      isTerminal = False
+      while not isTerminal:
         observation = sim.getObs()
-        action = [0]*4
+        # action = [0]*20
+        action = None
         sim.step(action)
-        reward = sim.computeReward()
-        print(reward)
+        reward, isTerminal = sim.computeReward()
         sim.render()
       sim.reset()

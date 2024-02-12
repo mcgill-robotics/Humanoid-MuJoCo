@@ -9,7 +9,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     VERTICAL_VELOCITY_REWARD_WEIGHT = -0.05
     # Termination A penalty, equal to −1 if the player is on the ground - 0.5
     GROUNDED_PENALTY_WEIGHT = -0.5
-    MIN_Z_BEFORE_GROUNDED = 0
+    MIN_Z_BEFORE_GROUNDED = -0.4
     # Upright 0 if the robot is upside down or if the tilt angle is greater
         # than 0.4 radians. Increases linearly, and is equal to +1 if the
         # tilt angle is less than 0.2 radians. - 0.02
@@ -33,6 +33,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     # Termination
     grounded_penalty = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, 0, GROUNDED_PENALTY_WEIGHT)
     reward += grounded_penalty
+    isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
       
     # Upright
     tilt_angle = jp.abs(2 * jp.arccos(quat[0]))
@@ -43,4 +44,4 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     total_joint_torque = jp.sum(jp.abs(joint_torques))
     reward += total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
     
-    return reward #TODO , isTouchingGround
+    return reward, isTouchingGround
