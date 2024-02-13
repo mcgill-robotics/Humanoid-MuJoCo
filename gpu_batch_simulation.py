@@ -6,8 +6,6 @@ from simulation_parameters import *
 from reward_functions import *
 import gc
 import random
-import os
-import cv2
 from gpu_batch_simulation_utils import *
 
 class GPUBatchSimulation:
@@ -26,18 +24,24 @@ class GPUBatchSimulation:
     self.rng = jax.random.split(self.rng_key, self.count)
     self.verbose = verbose
     
+    # define jax step function
+    def rollout(m,d):
+      for _ in range(self.physics_steps_per_control_step):
+        d = mjx.step(m,d)
+      return d
+    self.jax_step = jax.jit(jax.vmap(rollout, in_axes=(None, 0)))
+    
+    #define contact force function
+    self.getFootForces = jax.jit(jax.vmap(getFootForces, in_axes=(None, 0)))
+    
     self.reset()
     
-  def reset(self): # TODO -> slow
+  def reset(self):
     try: del self.model
     except: pass
     try: del self.cpu_model
     except: pass
     try: del self.base_mjx_data
-    except: pass
-    try: del self.getFootForces
-    except: pass
-    try: del self.jax_step
     except: pass
     try: del self.data_batch
     except: pass
@@ -50,8 +54,8 @@ class GPUBatchSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_CG
-    self.model.opt.iterations = 6
-    self.model.opt.ls_iterations = 6
+    self.model.opt.iterations = 4
+    self.model.opt.ls_iterations = 4
     # self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
     # self.model.opt.iterations = 10
     # self.model.opt.ls_iterations = 10
@@ -115,19 +119,13 @@ class GPUBatchSimulation:
       self.model.actuator(joint).gainprm[0] = kp
       self.model.actuator(joint).biasprm[1] = -kp
       self.model.actuator(joint).biasprm[2] = -kv
-
+      
     # create MJX model/data from CPU model/data
     self.cpu_model = self.model
     self.model = mjx.put_model(self.cpu_model)
     mj_data = mujoco.MjData(self.cpu_model)
     mujoco.mj_kinematics(self.cpu_model, mj_data)
     self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
-    
-    #define contact force function
-    self.getFootForces = jax.jit(jax.vmap(lambda d : getFootForces(self.pressure_sensor_ids, d)))
-    
-    # define step function
-    self.jax_step = jax.jit(jax.vmap(mjx.step, in_axes=(None, 0)))
     
     # randomize joint initial states (GPU)
     self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, maxval=JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)))(self.rng)
@@ -170,7 +168,7 @@ class GPUBatchSimulation:
     noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, 4)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector_batch)
     # foot pressure       8           Pressure values from foot sensors
-    pressure_values = self.getFootForces(self.data_batch)
+    pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
     # pressure_values = jp.zeros((self.count, 8))
 
     observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity[:, 0:2], torso_local_accel, local_gravity_vector, pressure_values))
@@ -184,7 +182,7 @@ class GPUBatchSimulation:
     return delayed_observations
   
   def step(self, action=None): # TODO -> slow
-    if self.verbose: print("Stepping simulations...")
+    # if self.verbose: print("Stepping simulations...")
     
     # cycle action through action buffer
     self.action_buffer.append(action)
@@ -197,10 +195,9 @@ class GPUBatchSimulation:
     self.data_batch = self.data_batch.replace(xfrc_applied=xfrc_applied)
 
     # step sims, update data batch
-    for _ in range(self.physics_steps_per_control_step):
-      self.data_batch = self.jax_step(self.model, self.data_batch)
+    self.data_batch = self.jax_step(self.model, self.data_batch)
     
-    if self.verbose: print("Simulations stepped.")
+    # if self.verbose: print("Simulations stepped.")
   
 if __name__ == "__main__":
     sim_batch = GPUBatchSimulation(count=512,

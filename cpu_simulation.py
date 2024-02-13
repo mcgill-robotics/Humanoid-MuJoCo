@@ -36,8 +36,8 @@ class CPUSimulation:
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_CG
-    self.model.opt.iterations = 10
-    self.model.opt.ls_iterations = 10
+    self.model.opt.iterations = 4
+    self.model.opt.ls_iterations = 4
     # self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
     # self.model.opt.iterations = 5
     # self.model.opt.ls_iterations = 5
@@ -226,8 +226,8 @@ if __name__ == "__main__":
       isTerminal = False
       while not isTerminal:
         observation = sim.getObs()
-        # action = [0]*20
-        action = None
+        action = [-jp.pi]*20
+        # action = None
         sim.step(action)
         reward, isTerminal = sim.computeReward()
         sim.render()
