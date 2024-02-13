@@ -121,8 +121,6 @@ class CPUSimulation:
     for i in range(len(self.data.qpos)):
       self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)*self.randomization_factor
 
-    self.step()      
-
     # clean up any unreferenced variables
     gc.collect()
     

@@ -29,6 +29,21 @@ class GPUBatchSimulation:
     self.reset()
     
   def reset(self):
+    try: del self.model
+    except: pass
+    try: del self.cpu_model
+    except: pass
+    try: del self.base_mjx_data
+    except: pass
+    try: del self.getFootForces
+    except: pass
+    try: del self.jax_step
+    except: pass
+    try: del self.data_batch
+    except: pass
+    # clean up any unreferenced variables
+    gc.collect()
+    
     if self.verbose: print("\nInitializing new simulations...")
     
     #load model from XML
@@ -104,27 +119,19 @@ class GPUBatchSimulation:
     # create MJX model/data from CPU model/data
     self.cpu_model = self.model
     self.model = mjx.put_model(self.cpu_model)
-    self.base_mjx_data = mjx.put_data(self.cpu_model, mujoco.MjData(self.cpu_model))
+    mj_data = mujoco.MjData(self.cpu_model)
+    mujoco.mj_kinematics(self.cpu_model, mj_data)
+    self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
     
     #define contact force function
     self.getFootForces = jax.jit(jax.vmap(lambda d : getFootForces(self.pressure_sensor_ids, d)))
     
-    # define step function (rollout)
-    def rollout(m, d):
-      for _ in range(self.physics_steps_per_control_step):
-        d = mjx.step(m, d)
-      return d
-    self.jax_step = jax.jit(jax.vmap(rollout, in_axes=(None, 0)))
+    # define step function
+    self.jax_step = jax.jit(jax.vmap(mjx.step, in_axes=(None, 0)))
     
     # randomize joint initial states (GPU)
     self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, maxval=JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)))(self.rng)
-  
-    # step sim (to populate self.data)
-    self.step()
-    
-    # clean up any unreferenced variables
-    gc.collect()
-    
+
     if self.verbose: print("Simulations initialized.")
 
   def computeReward(self):
@@ -183,13 +190,15 @@ class GPUBatchSimulation:
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
     if action_to_take is not None:
-      self.data_batch.replace(ctrl=jp.array(action_to_take))
+      self.data_batch = self.data_batch.replace(ctrl=jp.array(action_to_take))
     
     # apply forces to the robot to destabilise it
-    applyExternalForces(self)
+    xfrc_applied = applyExternalForces(self)
+    self.data_batch = self.data_batch.replace(xfrc_applied=xfrc_applied)
 
     # step sims, update data batch
-    self.data_batch = self.jax_step(self.model, self.data_batch)
+    for _ in range(self.physics_steps_per_control_step):
+      self.data_batch = self.jax_step(self.model, self.data_batch)
     
     if self.verbose: print("Simulations stepped.")
   

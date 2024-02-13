@@ -5,10 +5,14 @@ from reward_functions import *
 
 def estimateCPUSimSpeed():
     timestep = 0.005
-    simulation_time = 500 #seconds
+    simulation_time = 100 #seconds
     physics_steps_per_control_step = 5
 
-    sim = CPUSimulation("assets/world.xml", reward_fn=standingRewardFn, timestep=timestep, physics_steps_per_control_step=physics_steps_per_control_step, randomization_factor=1)
+    sim = CPUSimulation("assets/world.xml",
+                        reward_fn=standingRewardFn,
+                        timestep=timestep,
+                        physics_steps_per_control_step=physics_steps_per_control_step,
+                        randomization_factor=1)
     
     sim_time_executed = 0
     start_time = time.time()
@@ -20,7 +24,7 @@ def estimateCPUSimSpeed():
             sim.step()
             _, isTerminal = sim.computeReward()
             sim_time_executed += timestep * physics_steps_per_control_step
-            print("{}%".format(100 * sim_time_executed / simulation_time), end='\r')
+            print("{}%                   ".format(100 * sim_time_executed / simulation_time), end='\r')
         sim.reset()
             
     end_time = time.time()

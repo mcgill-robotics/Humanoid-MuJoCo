@@ -48,13 +48,15 @@ def applyExternalForces(sim_batch):
   # check which simulations need new random force times/durations/magnitudes/directions/target bodies
   should_update_force = sim_batch.data_batch.time > (sim_batch.next_force_start_times + sim_batch.next_force_durations)
   
+  xfrc_applied = np.array(sim_batch.data_batch.xfrc_applied)
+  
   # for the simulations which need to be updated, randomly generate new values
   if jp.any(should_update_force):
     N = jp.sum(should_update_force)
     updated_next_force_start_times = sim_batch.data_batch.time[should_update_force] + jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_INTERVAL, maxval=MAX_EXTERNAL_FORCE_INTERVAL)
     updated_next_force_durations = jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_DURATION, maxval=MAX_EXTERNAL_FORCE_DURATION)
     updated_next_force_magnitudes = jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_MAGNITUDE*sim_batch.randomization_factor, maxval=MAX_EXTERNAL_FORCE_MAGNITUDE*sim_batch.randomization_factor)
-    updated_next_force_bodies = jax.random.randint(key=sim_batch.rng_key, shape=(N,), minval=1, maxval=len(sim_batch.data_batch.xfrc_applied) - 1)
+    updated_next_force_bodies = jax.random.randint(key=sim_batch.rng_key, shape=(N,), minval=1, maxval=sim_batch.data_batch.xfrc_applied.shape[1] - 1)
     updated_next_force_directions = jax.random.ball(key=sim_batch.rng_key, d=2, shape=(N,))
     
     sim_batch.next_force_start_times = sim_batch.next_force_start_times.at[should_update_force].set(updated_next_force_start_times)
@@ -62,19 +64,19 @@ def applyExternalForces(sim_batch):
     sim_batch.next_force_magnitudes = sim_batch.next_force_magnitudes.at[should_update_force].set(updated_next_force_magnitudes)
     sim_batch.next_force_bodies = sim_batch.next_force_bodies.at[should_update_force].set(updated_next_force_bodies)
     sim_batch.next_force_directions = sim_batch.next_force_directions.at[should_update_force].set(updated_next_force_directions)
+    
+    xfrc_applied[should_update_force] = np.zeros((N,*sim_batch.data_batch.xfrc_applied.shape[1:]))
+    
 
   # apply force values (times/durations/etc.) to corresponding simulations
   should_apply_force = jp.logical_and((sim_batch.data_batch.time > sim_batch.next_force_start_times), (sim_batch.data_batch.time < (sim_batch.next_force_start_times + sim_batch.next_force_durations)))
   
   if jp.any(should_apply_force):
-    xfrc_applied = np.zeros(sim_batch.data_batch.xfrc_applied.shape)
     applied_forces_x = sim_batch.next_force_directions[should_apply_force][:, 0] * sim_batch.next_force_magnitudes[should_apply_force]
     applied_forces_y = sim_batch.next_force_directions[should_apply_force][:, 1] * sim_batch.next_force_magnitudes[should_apply_force]
-    xfrc_applied[np.array(should_apply_force), np.array(sim_batch.next_force_bodies[np.array(should_apply_force)]), 0:2] = np.array([applied_forces_x, applied_forces_y])
+    xfrc_applied[np.array(should_apply_force, dtype=bool), np.array(sim_batch.next_force_bodies[np.array(should_apply_force, dtype=bool)], dtype=int), 0:2] = np.array([applied_forces_x, applied_forces_y]).T
 
-    xfrc_applied = jp.array(xfrc_applied)
-    
-    sim_batch.data_batch.replace(xfrc_applied=xfrc_applied)
+  return jp.array(xfrc_applied, dtype=float)
 
 # helper functions
 inverseRotateVectors = jax.jit(jax.vmap(lambda q, v : Rotation.from_quat(q).inv().apply(v)))
