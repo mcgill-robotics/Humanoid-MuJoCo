@@ -28,7 +28,7 @@ class GPUBatchSimulation:
     
     self.reset()
     
-  def reset(self):
+  def reset(self): # TODO -> slow
     try: del self.model
     except: pass
     try: del self.cpu_model
@@ -183,7 +183,7 @@ class GPUBatchSimulation:
     
     return delayed_observations
   
-  def step(self, action=None):
+  def step(self, action=None): # TODO -> slow
     if self.verbose: print("Stepping simulations...")
     
     # cycle action through action buffer
