@@ -182,7 +182,7 @@ class GPUBatchSimulation:
     return delayed_observations
   
   def step(self, action=None): # TODO -> slow
-    # if self.verbose: print("Stepping simulations...")
+    if self.verbose: print("Stepping simulations...")
     
     # cycle action through action buffer
     self.action_buffer.append(action)
@@ -197,7 +197,7 @@ class GPUBatchSimulation:
     # step sims, update data batch
     self.data_batch = self.jax_step(self.model, self.data_batch)
     
-    # if self.verbose: print("Simulations stepped.")
+    if self.verbose: print("Simulations stepped.")
   
 if __name__ == "__main__":
     sim_batch = GPUBatchSimulation(count=512,
