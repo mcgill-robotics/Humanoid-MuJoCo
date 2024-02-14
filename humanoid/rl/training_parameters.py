@@ -2,6 +2,10 @@ from humanoid.simulation.reward_functions import *
 from humanoid.simulation.gpu_batch_simulation import GPUBatchSimulation
 from humanoid.simulation.cpu_simulation import CPUSimulation
 from humanoid import SIM_XML_PATH
+import os
+
+# Set environment variable to disable rendering
+os.environ["RENDER_SIM"] = "False"
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -41,10 +45,10 @@ print("training environment name : " + env_name)
 #                         reward_fn=standingRewardFn,
 #                         physics_steps_per_control_step=5,
 #                         timestep=0.005,
-#                         randomization_factor=1,
+#                         randomization_factor=0,
 #                         verbose=True)
 
-env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
+env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
 
 
 # state space dimension

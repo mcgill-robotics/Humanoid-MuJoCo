@@ -121,86 +121,96 @@ def train():
     i_episode = 0
 
     # training loop
-    while time_step <= max_training_timesteps:
+    try: # wrap in try-except so we can stop training with Ctrl+C and not lose the trained model
+        while time_step <= max_training_timesteps:
 
-        # TODO -> implement increasing randomization factor as time goes on (when avg. reward stagnates or something)
-        current_avg_ep_reward = 0
+            # TODO -> implement increasing randomization factor as time goes on (when avg. reward stagnates or something)
+            current_avg_ep_reward = 0
+            
+            env.reset()
+            action = env.lastAction
+            state = env.getObs()
+            state_history = [np.concatenate((state, action), axis=1)] * state_history_length
+            
+            for t in range(1, max_ep_len+1):
+
+                # select action with policy
+                action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
+                env.step(action)
+                state = np.concatenate((env.getObs(), action), axis=1)
+                state_history.pop(0)
+                state_history.append(state)
+                reward, done = env.computeReward()
+
+                # saving reward and is_terminals
+                ppo_agent.buffer.rewards.append(reward)
+                ppo_agent.buffer.is_terminals.append(done)
+
+                time_step += 1
+                current_avg_ep_reward += np.mean(reward)
+
+                # update PPO agent
+                if time_step % update_timestep == 0:
+                    ppo_agent.update()
+
+                # if continuous action space; then decay action std of ouput action distribution
+                if has_continuous_action_space and time_step % action_std_decay_freq == 0:
+                    ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
+
+                # log in logging file
+                if time_step % log_freq == 0:
+
+                    # log average reward till last episode
+                    log_avg_reward = log_running_avg_reward / log_running_episodes
+                    log_avg_reward = round(log_avg_reward, 4)
+
+                    log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
+                    log_f.flush()
+
+                    log_running_avg_reward = 0
+                    log_running_episodes = 0
+
+                # printing average reward
+                if time_step % print_freq == 0:
+
+                    # print average reward till last episode
+                    print_avg_reward = print_running_avg_reward / print_running_episodes
+                    print_avg_reward = round(print_avg_reward, 2)
+
+                    print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
+
+                    print_running_avg_reward = 0
+                    print_running_episodes = 0
+
+                # save model weights
+                if time_step % save_model_freq == 0:
+                    print("--------------------------------------------------------------------------------------------")
+                    print("saving model at : " + checkpoint_path)
+                    ppo_agent.save(checkpoint_path)
+                    print("model saved")
+                    print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
+                    print("--------------------------------------------------------------------------------------------")
+
+                # break; if the episode is over
+                if np.all(done):
+                    break
+
+            print_running_avg_reward += current_avg_ep_reward
+            print_running_episodes += 1
+
+            log_running_avg_reward += current_avg_ep_reward
+            log_running_episodes += 1
+
+            i_episode += 1
+    except:
+        print("\nUser ended training early. Saving current state of model.\n")
         
-        env.reset()
-        action = env.lastAction
-        state = env.getObs()
-        state_history = [np.concatenate((state, action), axis=1)] * state_history_length
-        
-        for t in range(1, max_ep_len+1):
-
-            # select action with policy
-            action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
-            env.step(action)
-            state = np.concatenate((env.getObs(), action), axis=1)
-            state_history.pop(0)
-            state_history.append(state)
-            reward, done = env.computeReward()
-
-            # saving reward and is_terminals
-            ppo_agent.buffer.rewards.append(reward)
-            ppo_agent.buffer.is_terminals.append(done)
-
-            time_step += 1
-            current_avg_ep_reward += np.mean(reward)
-
-            # update PPO agent
-            if time_step % update_timestep == 0:
-                ppo_agent.update()
-
-            # if continuous action space; then decay action std of ouput action distribution
-            if has_continuous_action_space and time_step % action_std_decay_freq == 0:
-                ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
-
-            # log in logging file
-            if time_step % log_freq == 0:
-
-                # log average reward till last episode
-                log_avg_reward = log_running_avg_reward / log_running_episodes
-                log_avg_reward = round(log_avg_reward, 4)
-
-                log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
-                log_f.flush()
-
-                log_running_avg_reward = 0
-                log_running_episodes = 0
-
-            # printing average reward
-            if time_step % print_freq == 0:
-
-                # print average reward till last episode
-                print_avg_reward = print_running_avg_reward / print_running_episodes
-                print_avg_reward = round(print_avg_reward, 2)
-
-                print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
-
-                print_running_avg_reward = 0
-                print_running_episodes = 0
-
-            # save model weights
-            if time_step % save_model_freq == 0:
-                print("--------------------------------------------------------------------------------------------")
-                print("saving model at : " + checkpoint_path)
-                ppo_agent.save(checkpoint_path)
-                print("model saved")
-                print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
-                print("--------------------------------------------------------------------------------------------")
-
-            # break; if the episode is over
-            if np.all(done):
-                break
-
-        print_running_avg_reward += current_avg_ep_reward
-        print_running_episodes += 1
-
-        log_running_avg_reward += current_avg_ep_reward
-        log_running_episodes += 1
-
-        i_episode += 1
+        print("--------------------------------------------------------------------------------------------")
+        print("saving model at : " + checkpoint_path)
+        ppo_agent.save(checkpoint_path)
+        print("model saved")
+        print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
+        print("--------------------------------------------------------------------------------------------")
 
     log_f.close()
 
