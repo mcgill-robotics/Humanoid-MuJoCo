@@ -25,7 +25,8 @@ class GPUBatchSimulation:
     if jax.default_backend() != 'gpu':
       print("ERROR: failed to find GPU device.")
       exit()
-      
+    
+    self.platform = "GPU"
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
@@ -222,7 +223,7 @@ class GPUBatchSimulation:
     if self.verbose: print("Simulations stepped.")
   
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=512,
+    sim_batch = GPUBatchSimulation(count=256,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,

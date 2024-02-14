@@ -10,6 +10,7 @@ device = torch.device('cpu')
 if(torch.cuda.is_available()): 
     device = torch.device('cuda:0') 
     torch.cuda.empty_cache()
+    print("INFO: Running PPO on CUDA.")
 else:
     print("WARN: CUDA is not available!")
 

@@ -20,7 +20,6 @@ os.environ["RENDER_SIM"] = "False"
 
 
 ####### initialize environment hyperparameters ######
-env_name = "standing"
 has_continuous_action_space = True  # continuous action space; else discrete
 
 max_ep_len = 1000                   # max timesteps in one episode
@@ -38,18 +37,19 @@ action_std_decay_freq = int(2.5e5)  # action_std decay frequency (in num timeste
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 
 #####################################################
+
+env = GPUBatchSimulation(count=256,
+                        xml_path=SIM_XML_PATH,
+                        reward_fn=standingRewardFn,
+                        physics_steps_per_control_step=5,
+                        timestep=0.005,
+                        randomization_factor=0)
+
+# env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
+
+env_name = env.platform + "Standing"
+
 print("training environment name : " + env_name)
-
-# env = GPUBatchSimulation(count=512,
-#                         xml_path=SIM_XML_PATH,
-#                         reward_fn=standingRewardFn,
-#                         physics_steps_per_control_step=5,
-#                         timestep=0.005,
-#                         randomization_factor=0,
-#                         verbose=True)
-
-env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
-
 
 # state space dimension
 state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length
