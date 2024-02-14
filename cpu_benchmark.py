@@ -1,6 +1,6 @@
-from simulation.cpu_simulation import CPUSimulation
+from humanoid_rl.simulation.cpu_simulation import CPUSimulation
+from humanoid_rl.simulation.reward_functions import *
 import time
-from simulation.reward_functions import *
 
 
 def estimateCPUSimSpeed():
@@ -8,7 +8,7 @@ def estimateCPUSimSpeed():
     simulation_time = 100 #seconds
     physics_steps_per_control_step = 5
 
-    sim = CPUSimulation("assets/world.xml",
+    sim = CPUSimulation("rl/simulation/assets/world.xml",
                         reward_fn=standingRewardFn,
                         timestep=timestep,
                         physics_steps_per_control_step=physics_steps_per_control_step,

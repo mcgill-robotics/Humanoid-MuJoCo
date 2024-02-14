@@ -2567,7 +2567,6 @@ void Simulate::Render() {
     }
 
     // save as PNG
-    // TODO(b/241577466): Parse the stem of the filename and use a .PNG extension.
     // Unfortunately, if we just yank ".xml"/".mjb" from the filename and append .PNG, the macOS
     // file dialog does not automatically open that location. Thus, we defer to a default
     // "screenshot.png" for now.

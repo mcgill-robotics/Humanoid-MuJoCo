@@ -1,8 +1,9 @@
-from simulation.gpu_batch_simulation import GPUBatchSimulation
+from humanoid_rl.simulation.gpu_batch_simulation import GPUBatchSimulation
+from humanoid_rl.simulation.reward_functions import *
 from cpu_benchmark import estimateCPUSimSpeed
 import time
-from simulation.reward_functions import *
 import matplotlib.pyplot as plt
+import numpy as np
 
 timestep = 0.005
 simulation_time = 100 #seconds
@@ -16,7 +17,7 @@ gpu_plot_y = []
 for sim_batch_size in sim_batch_sizes:
     print("Loading GPU w/ batch size {}...".format(sim_batch_size))
     sim_batch = GPUBatchSimulation(count=sim_batch_size,
-                                   xml_path="assets/world.xml",
+                                   xml_path="rl/simulation/assets/world.xml",
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=physics_steps_per_control_step,
                                    timestep=timestep,
@@ -29,8 +30,8 @@ for sim_batch_size in sim_batch_sizes:
     print("Starting benchmark.")
       
     while sim_time_executed < simulation_time:
-        areTerminal = jp.array([False])
-        while not jp.all(areTerminal):
+        areTerminal = np.array([False])
+        while not np.all(areTerminal):
             observations = sim_batch.getObs()
             sim_batch.step()
             _, areTerminal = sim_batch.computeReward()

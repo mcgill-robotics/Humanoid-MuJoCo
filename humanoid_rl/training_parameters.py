@@ -1,3 +1,19 @@
+from .simulation.reward_functions import *
+from .simulation.gpu_batch_simulation import GPUBatchSimulation
+from .simulation.cpu_simulation import CPUSimulation
+
+# STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+
+# STATE
+    # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
+    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
+    # angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
+    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
+    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
+    # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
+    # previous action     5 · 20          Action filter state (stacked)    
+
+
 ####### initialize environment hyperparameters ######
 env_name = "standing"
 has_continuous_action_space = True  # continuous action space; else discrete
@@ -14,19 +30,27 @@ action_std_decay_rate = 0.05        # linearly decay action_std (action_std = ac
 min_action_std = 0.1                # minimum action_std (stop decay after action_std <= min_action_std)
 action_std_decay_freq = int(2.5e5)  # action_std decay frequency (in num timesteps)
 
-state_history = 5 # how many iterations of the history of state observations is included in the current state observation
+state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 
 #####################################################
 print("training environment name : " + env_name)
 
-env = # TODO
+# env = GPUBatchSimulation(count=512,
+#                         xml_path="rl/simulation/assets/world.xml",
+#                         reward_fn=standingRewardFn,
+#                         physics_steps_per_control_step=5,
+#                         timestep=0.005,
+#                         randomization_factor=1,
+#                         verbose=True)
+
+env = CPUSimulation(xml_path="rl/simulation/assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
 
 # state space dimension
-state_dim = env.observation_space.shape[0] * state_history
+state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length
 
 # action space dimension
 if has_continuous_action_space:
-    action_dim = env.action_space.shape[0]
+    action_dim = env.action_space.shape[1]
 else:
     action_dim = env.action_space.n
 #####################################################

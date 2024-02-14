@@ -2,11 +2,11 @@ import jax
 from jax import numpy as jp
 import mujoco
 from mujoco import mjx
-from simulation.simulation_parameters import *
-from simulation.reward_functions import *
+from .simulation_parameters import *
+from .reward_functions import *
 import gc
 import random
-from gpu_batch_simulation_utils import *
+from .gpu_batch_simulation_utils import *
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -98,16 +98,6 @@ class GPUBatchSimulation:
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
     self.model.geom('floor').friction = [coef * (1.0*(1.0-self.randomization_factor) + random.uniform(FLOOR_FRICTION_MIN_MULTIPLIER, FLOOR_FRICTION_MAX_MULTIPLIER)*self.randomization_factor) for coef in self.model.geom('floor').friction]    
-    #delays in actions and observations (10ms to 50ms)
-    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    #round delays to be multiples of the timestep
-    self.actual_timestep = self.timestep * self.physics_steps_per_control_step
-    self.observation_delay = round(self.observation_delay / self.actual_timestep) * self.actual_timestep
-    self.action_delay = round(self.action_delay / self.actual_timestep) * self.actual_timestep
-    #make buffers for observations and actions
-    self.observation_buffer = [None] * (int)(self.observation_delay/self.actual_timestep)
-    self.action_buffer = [None] * (int)(self.action_delay/self.actual_timestep)
     # vary the mass of all limbs randomly
     for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
@@ -141,6 +131,23 @@ class GPUBatchSimulation:
     # randomize joint initial states (GPU)
     self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, maxval=JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)))(self.rng)
 
+    #delays in actions and observations (10ms to 50ms)
+    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    #round delays to be multiples of the timestep
+    self.actual_timestep = self.timestep * self.physics_steps_per_control_step
+    self.observation_delay = round(self.observation_delay / self.actual_timestep) * self.actual_timestep
+    self.action_delay = round(self.action_delay / self.actual_timestep) * self.actual_timestep
+    #make buffers for observations and actions
+    self.observation_buffer = []
+    self.observation_buffer = [self.getObs()] * (int)(self.observation_delay/self.actual_timestep)
+    self.action_buffer = [self.data_batch.ctrl] * (int)(self.action_delay/self.actual_timestep)
+    
+    # initialize environment properties
+    self.observation_shape = self.getObs().shape
+    self.action_shape = self.data_batch.ctrl.shape
+    self.lastAction = self.data_batch.ctrl
+
     if self.verbose: print("Simulations initialized.")
 
   def computeReward(self):
@@ -155,7 +162,7 @@ class GPUBatchSimulation:
     
     if self.verbose: print("Rewards computed.")
 
-    return rewards, areTerminal
+    return np.array(rewards), np.array(areTerminal)
     
   def getObs(self):
     if self.verbose: print("Collecting observations...")
@@ -190,16 +197,18 @@ class GPUBatchSimulation:
     
     if self.verbose: print("Observations collected.")
     
-    return delayed_observations
+    return np.array(delayed_observations)
   
-  def step(self, action=None): # TODO -> slow
+  def step(self, action=None):
     if self.verbose: print("Stepping simulations...")
     
     # cycle action through action buffer
+    if action is None:
+      action = self.data_batch.ctrl
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
-    if action_to_take is not None:
-      self.data_batch = self.data_batch.replace(ctrl=jp.array(action_to_take))
+    self.data_batch = self.data_batch.replace(ctrl=jp.array(action_to_take))
+    self.lastAction = action_to_take
     
     # apply forces to the robot to destabilise it
     xfrc_applied = applyExternalForces(self)
@@ -212,7 +221,7 @@ class GPUBatchSimulation:
   
 if __name__ == "__main__":
     sim_batch = GPUBatchSimulation(count=512,
-                                   xml_path="assets/world.xml",
+                                   xml_path="rl/simulation/assets/world.xml",
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,
                                    timestep=0.005,
@@ -221,8 +230,8 @@ if __name__ == "__main__":
 
 
     while True:
-      areTerminal = jp.array([False])
-      while not jp.all(areTerminal):
+      areTerminal = np.array([False])
+      while not np.all(areTerminal):
         observations = sim_batch.getObs()
         # actions = [[0]*20]*sim_batch.count
         actions = None

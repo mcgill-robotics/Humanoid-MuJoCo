@@ -258,7 +258,6 @@ class Simulate {
   mjUI ui1 = {};
 
   // Constant arrays needed for the option section of UI and the UI interface
-  // TODO setting the size here is not ideal
   const mjuiDef def_option[13] = {
     {mjITEM_SECTION,  "Option",        1, nullptr,           "AO"},
     {mjITEM_CHECKINT, "Help",          2, &this->help,       " #290"},

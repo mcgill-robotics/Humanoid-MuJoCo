@@ -1,5 +1,4 @@
-from simulation.simulation_parameters import *
-import math
+from .simulation_parameters import *
 from jax import numpy as jp
 
 # REWARD INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP

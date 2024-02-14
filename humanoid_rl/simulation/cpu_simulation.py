@@ -4,8 +4,8 @@ import numpy as np
 import mujoco
 import cv2
 import random
-from simulation.simulation_parameters import *
-from simulation.reward_functions import *
+from .simulation_parameters import *
+from .reward_functions import *
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os
@@ -91,16 +91,6 @@ class CPUSimulation:
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
     self.model.geom('floor').friction = [coef * (1.0*(1.0-self.randomization_factor) + random.uniform(FLOOR_FRICTION_MIN_MULTIPLIER, FLOOR_FRICTION_MAX_MULTIPLIER)*self.randomization_factor) for coef in self.model.geom('floor').friction]    
-    #delays in actions and observations (10ms to 50ms)
-    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    #round delays to be multiples of the timestep
-    actual_timestep = self.timestep * self.physics_steps_per_control_step
-    self.observation_delay = round(self.observation_delay / actual_timestep) * actual_timestep
-    self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
-    #make buffers for observations and actions
-    self.observation_buffer = [None] * (int)(self.observation_delay/actual_timestep)
-    self.action_buffer = [None] * (int)(self.action_delay/actual_timestep)
     # vary the mass of all limbs randomly
     for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
@@ -131,6 +121,24 @@ class CPUSimulation:
     # randomize joint initial states (CPU)
     for i in range(len(self.data.qpos)):
       self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)*self.randomization_factor
+
+    #delays in actions and observations (10ms to 50ms)
+    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    #round delays to be multiples of the timestep
+    actual_timestep = self.timestep * self.physics_steps_per_control_step
+    self.observation_delay = round(self.observation_delay / actual_timestep) * actual_timestep
+    self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
+    #make buffers for observations and actions
+    self.observation_buffer = []
+    self.observation_buffer = [self.getObs()] * (int)(self.observation_delay/actual_timestep)
+    self.action_buffer = [self.data.ctrl] * (int)(self.action_delay/actual_timestep)
+    
+    # initialize environment properties
+    # initialize environment properties
+    self.observation_shape = self.getObs().shape
+    self.action_shape = self.data.ctrl.shape
+    self.lastAction = self.data.ctrl
 
     # clean up any unreferenced variables
     gc.collect()
@@ -174,7 +182,7 @@ class CPUSimulation:
     
     if self.verbose: print("Observations collected.")
     
-    return delayed_observations
+    return np.array(jp.expand_dims(delayed_observations, axis=0))
     
   def computeReward(self):
     if self.verbose: print("Computing reward...")
@@ -189,15 +197,17 @@ class CPUSimulation:
     
     if self.verbose: print("Reward computed.")
 
-    return reward, isTerminal
+    return np.array(jp.expand_dims(reward, axis=0)), np.array(jp.expand_dims(isTerminal, axis=0))
     
   def step(self, action=None):
     if self.verbose: print("Stepping simulation...")
     # cycle action through action buffer
+    if action is None:
+      action = self.data.ctrl
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
-    if action_to_take is not None:
-      self.data.ctrl = action_to_take
+    self.data.ctrl = action_to_take
+    self.lastAction = action_to_take
         
     # apply forces to the robot to destabilise it
     if self.data.time >= self.next_force_start_time + self.next_force_duration:
@@ -231,15 +241,17 @@ class CPUSimulation:
     return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path="assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
+    sim = CPUSimulation(xml_path="rl/simulation/assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
     
     while True:
       isTerminal = False
       while not isTerminal:
-        observation = sim.getObs()
+        observation = sim.getObs()[0]
         action = [0]*20
         # action = None
         sim.step(action)
-        # reward, isTerminal = sim.computeReward()
+        reward, isTerminal = sim.computeReward()
+        reward = reward[0]
+        isTerminal = isTerminal[0]
         sim.render()
       sim.reset()
