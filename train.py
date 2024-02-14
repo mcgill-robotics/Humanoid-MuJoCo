@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 import torch
 import numpy as np
-from humanoid_rl.ppo import PPO
-from humanoid_rl.training_parameters import *
+from humanoid.rl.ppo import PPO
+from humanoid.rl.training_parameters import *
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -129,16 +129,14 @@ def train():
         env.reset()
         action = env.lastAction
         state = env.getObs()
-        state_history = [np.concatenate(state, action)] * state_history_length
+        state_history = [np.concatenate((state, action), axis=1)] * state_history_length
         
-        print(state_history[0].shape)
-
         for t in range(1, max_ep_len+1):
 
             # select action with policy
-            action = ppo_agent.select_action(np.array(state_history))
+            action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
             env.step(action)
-            state = np.concatenate(env.getObs(), action)
+            state = np.concatenate((env.getObs(), action), axis=1)
             state_history.pop(0)
             state_history.append(state)
             reward, done = env.computeReward()

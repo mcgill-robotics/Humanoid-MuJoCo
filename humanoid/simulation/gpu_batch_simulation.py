@@ -7,6 +7,7 @@ from .reward_functions import *
 import gc
 import random
 from .gpu_batch_simulation_utils import *
+from humanoid import SIM_XML_PATH
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -205,6 +206,7 @@ class GPUBatchSimulation:
     # cycle action through action buffer
     if action is None:
       action = self.data_batch.ctrl
+    # TODO: actions should be -1 to 1, we need to map each entry to the corresponding joint limits in radians
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
     self.data_batch = self.data_batch.replace(ctrl=jp.array(action_to_take))
@@ -221,7 +223,7 @@ class GPUBatchSimulation:
   
 if __name__ == "__main__":
     sim_batch = GPUBatchSimulation(count=512,
-                                   xml_path="rl/simulation/assets/world.xml",
+                                   xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,
                                    timestep=0.005,

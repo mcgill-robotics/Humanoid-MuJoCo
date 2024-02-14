@@ -9,6 +9,7 @@ from .reward_functions import *
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os
+from humanoid import SIM_XML_PATH
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -131,14 +132,14 @@ class CPUSimulation:
     self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
     #make buffers for observations and actions
     self.observation_buffer = []
-    self.observation_buffer = [self.getObs()] * (int)(self.observation_delay/actual_timestep)
-    self.action_buffer = [self.data.ctrl] * (int)(self.action_delay/actual_timestep)
+    self.observation_buffer = [self.getObs()[0]] * (int)(self.observation_delay/actual_timestep)
+    self.action_buffer = [jp.expand_dims(self.data.ctrl, axis=0)] * (int)(self.action_delay/actual_timestep)
     
     # initialize environment properties
     # initialize environment properties
     self.observation_shape = self.getObs().shape
-    self.action_shape = self.data.ctrl.shape
-    self.lastAction = self.data.ctrl
+    self.action_shape = jp.expand_dims(self.data.ctrl, axis=0).shape
+    self.lastAction = jp.expand_dims(self.data.ctrl, axis=0)
 
     # clean up any unreferenced variables
     gc.collect()
@@ -204,10 +205,11 @@ class CPUSimulation:
     # cycle action through action buffer
     if action is None:
       action = self.data.ctrl
-    self.action_buffer.append(action)
+    # TODO: actions should be -1 to 1, we need to map each entry to the corresponding joint limits in radians
+    self.action_buffer.append(action[0])
     action_to_take = self.action_buffer.pop(0)
     self.data.ctrl = action_to_take
-    self.lastAction = action_to_take
+    self.lastAction = jp.expand_dims(action_to_take, axis=0)
         
     # apply forces to the robot to destabilise it
     if self.data.time >= self.next_force_start_time + self.next_force_duration:
@@ -241,14 +243,14 @@ class CPUSimulation:
     return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path="rl/simulation/assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
+    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
     
     while True:
       isTerminal = False
       while not isTerminal:
-        observation = sim.getObs()[0]
-        action = [0]*20
-        # action = None
+        state = sim.getObs()[0]
+        action = None
+        # action = [[0]*20]
         sim.step(action)
         reward, isTerminal = sim.computeReward()
         reward = reward[0]

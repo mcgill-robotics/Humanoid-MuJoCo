@@ -1,6 +1,7 @@
-from .simulation.reward_functions import *
-from .simulation.gpu_batch_simulation import GPUBatchSimulation
-from .simulation.cpu_simulation import CPUSimulation
+from humanoid.simulation.reward_functions import *
+from humanoid.simulation.gpu_batch_simulation import GPUBatchSimulation
+from humanoid.simulation.cpu_simulation import CPUSimulation
+from humanoid import SIM_XML_PATH
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -36,23 +37,21 @@ state_history_length = 5 # how many iterations of the history of state observati
 print("training environment name : " + env_name)
 
 # env = GPUBatchSimulation(count=512,
-#                         xml_path="rl/simulation/assets/world.xml",
+#                         xml_path=SIM_XML_PATH,
 #                         reward_fn=standingRewardFn,
 #                         physics_steps_per_control_step=5,
 #                         timestep=0.005,
 #                         randomization_factor=1,
 #                         verbose=True)
 
-env = CPUSimulation(xml_path="rl/simulation/assets/world.xml", reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
+env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
+
 
 # state space dimension
 state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length
 
 # action space dimension
-if has_continuous_action_space:
-    action_dim = env.action_space.shape[1]
-else:
-    action_dim = env.action_space.n
+action_dim = env.action_shape[1]
 #####################################################
 
 ## Note : print/log frequencies should be > than max_ep_len

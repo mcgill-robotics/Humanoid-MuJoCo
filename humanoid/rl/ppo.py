@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.distributions import MultivariateNormal
 from torch.distributions import Categorical
+import numpy as np
 
 ################################## set device ##################################
 # set device to cpu or cuda
@@ -181,7 +182,7 @@ class PPO:
             self.buffer.logprobs.append(action_logprob)
             self.buffer.state_values.append(state_val)
 
-            return action.detach().cpu().numpy().flatten()
+            return action.detach().cpu().numpy()
         else:
             with torch.no_grad():
                 state = torch.FloatTensor(state).to(device)
@@ -205,7 +206,7 @@ class PPO:
             rewards.insert(0, discounted_reward)
             
         # Normalizing the rewards
-        rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
+        rewards = torch.tensor(np.array(rewards), dtype=torch.float32).to(device)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
 
         # convert list to tensor
@@ -224,7 +225,7 @@ class PPO:
             logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
 
             # match state_values tensor dimensions with rewards tensor
-            state_values = torch.squeeze(state_values)
+            # state_values = torch.squeeze(state_values) # REMOVED SINCE WE ARE TRAINING W/ BATCHED SIMULATION
             
             # Finding the ratio (pi_theta / pi_theta__old)
             ratios = torch.exp(logprobs - old_logprobs.detach())
