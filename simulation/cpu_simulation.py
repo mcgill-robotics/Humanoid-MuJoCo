@@ -4,12 +4,23 @@ import numpy as np
 import mujoco
 import cv2
 import random
-from simulation_parameters import *
-from reward_functions import *
+from simulation.simulation_parameters import *
+from simulation.reward_functions import *
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os
 
+# STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+
+# STATE
+    # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
+    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
+    # angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
+    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
+    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
+    # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
+    # previous action     5 · 20          Action filter state (stacked)
+    
 inverseRotateVectors = lambda q, v : Rotation.from_quat(q).inv().apply(v)
 
 class CPUSimulation:
@@ -226,9 +237,9 @@ if __name__ == "__main__":
       isTerminal = False
       while not isTerminal:
         observation = sim.getObs()
-        action = [-jp.pi]*20
+        action = [0]*20
         # action = None
         sim.step(action)
-        reward, isTerminal = sim.computeReward()
+        # reward, isTerminal = sim.computeReward()
         sim.render()
       sim.reset()

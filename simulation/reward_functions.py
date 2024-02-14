@@ -1,6 +1,19 @@
-from simulation_parameters import *
+from simulation.simulation_parameters import *
 import math
 from jax import numpy as jp
+
+# REWARD INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+    
+# REWARD
+# Velocity The magnitude of the player’s forward velocity. - 0.1
+# Termination A penalty, equal to −1 if the player is on the ground - 0.5
+# Upright 0 if the robot is upside down or if the tilt angle is greater
+    # than 0.4 radians. Increases linearly, and is equal to +1 if the
+    # tilt angle is less than 0.2 radians. - 0.02
+# Joint torque A penalty, equal to the magnitude of the torque measured at
+    # the player’s knees. This discourages the player from learning
+    # gaits which cause high forces on the knees, for example
+    # during ground impacts, which can damage a physical robot. - 0.01
 
 def standingRewardFn(velocity, z_pos, quat, joint_torques):
     ### REWARD PARAMETERS

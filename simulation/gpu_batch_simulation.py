@@ -2,11 +2,22 @@ import jax
 from jax import numpy as jp
 import mujoco
 from mujoco import mjx
-from simulation_parameters import *
-from reward_functions import *
+from simulation.simulation_parameters import *
+from simulation.reward_functions import *
 import gc
 import random
 from gpu_batch_simulation_utils import *
+
+# STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+
+# STATE
+    # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
+    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
+    # angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
+    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
+    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
+    # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
+    # previous action     5 · 20          Action filter state (stacked)
 
 class GPUBatchSimulation:
   def __init__(self, count, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):

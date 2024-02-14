@@ -1,6 +1,6 @@
-from cpu_simulation import CPUSimulation
+from simulation.cpu_simulation import CPUSimulation
 import time
-from reward_functions import *
+from simulation.reward_functions import *
 
 
 def estimateCPUSimSpeed():
