@@ -5,8 +5,8 @@ services:
       - RENDER_SIM=false # change if using novnc
       - XLA_FLAGS=--xla_gpu_triton_gemm_any=true
     volumes:
-      - ../../Humanoid-Mujoco-Sim:/root/Humanoid-Mujoco-Sim
-    image: "mcgillrobotics/mujoco:latest"
+      - ../../../Humanoid-Mujoco-Sim:/root/Humanoid-Mujoco-Sim
+    image: "mcgillrobotics/mujoco:cuda118"
     command: bash -c "tail -f /dev/null"
     deploy:
       resources:
