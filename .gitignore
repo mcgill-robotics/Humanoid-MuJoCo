@@ -1,2 +1,3 @@
 MUJOCO_LOG.TXT
 *.pyc
+humanoid/simulation/*.pyc

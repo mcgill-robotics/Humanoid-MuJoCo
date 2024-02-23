@@ -1,7 +1,7 @@
 from .simulation_parameters import *
 from jax import numpy as jp
 
-# REWARD INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+# REWARD INFO FROM https://arxiv.org/pdf/2304.13653.pdf
     
 # REWARD
 # Velocity The magnitude of the player’s forward velocity. - 0.1
@@ -15,6 +15,12 @@ from jax import numpy as jp
     # during ground impacts, which can damage a physical robot. - 0.01
 
 def standingRewardFn(velocity, z_pos, quat, joint_torques):
+    # ALL IN NWU
+    # velocity in m/s
+    # z_pos in meters
+    # quat is quaternion of torso
+    # joint torques in N m
+    
     ### REWARD PARAMETERS
     # Velocity The magnitude of the player’s velocity. - 0.1
     HORIZONTAL_VELOCITY_REWARD_WEIGHT = -0.1
@@ -33,6 +39,8 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
         # gaits which cause high forces on the knees, for example
         # during ground impacts, which can damage a physical robot. - 0.01
     JOINT_TORQUE_PENALTY_WEIGHT = -0.01 / 20 # divide by 20 since there are 20 joints and we consider the sum of joint torques
+    # penalty term to minimize the time integral of torque peaks
+    # (thresholded above 5 N m)
     
     ### COMPUTE REWARD
     reward = 0
@@ -53,7 +61,8 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     reward += tilt_reward
       
     # Joint torque
-    total_joint_torque = jp.sum(jp.abs(joint_torques))
+    thresholded_joint_torques = jp.minimum(jp.abs(joint_torques), jp.full(joint_torques.shape, 5.0))
+    total_joint_torque = jp.sum(thresholded_joint_torques)
     reward += total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
     
     return reward, isTouchingGround

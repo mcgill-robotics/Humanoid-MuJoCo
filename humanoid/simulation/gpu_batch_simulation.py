@@ -9,7 +9,7 @@ import random
 from .gpu_batch_simulation_utils import *
 from humanoid import SIM_XML_PATH
 
-# STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+# STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
@@ -175,21 +175,20 @@ class GPUBatchSimulation:
     # joint positions     20          Joint positions in radians
     joint_angles = self.data_batch.qpos[:, self.joint_qpos_idx] + ((JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, len(self.joint_qpos_idx))))
     
-    # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
+    # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[:, 0:3]
     local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
-    # agent velocity      2           X and Y velocity of robot torso
+    # agent velocity      2           X and Y velocity of robot torso (global, NWU)
     torso_global_velocity = torso_global_vel[:, 3:] + (VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
-    # linear acceleration 3           Linear acceleration from IMU
+    # linear acceleration 3           Linear acceleration from IMU (local to torso)
     torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
     torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.actual_timestep) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
     self.previous_torso_local_velocity = torso_local_velocity
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, 4)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector_batch)
-    # foot pressure       8           Pressure values from foot sensors
+    # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
-    # pressure_values = jp.zeros((self.count, 8))
 
     observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity[:, 0:2], torso_local_accel, local_gravity_vector, pressure_values))
   

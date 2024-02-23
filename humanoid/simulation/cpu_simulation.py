@@ -11,7 +11,7 @@ import gc
 import os
 from humanoid import SIM_XML_PATH
 
-# STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+# STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
@@ -101,13 +101,13 @@ class CPUSimulation:
     # randomize IMU Z
     self.imu_z_offset = jax.random.uniform(key=self.rng_key, minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
-    # for joint in JOINT_NAMES:
-    #   self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
-    #   self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
-    #   self.model.joint(joint).stiffness[0] += random.uniform(0, JOINT_STIFFNESS_MAX_CHANGE)*self.randomization_factor
-    #   self.model.joint(joint).margin[0] += random.uniform(0, JOINT_MARGIN_MAX_CHANGE)*self.randomization_factor
-    #   self.model.joint(joint).range[0] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
-    #   self.model.joint(joint).range[1] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
+    for joint in JOINT_NAMES:
+      self.model.joint(joint).damping[0] += random.uniform(-JOINT_DAMPING_MAX_CHANGE, JOINT_DAMPING_MAX_CHANGE)*self.randomization_factor
+      self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
+      self.model.joint(joint).stiffness[0] += random.uniform(0, JOINT_STIFFNESS_MAX_CHANGE)*self.randomization_factor
+      self.model.joint(joint).margin[0] += random.uniform(0, JOINT_MARGIN_MAX_CHANGE)*self.randomization_factor
+      self.model.joint(joint).range[0] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
+      self.model.joint(joint).range[1] += random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)*self.randomization_factor
     for joint in JOINT_ACTUATOR_NAMES:
       self.model.actuator(joint).forcerange[0] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
       self.model.actuator(joint).forcerange[1] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
@@ -157,19 +157,19 @@ class CPUSimulation:
     # joint positions     20          Joint positions in radians
     joint_angles = self.data.qpos[self.joint_qpos_idx] + ((JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
     
-    # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU
+    # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[0:3]
     local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
-    # agent velocity      2           X and Y velocity of robot torso
+    # agent velocity      2           X and Y velocity of robot torso (global, NWU)
     torso_global_velocity = torso_global_vel[3:] + (VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
-    # linear acceleration 3           Linear acceleration from IMU
+    # linear acceleration 3           Linear acceleration from IMU (local to torso)
     torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
     torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/(self.timestep * self.physics_steps_per_control_step)) + (ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     self.previous_torso_local_velocity = torso_local_velocity
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + ((IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector)
-    # foot pressure       8           Pressure values from foot sensors
+    # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = np.zeros((8))
     for i in range(len(self.pressure_sensor_ids)):
       for ci in range(len(self.data.contact.geom1)):
@@ -177,6 +177,7 @@ class CPUSimulation:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
+    
     observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity[0:2], torso_local_accel, local_gravity_vector, pressure_values))
   
     # cycle observation through observation buffer

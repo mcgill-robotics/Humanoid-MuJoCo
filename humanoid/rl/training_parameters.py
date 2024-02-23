@@ -7,7 +7,7 @@ import os
 # Set environment variable to disable rendering
 os.environ["RENDER_SIM"] = "False"
 
-# STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
+# STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
