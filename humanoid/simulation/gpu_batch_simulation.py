@@ -23,8 +23,9 @@ from humanoid import SIM_XML_PATH
 class GPUBatchSimulation:
   def __init__(self, count, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
     if jax.default_backend() != 'gpu':
-      print("ERROR: failed to find GPU device.")
+      print("ERROR: Failed to find GPU device.")
       exit()
+    print("INFO: Running MuJoCo on GPU.")
     
     self.platform = "GPU"
     self.xml_path = xml_path

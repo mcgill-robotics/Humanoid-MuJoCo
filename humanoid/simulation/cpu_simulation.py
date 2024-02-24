@@ -27,6 +27,7 @@ inverseRotateVectors = lambda q, v : Rotation.from_quat(q).inv().apply(v)
 class CPUSimulation:
   def __init__(self, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
     
+    print("INFO: Running MuJoCo on CPU.")
     self.platform = "CPU"
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor

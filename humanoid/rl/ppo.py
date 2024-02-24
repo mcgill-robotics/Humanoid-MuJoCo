@@ -12,7 +12,7 @@ if(torch.cuda.is_available()):
     torch.cuda.empty_cache()
     print("INFO: Running PPO on CUDA.")
 else:
-    print("WARN: CUDA is not available!")
+    print("WARN: (PyTorch) GPU is not available!")
 
 
 ################################## PPO Policy ##################################
