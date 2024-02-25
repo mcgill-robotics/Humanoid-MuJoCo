@@ -1,22 +1,18 @@
 import json
 import httpx
 import platform
+import pygame
 
 def sound_alarm():
     try:
-        if platform.system() == "Windows":
-            import winsound
-            winsound.PlaySound("cheering.mp3", winsound.SND_FILENAME)
-        else:
-            import pygame
-            pygame.init()
-            pygame.mixer.init()
-            pygame.mixer.music.load("cheering.mp3")
-            pygame.mixer.music.play()
-            while pygame.mixer.music.get_busy():
-                continue
-            pygame.mixer.quit()
-            pygame.quit()
+        pygame.init()
+        pygame.mixer.init()
+        pygame.mixer.music.load("cheering.mp3")
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            continue
+        pygame.mixer.quit()
+        pygame.quit()
     except Exception as e:
         print(f"Failed to play alarm sound: {e}")
 
@@ -53,7 +49,7 @@ def get_availability(GPU_NAME, secure):
             "minVcpuCount": 1,
             "secureCloud": secure,
             "allowedCudaVersions": [
-                "11.8", "12.2"
+                "11.8"
             ]
         }
     },
