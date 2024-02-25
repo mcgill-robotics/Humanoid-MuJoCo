@@ -133,11 +133,11 @@ def train():
             state_history = [np.concatenate((state, action), axis=1)] * state_history_length
             
             for t in range(1, max_ep_len+1):
-
                 # select action with policy
                 action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
                 env.step(action)
-                state = np.concatenate((env.getObs(), action), axis=1)
+                obs = env.getObs()
+                state = np.concatenate((obs, action), axis=1)
                 state_history.pop(0)
                 state_history.append(state)
                 reward, done = env.computeReward()
@@ -202,7 +202,7 @@ def train():
             log_running_episodes += 1
 
             i_episode += 1
-    except:
+    except KeyboardInterrupt:
         print("\nUser ended training early. Saving current state of model.\n")
         
         print("--------------------------------------------------------------------------------------------")

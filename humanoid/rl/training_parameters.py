@@ -25,20 +25,20 @@ has_continuous_action_space = True  # continuous action space; else discrete
 max_ep_len = 1000                   # max timesteps in one episode
 max_training_timesteps = int(3e6)   # break training loop if timeteps > max_training_timesteps
 
-print_freq = max_ep_len * 10        # print avg reward in the interval (in num timesteps)
-log_freq = max_ep_len * 2           # log avg reward in the interval (in num timesteps)
+print_freq = 50        # print avg reward in the interval (in num timesteps)
+log_freq = 100           # log avg reward in the interval (in num timesteps)
 save_model_freq = max_ep_len * 100  # save model frequency (in num timesteps)
 
 action_std = 0.6                    # starting std for action distribution (Multivariate Normal)
 action_std_decay_rate = 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
-min_action_std = 0.1                # minimum action_std (stop decay after action_std <= min_action_std)
+min_action_std = 0.01                # minimum action_std (stop decay after action_std <= min_action_std)
 action_std_decay_freq = int(2.5e5)  # action_std decay frequency (in num timesteps)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 
 #####################################################
 
-env = GPUBatchSimulation(count=256,
+env = GPUBatchSimulation(count=128,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=5,
