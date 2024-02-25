@@ -135,16 +135,44 @@ class GPUBatchSimulation:
     self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, maxval=JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)))(self.rng)
 
     #delays in actions and observations (10ms to 50ms)
-    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     #round delays to be multiples of the timestep
     self.actual_timestep = self.timestep * self.physics_steps_per_control_step
-    self.observation_delay = round(self.observation_delay / self.actual_timestep) * self.actual_timestep
+    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.action_delay = round(self.action_delay / self.actual_timestep) * self.actual_timestep
+    self.joint_angles_observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.joint_angles_observation_delay = round(self.joint_angles_observation_delay / self.actual_timestep) * self.actual_timestep
+    self.local_ang_vel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.local_ang_vel_delay = round(self.local_ang_vel_delay / self.actual_timestep) * self.actual_timestep
+    self.torso_global_velocity_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.torso_global_velocity_delay = round(self.torso_global_velocity_delay / self.actual_timestep) * self.actual_timestep
+    self.torso_local_accel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.torso_local_accel_delay = round(self.torso_local_accel_delay / self.actual_timestep) * self.actual_timestep
+    self.local_gravity_vector_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.local_gravity_vector_delay = round(self.local_gravity_vector_delay / self.actual_timestep) * self.actual_timestep
+    self.pressure_values_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.pressure_values_delay = round(self.pressure_values_delay / self.actual_timestep) * self.actual_timestep
+     
     #make buffers for observations and actions
-    self.observation_buffer = []
-    self.observation_buffer = [self.getObs()] * (int)(self.observation_delay/self.actual_timestep)
     self.action_buffer = [self.data_batch.ctrl] * (int)(self.action_delay/self.actual_timestep)
+    self.joint_angles_buffer = []
+    self.local_ang_vel_buffer = []
+    self.torso_global_velocity_buffer = []
+    self.torso_local_accel_buffer = []
+    self.local_gravity_vector_buffer = []
+    self.pressure_values_buffer = []
+    
+    for i in range((int)(self.joint_angles_observation_delay/self.actual_timestep)):
+      self.joint_angles_buffer.append(jp.array([[0]*20]*self.count))
+    for i in range((int)(self.local_ang_vel_delay/self.actual_timestep)):
+      self.local_ang_vel_buffer.append(jp.array([[0]*3]*self.count))
+    for i in range((int)(self.torso_global_velocity_delay/self.actual_timestep)):
+      self.torso_global_velocity_buffer.append(jp.array([[0]*3]*self.count))
+    for i in range((int)(self.torso_local_accel_delay/self.actual_timestep)):
+      self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.count))
+    for i in range((int)(self.local_gravity_vector_delay/self.actual_timestep)):
+      self.local_gravity_vector_buffer.append(jp.array([[0, 0, -9.81]]*self.count))
+    for i in range((int)(self.pressure_values_delay/self.actual_timestep)):
+      self.pressure_values_buffer.append(jp.array([[0]*8]*self.count))
     
     # initialize environment properties
     self.observation_shape = self.getObs().shape
@@ -191,12 +219,23 @@ class GPUBatchSimulation:
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
 
-    observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity[:, 0:2], torso_local_accel, local_gravity_vector, pressure_values))
-  
-    # cycle observation through observation buffer
-    self.observation_buffer.append(observations)
-    delayed_observations = self.observation_buffer.pop(0)
+    # cycle observations through observation buffers
+    self.joint_angles_buffer.append(joint_angles)
+    self.local_ang_vel_buffer.append(local_ang_vel)
+    self.torso_global_velocity_buffer.append(torso_global_velocity[:, 0:2])
+    self.torso_local_accel_buffer.append(torso_local_accel)
+    self.local_gravity_vector_buffer.append(local_gravity_vector)
+    self.pressure_values_buffer.append(pressure_values)
     
+    joint_angles = self.joint_angles_buffer.pop(0)
+    local_ang_vel = self.local_ang_vel_buffer.pop(0)
+    torso_global_velocity = self.torso_global_velocity_buffer.pop(0)
+    torso_local_accel = self.torso_local_accel_buffer.pop(0)
+    local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
+    pressure_values = self.pressure_values_buffer.pop(0)
+    
+    delayed_observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity[:, 0:2], torso_local_accel, local_gravity_vector, pressure_values))
+        
     if self.verbose: print("Observations collected.")
     
     return np.array(delayed_observations)
@@ -240,4 +279,5 @@ if __name__ == "__main__":
         actions = None
         sim_batch.step(actions)
         rewards, areTerminal = sim_batch.computeReward()
+        print(rewards[0])
       sim_batch.reset()

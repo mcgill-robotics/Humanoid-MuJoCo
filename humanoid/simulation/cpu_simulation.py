@@ -51,12 +51,8 @@ class CPUSimulation:
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_CG
-    self.model.opt.iterations = 4
-    self.model.opt.ls_iterations = 4
-    # self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    # self.model.opt.iterations = 5
-    # self.model.opt.ls_iterations = 5
-    # self.model.opt.jacobian = mujoco.mjtJacobian.mjJAC_DENSE
+    self.model.opt.iterations = 5
+    self.model.opt.ls_iterations = 5
    
     # Visualization Options:
     self.scene_option = mujoco.MjvOption()
@@ -127,18 +123,45 @@ class CPUSimulation:
       self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)*self.randomization_factor
 
     #delays in actions and observations (10ms to 50ms)
-    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     #round delays to be multiples of the timestep
     actual_timestep = self.timestep * self.physics_steps_per_control_step
-    self.observation_delay = round(self.observation_delay / actual_timestep) * actual_timestep
+    self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
-    #make buffers for observations and actions
-    self.observation_buffer = []
-    self.observation_buffer = [self.getObs()[0]] * (int)(self.observation_delay/actual_timestep)
+    self.joint_angles_observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.joint_angles_observation_delay = round(self.joint_angles_observation_delay / actual_timestep) * actual_timestep
+    self.local_ang_vel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.local_ang_vel_delay = round(self.local_ang_vel_delay / actual_timestep) * actual_timestep
+    self.torso_global_velocity_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.torso_global_velocity_delay = round(self.torso_global_velocity_delay / actual_timestep) * actual_timestep
+    self.torso_local_accel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.torso_local_accel_delay = round(self.torso_local_accel_delay / actual_timestep) * actual_timestep
+    self.local_gravity_vector_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.local_gravity_vector_delay = round(self.local_gravity_vector_delay / actual_timestep) * actual_timestep
+    self.pressure_values_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.pressure_values_delay = round(self.pressure_values_delay / actual_timestep) * actual_timestep
+     
+    #make buffers for observations and actions   
     self.action_buffer = [jp.expand_dims(self.data.ctrl, axis=0)] * (int)(self.action_delay/actual_timestep)
+    self.joint_angles_buffer = []
+    self.local_ang_vel_buffer = []
+    self.torso_global_velocity_buffer = []
+    self.torso_local_accel_buffer = []
+    self.local_gravity_vector_buffer = []
+    self.pressure_values_buffer = []
     
-    # initialize environment properties
+    for i in range((int)(self.joint_angles_observation_delay/actual_timestep)):
+      self.joint_angles_buffer.append(jp.array([0]*20))
+    for i in range((int)(self.local_ang_vel_delay/actual_timestep)):
+      self.local_ang_vel_buffer.append(jp.array([0]*3))
+    for i in range((int)(self.torso_global_velocity_delay/actual_timestep)):
+      self.torso_global_velocity_buffer.append(jp.array([0]*3))
+    for i in range((int)(self.torso_local_accel_delay/actual_timestep)):
+      self.torso_local_accel_buffer.append(jp.array([0]*3))
+    for i in range((int)(self.local_gravity_vector_delay/actual_timestep)):
+      self.local_gravity_vector_buffer.append(jp.array([0, 0, -9.81]))
+    for i in range((int)(self.pressure_values_delay/actual_timestep)):
+      self.pressure_values_buffer.append(jp.array([0]*8))
+    
     # initialize environment properties
     self.observation_shape = self.getObs().shape
     self.action_shape = jp.expand_dims(self.data.ctrl, axis=0).shape
@@ -179,12 +202,23 @@ class CPUSimulation:
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
     
-    observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity[0:2], torso_local_accel, local_gravity_vector, pressure_values))
-  
-    # cycle observation through observation buffer
-    self.observation_buffer.append(observations)
-    delayed_observations = self.observation_buffer.pop(0)
+    # cycle observations through observation buffers
+    self.joint_angles_buffer.append(joint_angles)
+    self.local_ang_vel_buffer.append(local_ang_vel)
+    self.torso_global_velocity_buffer.append(torso_global_velocity[0:2])
+    self.torso_local_accel_buffer.append(torso_local_accel)
+    self.local_gravity_vector_buffer.append(local_gravity_vector)
+    self.pressure_values_buffer.append(pressure_values)
     
+    joint_angles = self.joint_angles_buffer.pop(0)
+    local_ang_vel = self.local_ang_vel_buffer.pop(0)
+    torso_global_velocity = self.torso_global_velocity_buffer.pop(0)
+    torso_local_accel = self.torso_local_accel_buffer.pop(0)
+    local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
+    pressure_values = self.pressure_values_buffer.pop(0)
+    
+    delayed_observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
+  
     if self.verbose: print("Observations collected.")
     
     return np.array(jp.expand_dims(delayed_observations, axis=0))
