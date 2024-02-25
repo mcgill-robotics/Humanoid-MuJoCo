@@ -4,17 +4,18 @@ import platform
 import pygame
 
 def sound_alarm():
-    try:
-        pygame.init()
-        pygame.mixer.init()
-        pygame.mixer.music.load("cheering.mp3")
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            continue
-        pygame.mixer.quit()
-        pygame.quit()
-    except Exception as e:
-        print(f"Failed to play alarm sound: {e}")
+    while True:
+        try:
+            pygame.init()
+            pygame.mixer.init()
+            pygame.mixer.music.load("cheering.mp3")
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                continue
+            pygame.mixer.quit()
+            pygame.quit()
+        except Exception as e:
+            print(f"Failed to play alarm sound: {e}")
 
 
 API_KEY = 'AI0SVJ2XA80KY4SQ8N2JLIKXV6H1SJ9KOPT55CHY'
@@ -56,17 +57,25 @@ def get_availability(GPU_NAME, secure):
     "query": "query SecureGpuTypes($lowestPriceInput: GpuLowestPriceInput, $gpuTypesInput: GpuTypeFilter) {\n  gpuTypes(input: $gpuTypesInput) {\n    lowestPrice(input: $lowestPriceInput) {\n      minimumBidPrice\n      uninterruptablePrice\n      minVcpu\n      minMemory\n      stockStatus\n      __typename\n    }\n    id\n    displayName\n    memoryInGb\n    securePrice\n    communityPrice\n    oneMonthPrice\n    threeMonthPrice\n    sixMonthPrice\n    secureSpotPrice\n    __typename\n  }\n}"
     }
 
-    response = _run_query(query).json()["data"]["gpuTypes"][0]["lowestPrice"]["stockStatus"]
+    response = _run_query(query).json()
+    
+    try:
+        result = response["data"]["gpuTypes"][0]["lowestPrice"]["stockStatus"]
+    except:
+        print("ERROR: Failed query, response is ", response)
+        result = None
 
-    return response is not None
+    return result is not None
 
 is_gpu_available = False
 
 while not is_gpu_available:
     for GPU_NAME in GPU_NAMES:
-        is_gpu_available = get_availability(GPU_NAME, True) or get_availability(GPU_NAME, False)
+        try:
+            is_gpu_available = get_availability(GPU_NAME, True) or get_availability(GPU_NAME, False)
+        except:
+            is_gpu_available = False
         print(str(is_gpu_available) + " " + GPU_NAME)
         if is_gpu_available: break
 
-while True:
-    sound_alarm()
+sound_alarm()

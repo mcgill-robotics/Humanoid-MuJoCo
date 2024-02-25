@@ -1,0 +1,14 @@
+jax
+jaxlib
+jaxopt
+jaxtyping
+numpy-quaternion
+numpy
+mujoco
+mujoco_mjx
+brax
+opencv-python
+matplotlib
+torch
+torchvision
+torchaudio
