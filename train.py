@@ -134,7 +134,12 @@ def train():
             
             for t in range(1, max_ep_len+1):
                 # select action with policy
-                action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
+                try:
+                    action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
+                except:
+                    # TODO -> find a better way to fix this issue
+                    print("ERROR: NaN value in observations. Skipping to next episode.")
+                    break
                 env.step(action)
                 obs = env.getObs()
                 state = np.concatenate((obs, action), axis=1)

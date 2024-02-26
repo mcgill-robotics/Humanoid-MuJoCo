@@ -64,7 +64,7 @@ class ActorCritic(nn.Module):
                         )
         # critic
         self.critic = nn.Sequential(
-                        nn.Linear(state_dim, 512),
+                        nn.Linear(state_dim, 64),
                         nn.Tanh(),
                         nn.Linear(64, 64),
                         nn.Tanh(),

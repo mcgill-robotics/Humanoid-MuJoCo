@@ -25,7 +25,7 @@ MIN_EXTERNAL_FORCE_MAGNITUDE = 5 #N
 MAX_EXTERNAL_FORCE_MAGNITUDE = 15 #N
 MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
 MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
-JOINT_INITIAL_STATE_OFFSET_MAX = 3.5 # degrees (this values applies for randomization_factor = 0, will be doubled when randomization_factor = 1)
+JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees (this values applies for randomization_factor = 0, will be doubled when randomization_factor = 1)
 IMU_Z_OFFSET_MAX = 0.05 # meters
 PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
 JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
