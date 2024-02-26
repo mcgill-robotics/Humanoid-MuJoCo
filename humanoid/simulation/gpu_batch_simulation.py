@@ -272,8 +272,8 @@ if __name__ == "__main__":
       areTerminal = np.array([False])
       while not np.all(areTerminal):
         observations = sim_batch.getObs()
-        # actions = [[0]*20]*sim_batch.count
-        actions = None
+        actions = [[100]*20]*sim_batch.count
+        # actions = None
         sim_batch.step(actions)
         rewards, areTerminal = sim_batch.computeReward()
         print(rewards[0])

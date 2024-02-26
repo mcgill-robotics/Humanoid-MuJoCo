@@ -23,16 +23,16 @@ os.environ["RENDER_SIM"] = "False"
 has_continuous_action_space = True  # continuous action space; else discrete
 
 max_ep_len = 1000                   # max timesteps in one episode
-max_training_timesteps = int(3e6)   # break training loop if timeteps > max_training_timesteps
+max_training_timesteps = int(3e20)   # break training loop if timeteps > max_training_timesteps
 
 print_freq = 50        # print avg reward in the interval (in num timesteps)
-log_freq = 50           # log avg reward in the interval (in num timesteps)
-save_model_freq = 500  # save model frequency (in num timesteps)
+log_freq = 250           # log avg reward in the interval (in num timesteps)
+save_model_freq = 1000  # save model frequency (in num timesteps)
 
 action_std = 0.6                    # starting std for action distribution (Multivariate Normal)
 action_std_decay_rate = 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
 min_action_std = 0.01                # minimum action_std (stop decay after action_std <= min_action_std)
-action_std_decay_freq = int(2.5e5)  # action_std decay frequency (in num timesteps)
+action_std_decay_freq = int(10000)  # action_std decay frequency (in num timesteps)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 
@@ -58,9 +58,8 @@ state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_len
 action_dim = env.action_shape[1]
 #####################################################
 
-## Note : print/log frequencies should be > than max_ep_len
 ################ PPO hyperparameters ################
-update_timestep = 50      # update policy every n timesteps
+update_timestep = 500      # update policy every n timesteps
 K_epochs = 80               # update policy for K epochs in one PPO update
 
 eps_clip = 0.2          # clip parameter for PPO

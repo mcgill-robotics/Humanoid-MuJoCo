@@ -17,7 +17,7 @@ from humanoid.rl.training_parameters import *
     # previous action     5 · 20          Action filter state (stacked)    
     
 ################################### Training ###################################
-def train():
+def train(previous_checkpoint=None):
     ###################### logging ######################
 
     #### log files for multiple runs are NOT overwritten
@@ -53,8 +53,8 @@ def train():
           os.makedirs(directory)
 
 
-    checkpoint_path = directory + "PPO_{}_{}_{}.pth".format(env_name, random_seed, run_num_pretrained)
-    print("save checkpoint path : " + checkpoint_path)
+    checkpoint_path = lambda timestep : directory + "PPO_{}_{}_{}_t{}.pth".format(env_name, random_seed, run_num_pretrained, timestep)
+    print("save checkpoint path : " + checkpoint_path(0))
     #####################################################
 
 
@@ -99,6 +99,8 @@ def train():
 
     # initialize a PPO agent
     ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std)
+    if previous_checkpoint is not None:
+        ppo_agent.load(previous_checkpoint)
 
     # track total training time
     start_time = datetime.now().replace(microsecond=0)
@@ -108,14 +110,14 @@ def train():
 
     # logging file
     log_f = open(log_f_name,"w+")
-    log_f.write('episode,timestep,reward\n')
+    log_f.write('timestep,reward\n')
 
     # printing and logging variables
     print_running_avg_reward = 0
-    print_running_episodes = 0
+    print_running_timesteps = 0
 
     log_running_avg_reward = 0
-    log_running_episodes = 0
+    log_running_timesteps = 0
 
     time_step = 0
     i_episode = 0
@@ -125,7 +127,6 @@ def train():
         while time_step <= max_training_timesteps:
 
             # TODO -> implement increasing randomization factor as time goes on (when avg. reward stagnates or something)
-            current_avg_ep_reward = 0
             
             env.reset()
             action = env.lastAction
@@ -152,7 +153,6 @@ def train():
                 ppo_agent.buffer.is_terminals.append(done)
 
                 time_step += 1
-                current_avg_ep_reward += np.mean(reward)
 
                 # update PPO agent
                 if time_step % update_timestep == 0:
@@ -166,53 +166,54 @@ def train():
                 if time_step % log_freq == 0:
 
                     # log average reward till last episode
-                    log_avg_reward = log_running_avg_reward / log_running_episodes
+                    log_avg_reward = log_running_avg_reward / log_running_timesteps
                     log_avg_reward = round(log_avg_reward, 4)
 
-                    log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
+                    log_f.write('{},{}\n'.format(time_step, log_avg_reward))
                     log_f.flush()
 
                     log_running_avg_reward = 0
-                    log_running_episodes = 0
+                    log_running_timesteps = 0
 
                 # printing average reward
                 if time_step % print_freq == 0:
 
                     # print average reward till last episode
-                    print_avg_reward = print_running_avg_reward / print_running_episodes
+                    print_avg_reward = print_running_avg_reward / print_running_timesteps
                     print_avg_reward = round(print_avg_reward, 2)
 
                     print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
 
                     print_running_avg_reward = 0
-                    print_running_episodes = 0
+                    print_running_timesteps = 0
 
                 # save model weights
                 if time_step % save_model_freq == 0:
                     print("--------------------------------------------------------------------------------------------")
-                    print("saving model at : " + checkpoint_path)
-                    ppo_agent.save(checkpoint_path)
+                    print("saving model at : " + checkpoint_path(time_step))
+                    ppo_agent.save(checkpoint_path(time_step))
                     print("model saved")
                     print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
                     print("--------------------------------------------------------------------------------------------")
 
+                print_running_avg_reward += np.mean(reward)
+                print_running_timesteps += 1
+
+                log_running_avg_reward += np.mean(reward)
+                log_running_timesteps += 1
+            
                 # break; if the episode is over
                 if np.all(done):
                     break
-
-            print_running_avg_reward += current_avg_ep_reward
-            print_running_episodes += 1
-
-            log_running_avg_reward += current_avg_ep_reward
-            log_running_episodes += 1
-
+                
             i_episode += 1
+
     except KeyboardInterrupt:
         print("\nUser ended training early. Saving current state of model.\n")
         
         print("--------------------------------------------------------------------------------------------")
-        print("saving model at : " + checkpoint_path)
-        ppo_agent.save(checkpoint_path)
+        print("saving model at : " + checkpoint_path(time_step))
+        ppo_agent.save(checkpoint_path(time_step))
         print("model saved")
         print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
         print("--------------------------------------------------------------------------------------------")

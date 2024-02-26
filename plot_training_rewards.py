@@ -5,7 +5,7 @@ timesteps = []
 rewards = []
 
 # Read the CSV file
-with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_6.csv", 'r') as file:
+with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_2.csv", 'r') as file:
     # Skip header row
     next(file)
     
@@ -14,8 +14,8 @@ with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_6.csv", 'r') as file:
         values = line.strip().split(',')
         
         # Extract X and Y values
-        timesteps.append(float(values[1]))
-        rewards.append(float(values[2]))
+        timesteps.append(float(values[0]))
+        rewards.append(float(values[1]))
 
 def smoothMAconv(depth, data, scale=1): # Moving average by numpy convolution
     dz = np.diff(depth) 
@@ -35,8 +35,8 @@ for i in range(len(rewards)):
     running_avgs.append(running_avg)
 
 # Plot the curve
-plt.plot(timesteps, rewards)
-plt.plot(timesteps, running_avgs)
+plt.plot(timesteps, rewards, label="Reward", color="red")
+plt.plot(timesteps, running_avgs, label="Running Average", color="blue")
 
 # Add labels and title
 plt.xlabel('Timesteps')
@@ -47,4 +47,5 @@ plt.title('Training Performance for Standing Behavior')
 plt.grid(True)
 
 # Show the plot
+plt.legend()
 plt.show()
