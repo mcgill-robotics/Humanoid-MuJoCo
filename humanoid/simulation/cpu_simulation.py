@@ -289,6 +289,7 @@ if __name__ == "__main__":
         state = sim.getObs()[0]
         action = None
         # action = [[0]*20]
+        # TODO ensure actions are properly executed
         sim.step(action)
         reward, isTerminal = sim.computeReward()
         reward = reward[0]

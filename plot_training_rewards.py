@@ -5,7 +5,7 @@ timesteps = []
 rewards = []
 
 # Read the CSV file
-with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_2.csv", 'r') as file:
+with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_1.csv", 'r') as file:
     # Skip header row
     next(file)
     
@@ -23,7 +23,7 @@ def smoothMAconv(depth, data, scale=1): # Moving average by numpy convolution
     smoothed=0
     return smoothed
 
-window_size = 5
+window_size = 10
 running_avgs = []
 for i in range(len(rewards)):
     running_avg = 0

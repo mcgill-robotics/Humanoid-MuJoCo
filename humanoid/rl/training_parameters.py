@@ -38,7 +38,7 @@ state_history_length = 5 # how many iterations of the history of state observati
 
 #####################################################
 
-env = GPUBatchSimulation(count=256,
+env = GPUBatchSimulation(count=128,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=5,

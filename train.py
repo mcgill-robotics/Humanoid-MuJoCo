@@ -135,12 +135,7 @@ def train(previous_checkpoint=None):
             
             for t in range(1, max_ep_len+1):
                 # select action with policy
-                try:
-                    action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
-                except:
-                    # TODO -> find a better way to fix this issue
-                    print("ERROR: NaN value in observations. Skipping to next episode.")
-                    break
+                action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
                 env.step(action)
                 obs = env.getObs()
                 state = np.concatenate((obs, action), axis=1)
@@ -148,6 +143,27 @@ def train(previous_checkpoint=None):
                 state_history.append(state)
                 reward, done = env.computeReward()
 
+                if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
+                    # TODO -> find a better way to fix this issue
+                    print("ERROR: NaN value in observations. Skipping to next episode.")
+                    # for debugging
+                    with np.printoptions(threshold=np.inf):
+                        print("########## DEBUG ##########")
+                        print("OBS\n", obs)
+                        print("ACTION\n", action)
+                        print("REWARD\n", reward)
+                        print("DONE\n", done)
+                        print("###########################")
+                    log_running_avg_reward = 0
+                    log_running_timesteps = 0
+                    print_running_avg_reward = 0
+                    print_running_timesteps = 0
+                    ppo_agent.buffer.states.pop()
+                    ppo_agent.buffer.actions.pop()
+                    ppo_agent.buffer.logprobs.pop()
+                    ppo_agent.buffer.state_values.pop()
+                    break
+                
                 # saving reward and is_terminals
                 ppo_agent.buffer.rewards.append(reward)
                 ppo_agent.buffer.is_terminals.append(done)
