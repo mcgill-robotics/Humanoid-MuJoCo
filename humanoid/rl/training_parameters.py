@@ -26,8 +26,8 @@ max_ep_len = 1000                   # max timesteps in one episode
 max_training_timesteps = int(3e6)   # break training loop if timeteps > max_training_timesteps
 
 print_freq = 50        # print avg reward in the interval (in num timesteps)
-log_freq = 100           # log avg reward in the interval (in num timesteps)
-save_model_freq = 1000  # save model frequency (in num timesteps)
+log_freq = 50           # log avg reward in the interval (in num timesteps)
+save_model_freq = 500  # save model frequency (in num timesteps)
 
 action_std = 0.6                    # starting std for action distribution (Multivariate Normal)
 action_std_decay_rate = 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
