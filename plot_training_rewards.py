@@ -5,7 +5,7 @@ timesteps = []
 rewards = []
 
 # Read the CSV file
-with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_2.csv", 'r') as file:
+with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_6.csv", 'r') as file:
     # Skip header row
     next(file)
     

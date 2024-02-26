@@ -199,16 +199,15 @@ class PPO:
     def update(self):
         # Monte Carlo estimate of returns
         rewards = []
-        discounted_reward = 0
+        discounted_reward = np.array([0]*len(self.buffer.is_terminals[0]))
         for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
-            if is_terminal:
-                discounted_reward = 0
+            discounted_reward[is_terminal] = 0
             discounted_reward = reward + (self.gamma * discounted_reward)
             rewards.insert(0, discounted_reward)
             
         # Normalizing the rewards
         rewards = torch.tensor(np.array(rewards), dtype=torch.float32).to(device)
-        rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
+        rewards = (rewards - torch.mean(rewards, dim=0)) / (torch.std(rewards, dim=0) + 1e-7)
 
         # convert list to tensor
         old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
@@ -236,7 +235,7 @@ class PPO:
             surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
 
             # final loss of clipped objective PPO
-            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards) - 0.01 * dist_entropy
+            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values.reshape(state_values.shape[0:2]), rewards) - 0.01 * dist_entropy
             
             # take gradient step
             self.optimizer.zero_grad()
