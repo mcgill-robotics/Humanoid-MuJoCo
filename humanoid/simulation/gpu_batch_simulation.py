@@ -68,8 +68,8 @@ class GPUBatchSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    self.model.opt.iterations = 10
-    self.model.opt.ls_iterations = 10
+    self.model.opt.iterations = 5
+    self.model.opt.ls_iterations = 5
 
     #initialize instance parameters
     self.next_force_start_times = jp.zeros((self.count))

@@ -22,30 +22,31 @@ os.environ["RENDER_SIM"] = "False"
 ####### initialize environment hyperparameters ######
 has_continuous_action_space = True  # continuous action space; else discrete
 
-max_ep_len = 1000                   # max timesteps in one episode
-max_training_timesteps = int(3e20)   # break training loop if timeteps > max_training_timesteps
+max_training_timesteps = int(1e20)   # break training loop if timeteps > max_training_timesteps
 
 print_freq = 1        # print avg reward in the interval (in num episodes)
-log_freq = 5           # log avg reward in the interval (in num episodes)
-save_model_freq = 50  # save model frequency (in num episodes)
+log_freq = 10           # log avg reward in the interval (in num episodes)
+save_model_freq = 100  # save model frequency (in num episodes)
 
-action_std = 0.2                    # starting std for action distribution (Multivariate Normal)
-action_std_decay_rate = 0.01        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
-min_action_std = 0.025                # minimum action_std (stop decay after action_std <= min_action_std)
-action_std_decay_freq = 10000  # action_std decay frequency (in num episodes)
+action_std = 0.1                    # starting std for action distribution (Multivariate Normal)
+action_std_decay_rate = 0.025        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
+min_action_std = 0.0                # minimum action_std (stop decay after action_std <= min_action_std)
+action_std_decay_freq = 100  # action_std decay frequency (in num episodes)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 
 #####################################################
 
-env = GPUBatchSimulation(count=256,
+env = GPUBatchSimulation(count=128,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=5,
-                        timestep=0.005,
+                        timestep=0.001,
                         randomization_factor=0)
 
 # env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
+
+max_ep_len = int(5.0 / env.timestep)                   # max timesteps in one episode
 
 env_name = env.platform + "Standing"
 
@@ -60,7 +61,7 @@ action_dim = env.action_shape[1]
 
 # HYPERPARAMETER INFO FROM https://arxiv.org/pdf/1910.10620.pdf#page=3&zoom=100,433,952
 ################ PPO hyperparameters ################
-update_timesteps = int(4096*64 / env.count)      # update policy every n timesteps
+update_timesteps = int(4096 / env.count)    # update policy every n timesteps
 K_epochs = 10               # update policy for K epochs in one PPO update
 
 eps_clip = 0.1          # clip parameter for PPO

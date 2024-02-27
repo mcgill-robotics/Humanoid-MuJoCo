@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from humanoid.rl.ppo import PPO
 from humanoid.rl.training_parameters import *
+import pickle
 
 # STATE INFO FROM https://colab.research.google.com/github/google-deepmind/mujoco/blob/main/python/tutorial.ipynb#scrollTo=HlRhFs_d3WLP
 
@@ -17,7 +18,7 @@ from humanoid.rl.training_parameters import *
     # previous action     5 · 20          Action filter state (stacked)    
     
 ################################### Training ###################################
-def train(previous_checkpoint=None, previous_checkpoint_index=None):
+def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     ###################### logging ######################
 
     #### log files for multiple runs are NOT overwritten
@@ -33,12 +34,12 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
     run_num = 0
     current_num_files = next(os.walk(log_dir))[2]
     run_num = len(current_num_files)
-
+    if previous_checkpoint_info_file is not None:
+        with open(previous_checkpoint_info_file, 'rb') as f:
+            saved_info = pickle.load(f)
+        run_num = saved_info["run_num"]
     #### create new log file for each run
-    if previous_checkpoint_index is not None:
-        log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(previous_checkpoint_index) + ".csv"
-    else:
-        log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
+    log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
 
     print("current logging run number for " + env_name + " : ", run_num)
     print("logging at : " + log_f_name)
@@ -55,7 +56,9 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
     if not os.path.exists(directory):
           os.makedirs(directory)
 
+
     checkpoint_path = lambda episode : directory + "PPO_{}_{}_{}_episode_{}.pth".format(env_name, random_seed, run_num_pretrained, episode)
+    checkpoint_info_path = lambda episode : directory + "PPO_{}_{}_{}_episode_{}_INFO.pkl".format(env_name, random_seed, run_num_pretrained, episode)
     print("save checkpoint path : " + checkpoint_path(0))
     #####################################################
 
@@ -103,6 +106,7 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
     ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std)
     if previous_checkpoint is not None:
         ppo_agent.load(previous_checkpoint)
+        ppo_agent.set_action_std(saved_info["action_std"])
 
     # track total training time
     start_time = datetime.now().replace(microsecond=0)
@@ -111,8 +115,17 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
     print("============================================================================================")
 
     # logging file
-    log_f = open(log_f_name,"w+")
-    log_f.write('episode,timestep,reward\n')
+    if previous_checkpoint is None:
+        log_f = open(log_f_name,"w+")
+        log_f.write('episode,timestep,reward\n')
+        # printing and logging variables
+        time_step = 0
+        i_episode = 0
+    else:
+        log_f = open(log_f_name,"a")
+        # printing and logging variables
+        time_step = saved_info["time_step"]
+        i_episode = saved_info["i_episode"]
 
     # printing and logging variables
     print_running_avg_reward = 0
@@ -120,9 +133,6 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
 
     log_running_avg_reward = 0
     log_running_timesteps = 0
-
-    time_step = 0
-    i_episode = 0
 
     # training loop
     try: # wrap in try-except so we can stop training with Ctrl+C and not lose the trained model
@@ -146,16 +156,7 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
                 reward, done = env.computeReward()
 
                 if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
-                    # TODO -> find a better way to fix this issue
                     print("ERROR: NaN value in observations. Skipping to next episode.")
-                    # for debugging
-                    # with np.printoptions(threshold=np.inf):
-                    #     print("########## DEBUG ##########")
-                    #     print("OBS\n", obs)
-                    #     print("ACTION\n", action)
-                    #     print("REWARD\n", reward)
-                    #     print("DONE\n", done)
-                    #     print("###########################")
                     ppo_agent.buffer.states.pop()
                     ppo_agent.buffer.actions.pop()
                     ppo_agent.buffer.logprobs.pop()
@@ -218,6 +219,8 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
                 print("--------------------------------------------------------------------------------------------")
                 print("saving model at : " + checkpoint_path(i_episode))
                 ppo_agent.save(checkpoint_path(i_episode))
+                with open(checkpoint_info_path, 'wb') as f:
+                    pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode}, f)
                 print("model saved")
                 print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
                 print("--------------------------------------------------------------------------------------------")
@@ -231,6 +234,8 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
         print("--------------------------------------------------------------------------------------------")
         print("saving model at : " + checkpoint_path(i_episode))
         ppo_agent.save(checkpoint_path(i_episode))
+        with open(checkpoint_info_path, 'wb') as f:
+            pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode}, f)
         print("model saved")
         print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
         print("--------------------------------------------------------------------------------------------")
