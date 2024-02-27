@@ -55,7 +55,7 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
     if not os.path.exists(directory):
           os.makedirs(directory)
 
-    checkpoint_path = lambda episode : directory + "PPO_{}_{}_{}_t{}.pth".format(env_name, random_seed, run_num_pretrained, episode)
+    checkpoint_path = lambda episode : directory + "PPO_{}_{}_{}_episode_{}.pth".format(env_name, random_seed, run_num_pretrained, episode)
     print("save checkpoint path : " + checkpoint_path(0))
     #####################################################
 
@@ -81,7 +81,7 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
     else:
         print("Initializing a discrete action space policy")
     print("--------------------------------------------------------------------------------------------")
-    print("PPO update frequency : " + str(update_episode) + " episodes")
+    print("PPO update frequency : " + str(update_timesteps) + " timesteps")
     print("PPO K epochs : ", K_epochs)
     print("PPO epsilon clip : ", eps_clip)
     print("discount factor (gamma) : ", gamma)
@@ -174,15 +174,15 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
 
                 time_step += 1
                 
+                # update PPO agent
+                if time_step % update_timesteps == 0:
+                    ppo_agent.update()
+                
                 # break; if the episode is over
                 if np.all(done):
                     break
                 
             i_episode += 1
-
-            # update PPO agent
-            if i_episode % update_episode == 0:
-                ppo_agent.update()
 
             # if continuous action space; then decay action std of ouput action distribution
             if has_continuous_action_space and i_episode % action_std_decay_freq == 0:
@@ -247,7 +247,7 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
 
 
 if __name__ == '__main__':
-    train("PPO_preTrained/GPUStanding/PPO_GPUStanding_0_0_t50.pth", 0)
+    train()
     
     
     

@@ -36,6 +36,7 @@ class CPUSimulation:
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
     self.verbose = verbose
+    self.count = 1
     
     self.reset()
     

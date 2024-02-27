@@ -9,6 +9,8 @@ os.environ["RENDER_SIM"] = "False"
 
 # STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
+# HYPERPARAMETER INFO FROM https://arxiv.org/pdf/1910.10620.pdf#page=3&zoom=100,433,952
+
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
     # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
@@ -29,10 +31,10 @@ print_freq = 1        # print avg reward in the interval (in num episodes)
 log_freq = 5           # log avg reward in the interval (in num episodes)
 save_model_freq = 50  # save model frequency (in num episodes)
 
-action_std = 0.6                    # starting std for action distribution (Multivariate Normal)
-action_std_decay_rate = 0.05        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
-min_action_std = 0.01                # minimum action_std (stop decay after action_std <= min_action_std)
-action_std_decay_freq = 200  # action_std decay frequency (in num episodes)
+action_std = 0.2                    # starting std for action distribution (Multivariate Normal)
+action_std_decay_rate = 0.01        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
+min_action_std = 0.025                # minimum action_std (stop decay after action_std <= min_action_std)
+action_std_decay_freq = 10000  # action_std decay frequency (in num episodes)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 
@@ -59,14 +61,14 @@ action_dim = env.action_shape[1]
 #####################################################
 
 ################ PPO hyperparameters ################
-update_episode = 5      # update policy every n episodes
-K_epochs = 80               # update policy for K epochs in one PPO update
+update_timesteps = int(4096*64 / env.count)      # update policy every n timesteps
+K_epochs = 10               # update policy for K epochs in one PPO update
 
-eps_clip = 0.2          # clip parameter for PPO
+eps_clip = 0.1          # clip parameter for PPO
 gamma = 0.99            # discount factor
 
-lr_actor = 0.0003       # learning rate for actor network
-lr_critic = 0.001       # learning rate for critic network
+lr_actor = 0.0001       # learning rate for actor network
+lr_critic = 0.0001       # learning rate for critic network
 
 random_seed = 0         # set random seed if required (0 = no random seed)
 #####################################################

@@ -208,12 +208,18 @@ class PPO:
         # Normalizing the rewards
         rewards = torch.tensor(np.array(rewards), dtype=torch.float32).to(device)
         rewards = (rewards - torch.mean(rewards, dim=0)) / (torch.std(rewards, dim=0) + 1e-7)
-
+        rewards = rewards.reshape(-1, 1)
+        
         # convert list to tensor
         old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
         old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
         old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
         old_state_values = torch.squeeze(torch.stack(self.buffer.state_values, dim=0)).detach().to(device)
+
+        old_states = old_states.reshape(-1, old_states.shape[-1])
+        old_actions = old_actions.reshape(-1, old_actions.shape[-1])
+        old_logprobs = old_logprobs.reshape(-1, 1)
+        old_state_values = old_state_values.reshape(-1, 1)
 
         # calculate advantages
         advantages = rewards.detach() - old_state_values.detach()
@@ -223,9 +229,6 @@ class PPO:
 
             # Evaluating old actions and values
             logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
-
-            # match state_values tensor dimensions with rewards tensor
-            # state_values = torch.squeeze(state_values) # REMOVED SINCE WE ARE TRAINING W/ BATCHED SIMULATION
             
             # Finding the ratio (pi_theta / pi_theta__old)
             ratios = torch.exp(logprobs - old_logprobs.detach())
@@ -235,7 +238,7 @@ class PPO:
             surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
 
             # final loss of clipped objective PPO
-            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values.reshape(state_values.shape[0:2]), rewards) - 0.01 * dist_entropy
+            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards) - 0.01 * dist_entropy
             
             # take gradient step
             self.optimizer.zero_grad()
