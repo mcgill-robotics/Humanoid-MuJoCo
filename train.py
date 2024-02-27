@@ -149,13 +149,13 @@ def train(previous_checkpoint=None, previous_checkpoint_index=None):
                     # TODO -> find a better way to fix this issue
                     print("ERROR: NaN value in observations. Skipping to next episode.")
                     # for debugging
-                    with np.printoptions(threshold=np.inf):
-                        print("########## DEBUG ##########")
-                        print("OBS\n", obs)
-                        print("ACTION\n", action)
-                        print("REWARD\n", reward)
-                        print("DONE\n", done)
-                        print("###########################")
+                    # with np.printoptions(threshold=np.inf):
+                    #     print("########## DEBUG ##########")
+                    #     print("OBS\n", obs)
+                    #     print("ACTION\n", action)
+                    #     print("REWARD\n", reward)
+                    #     print("DONE\n", done)
+                    #     print("###########################")
                     ppo_agent.buffer.states.pop()
                     ppo_agent.buffer.actions.pop()
                     ppo_agent.buffer.logprobs.pop()
