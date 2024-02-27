@@ -128,8 +128,7 @@ class GPUBatchSimulation:
     self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
     
     # randomize joint initial states (GPU)
-    random_joint_max_offset = JOINT_INITIAL_STATE_OFFSET_MAX + JOINT_INITIAL_STATE_OFFSET_MAX*self.randomization_factor
-    self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=-1.0*random_joint_max_offset/180.0*jp.pi, maxval=random_joint_max_offset/180.0*jp.pi)))(self.rng)
+    self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(qpos=self.base_mjx_data.qpos + jax.random.uniform(rng, self.base_mjx_data.qpos.shape, minval=self.randomization_factor*-1.0*JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, maxval=self.randomization_factor*JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)))(self.rng)
 
     #delays in actions and observations (10ms to 50ms)
     #round delays to be multiples of the timestep

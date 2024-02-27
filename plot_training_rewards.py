@@ -4,8 +4,10 @@ import numpy as np
 timesteps = []
 rewards = []
 
+train_id = input("Enter the integer ID of the training CSV:    ")
+
 # Read the CSV file
-with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_1.csv", 'r') as file:
+with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_{}.csv".format(train_id), 'r') as file:
     # Skip header row
     next(file)
     
@@ -14,8 +16,8 @@ with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_1.csv", 'r') as file:
         values = line.strip().split(',')
         
         # Extract X and Y values
-        timesteps.append(float(values[0]))
-        rewards.append(float(values[1]))
+        timesteps.append(float(values[1]))
+        rewards.append(float(values[2]))
 
 def smoothMAconv(depth, data, scale=1): # Moving average by numpy convolution
     dz = np.diff(depth) 

@@ -17,7 +17,7 @@ from humanoid.rl.training_parameters import *
     # previous action     5 · 20          Action filter state (stacked)    
     
 ################################### Training ###################################
-def train(previous_checkpoint=None):
+def train(previous_checkpoint=None, previous_checkpoint_index=None):
     ###################### logging ######################
 
     #### log files for multiple runs are NOT overwritten
@@ -35,7 +35,10 @@ def train(previous_checkpoint=None):
     run_num = len(current_num_files)
 
     #### create new log file for each run
-    log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
+    if previous_checkpoint_index is not None:
+        log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(previous_checkpoint_index) + ".csv"
+    else:
+        log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
 
     print("current logging run number for " + env_name + " : ", run_num)
     print("logging at : " + log_f_name)
@@ -52,8 +55,7 @@ def train(previous_checkpoint=None):
     if not os.path.exists(directory):
           os.makedirs(directory)
 
-
-    checkpoint_path = lambda timestep : directory + "PPO_{}_{}_{}_t{}.pth".format(env_name, random_seed, run_num_pretrained, timestep)
+    checkpoint_path = lambda episode : directory + "PPO_{}_{}_{}_t{}.pth".format(env_name, random_seed, run_num_pretrained, episode)
     print("save checkpoint path : " + checkpoint_path(0))
     #####################################################
 
@@ -62,9 +64,9 @@ def train(previous_checkpoint=None):
     print("--------------------------------------------------------------------------------------------")
     print("max training timesteps : ", max_training_timesteps)
     print("max timesteps per episode : ", max_ep_len)
-    print("model saving frequency : " + str(save_model_freq) + " timesteps")
-    print("log frequency : " + str(log_freq) + " timesteps")
-    print("printing average reward over episodes in last : " + str(print_freq) + " timesteps")
+    print("model saving frequency : " + str(save_model_freq) + " episodes")
+    print("log frequency : " + str(log_freq) + " episodes")
+    print("printing average reward over episodes in last : " + str(print_freq) + " episodes")
     print("--------------------------------------------------------------------------------------------")
     print("state space dimension : ", state_dim)
     print("action space dimension : ", action_dim)
@@ -75,11 +77,11 @@ def train(previous_checkpoint=None):
         print("starting std of action distribution : ", action_std)
         print("decay rate of std of action distribution : ", action_std_decay_rate)
         print("minimum std of action distribution : ", min_action_std)
-        print("decay frequency of std of action distribution : " + str(action_std_decay_freq) + " timesteps")
+        print("decay frequency of std of action distribution : " + str(action_std_decay_freq) + " episodes")
     else:
         print("Initializing a discrete action space policy")
     print("--------------------------------------------------------------------------------------------")
-    print("PPO update frequency : " + str(update_timestep) + " timesteps")
+    print("PPO update frequency : " + str(update_episode) + " episodes")
     print("PPO K epochs : ", K_epochs)
     print("PPO epsilon clip : ", eps_clip)
     print("discount factor (gamma) : ", gamma)
@@ -110,7 +112,7 @@ def train(previous_checkpoint=None):
 
     # logging file
     log_f = open(log_f_name,"w+")
-    log_f.write('timestep,reward\n')
+    log_f.write('episode,timestep,reward\n')
 
     # printing and logging variables
     print_running_avg_reward = 0
@@ -154,82 +156,81 @@ def train(previous_checkpoint=None):
                         print("REWARD\n", reward)
                         print("DONE\n", done)
                         print("###########################")
-                    log_running_avg_reward = 0
-                    log_running_timesteps = 0
-                    print_running_avg_reward = 0
-                    print_running_timesteps = 0
                     ppo_agent.buffer.states.pop()
                     ppo_agent.buffer.actions.pop()
                     ppo_agent.buffer.logprobs.pop()
                     ppo_agent.buffer.state_values.pop()
                     break
                 
-                # saving reward and is_terminals
-                ppo_agent.buffer.rewards.append(reward)
-                ppo_agent.buffer.is_terminals.append(done)
-
-                time_step += 1
-
-                # update PPO agent
-                if time_step % update_timestep == 0:
-                    ppo_agent.update()
-
-                # if continuous action space; then decay action std of ouput action distribution
-                if has_continuous_action_space and time_step % action_std_decay_freq == 0:
-                    ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
-
-                # log in logging file
-                if time_step % log_freq == 0:
-
-                    # log average reward till last episode
-                    log_avg_reward = log_running_avg_reward / log_running_timesteps
-                    log_avg_reward = round(log_avg_reward, 4)
-
-                    log_f.write('{},{}\n'.format(time_step, log_avg_reward))
-                    log_f.flush()
-
-                    log_running_avg_reward = 0
-                    log_running_timesteps = 0
-
-                # printing average reward
-                if time_step % print_freq == 0:
-
-                    # print average reward till last episode
-                    print_avg_reward = print_running_avg_reward / print_running_timesteps
-                    print_avg_reward = round(print_avg_reward, 2)
-
-                    print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
-
-                    print_running_avg_reward = 0
-                    print_running_timesteps = 0
-
-                # save model weights
-                if time_step % save_model_freq == 0:
-                    print("--------------------------------------------------------------------------------------------")
-                    print("saving model at : " + checkpoint_path(time_step))
-                    ppo_agent.save(checkpoint_path(time_step))
-                    print("model saved")
-                    print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
-                    print("--------------------------------------------------------------------------------------------")
-
                 print_running_avg_reward += np.mean(reward)
                 print_running_timesteps += 1
 
                 log_running_avg_reward += np.mean(reward)
                 log_running_timesteps += 1
-            
+                
+                # saving reward and is_terminals
+                ppo_agent.buffer.rewards.append(reward)
+                ppo_agent.buffer.is_terminals.append(done)
+
+                time_step += 1
+                
                 # break; if the episode is over
                 if np.all(done):
                     break
                 
             i_episode += 1
 
+            # update PPO agent
+            if i_episode % update_episode == 0:
+                ppo_agent.update()
+
+            # if continuous action space; then decay action std of ouput action distribution
+            if has_continuous_action_space and i_episode % action_std_decay_freq == 0:
+                ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
+
+            # log in logging file
+            if i_episode % log_freq == 0 and log_running_timesteps > 0:
+
+                # log average reward till last episode
+                log_avg_reward = log_running_avg_reward / log_running_timesteps
+                log_avg_reward = round(log_avg_reward, 4)
+
+                log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
+                log_f.flush()
+
+                log_running_avg_reward = 0
+                log_running_timesteps = 0
+
+            # printing average reward
+            if i_episode % print_freq == 0 and print_running_timesteps > 0:
+
+                # print average reward till last episode
+                print_avg_reward = print_running_avg_reward / print_running_timesteps
+                print_avg_reward = round(print_avg_reward, 2)
+
+                print("Episode : {} \t\t Timestep : {} \t\t Average Reward : {}".format(i_episode, time_step, print_avg_reward))
+
+                print_running_avg_reward = 0
+                print_running_timesteps = 0
+
+            # save model weights
+            if i_episode % save_model_freq == 0:
+                print("--------------------------------------------------------------------------------------------")
+                print("saving model at : " + checkpoint_path(i_episode))
+                ppo_agent.save(checkpoint_path(i_episode))
+                print("model saved")
+                print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
+                print("--------------------------------------------------------------------------------------------")
+
+            
+                
+
     except KeyboardInterrupt:
         print("\nUser ended training early. Saving current state of model.\n")
         
         print("--------------------------------------------------------------------------------------------")
-        print("saving model at : " + checkpoint_path(time_step))
-        ppo_agent.save(checkpoint_path(time_step))
+        print("saving model at : " + checkpoint_path(i_episode))
+        ppo_agent.save(checkpoint_path(i_episode))
         print("model saved")
         print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
         print("--------------------------------------------------------------------------------------------")
@@ -246,7 +247,7 @@ def train(previous_checkpoint=None):
 
 
 if __name__ == '__main__':
-    train()
+    train("PPO_preTrained/GPUStanding/PPO_GPUStanding_0_0_t50.pth", 0)
     
     
     
