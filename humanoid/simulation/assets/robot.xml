@@ -153,26 +153,26 @@
   
   <!-- CUSTOM -->
   <actuator>
-    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_shoulder_roll" joint="right_shoulder_roll" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_shoulder_roll" joint="left_shoulder_roll" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_hip_yaw" joint="left_hip_yaw" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_knee" joint="left_knee" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_ankle_pitch" joint="left_ankle_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="left_ankle_roll" joint="left_ankle_roll" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_hip_yaw" joint="right_hip_yaw" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_hip_roll" joint="right_hip_roll" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_hip_pitch" joint="right_hip_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_knee" joint="right_knee" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_ankle_pitch" joint="right_ankle_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="right_ankle_roll" joint="right_ankle_roll" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="head_yaw" joint="head_yaw" forcelimited="true" forcerange="-0.4 0.4"/>
-    <position name="head_pitch" joint="head_pitch" forcelimited="true" forcerange="-0.4 0.4"/>
+    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_shoulder_roll" joint="right_shoulder_roll" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_shoulder_roll" joint="left_shoulder_roll" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_hip_yaw" joint="left_hip_yaw" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_knee" joint="left_knee" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_ankle_pitch" joint="left_ankle_pitch" forcelimited="true" forcerange="-4 4"/>
+    <position name="left_ankle_roll" joint="left_ankle_roll" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_hip_yaw" joint="right_hip_yaw" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_hip_roll" joint="right_hip_roll" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_hip_pitch" joint="right_hip_pitch" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_knee" joint="right_knee" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_ankle_pitch" joint="right_ankle_pitch" forcelimited="true" forcerange="-4 4"/>
+    <position name="right_ankle_roll" joint="right_ankle_roll" forcelimited="true" forcerange="-4 4"/>
+    <position name="head_yaw" joint="head_yaw" forcelimited="true" forcerange="-4 4"/>
+    <position name="head_pitch" joint="head_pitch" forcelimited="true" forcerange="-4 4"/>
   </actuator>
 
   <!-- CUSTOM -->
