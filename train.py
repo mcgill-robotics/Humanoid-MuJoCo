@@ -219,7 +219,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 print("--------------------------------------------------------------------------------------------")
                 print("saving model at : " + checkpoint_path(i_episode))
                 ppo_agent.save(checkpoint_path(i_episode))
-                with open(checkpoint_info_path, 'wb') as f:
+                with open(checkpoint_info_path(i_episode), 'wb') as f:
                     pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode}, f)
                 print("model saved")
                 print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
@@ -234,7 +234,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
         print("--------------------------------------------------------------------------------------------")
         print("saving model at : " + checkpoint_path(i_episode))
         ppo_agent.save(checkpoint_path(i_episode))
-        with open(checkpoint_info_path, 'wb') as f:
+        with open(checkpoint_info_path(i_episode), 'wb') as f:
             pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode}, f)
         print("model saved")
         print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
