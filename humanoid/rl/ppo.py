@@ -200,8 +200,11 @@ class PPO:
         # Monte Carlo estimate of returns
         rewards = []
         discounted_reward = np.array([0]*len(self.buffer.is_terminals[0]))
-        for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
-            discounted_reward[is_terminal] = 0
+        # for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
+        #     discounted_reward[is_terminal] = -1
+        #     discounted_reward = reward + (self.gamma * discounted_reward)
+        #     rewards.insert(0, discounted_reward)
+        for reward in reversed(self.buffer.rewards):
             discounted_reward = reward + (self.gamma * discounted_reward)
             rewards.insert(0, discounted_reward)
             
