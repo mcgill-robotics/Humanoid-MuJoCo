@@ -37,8 +37,8 @@ for i in range(len(rewards)):
     running_avgs.append(running_avg)
 
 # Plot the curve
-plt.plot(timesteps, rewards, label="Reward", color="red")
-plt.plot(timesteps, running_avgs, label="Running Average", color="blue")
+plt.plot(timesteps, rewards, label="Reward", color="blue")
+plt.plot(timesteps, running_avgs, label="Running Average", color="red")
 
 # Add labels and title
 plt.xlabel('Timesteps')
