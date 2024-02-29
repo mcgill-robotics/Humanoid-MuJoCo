@@ -4,7 +4,9 @@ FROM ubuntu
 RUN apt-get update \
     && apt-get install -y python3 python3-pip python-is-python3 \
     && apt-get install -y --no-install-recommends git \
-    && apt-get install libgl1-mesa-glx ffmpeg libsm6 libxext6  -y
+    && apt-get install libgl1-mesa-glx ffmpeg libsm6 libxext6  -y \
+    && apt-get install vim \
+    && apt-get install screen
 
 RUN pip3 install --no-cache-dir --upgrade numpy \
     && pip3 install --no-cache-dir numpy-quaternion \

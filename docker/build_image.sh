@@ -1,1 +1,1 @@
-docker buildx build . -t mcgillrobotics/mujoco:cuda118
+docker buildx build . -t mcgillrobotics/mujoco
