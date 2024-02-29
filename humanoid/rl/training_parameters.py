@@ -32,6 +32,7 @@ min_action_std = 0.0001                # minimum action_std (stop decay after ac
 action_std_decay_freq = 50  # action_std decay frequency (in num episodes)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
+physics_steps_per_control_step = 5
 
 max_reward_for_randomization = -0.1 # if average reward of an episode is greater than this, increase randomization of environment
 randomization_increment = 0.1
@@ -41,13 +42,13 @@ randomization_increment = 0.1
 env = GPUBatchSimulation(count=256,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
-                        physics_steps_per_control_step=5,
+                        physics_steps_per_control_step=physics_steps_per_control_step,
                         timestep=0.001,
                         randomization_factor=0)
 
 # env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
 
-max_ep_len = int(5.0 / env.timestep)                   # max timesteps in one episode
+max_ep_len = int(5.0 / (physics_steps_per_control_step * env.timestep))                   # max timesteps in one episode
 max_training_timesteps = max_ep_len * 200000000   # break training loop if timeteps > max_training_timesteps
 
 env_name = "Standing"
