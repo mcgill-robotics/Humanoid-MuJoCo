@@ -191,15 +191,8 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                     ppo_agent.update()
                 
                 # break; if the episode is over
-                if np.any(done):
+                if np.all(done):
                     break
-                
-            episode_avg_reward = episode_avg_reward / episode_avg_timesteps
-            if episode_avg_reward > max_reward_for_randomization and not failed_with_null:
-                new_randomization_factor = min(1.0, env.randomization_factor + randomization_increment)
-                if env.randomization_factor < 1.0:  
-                    print(" >> Increased randomization factor to {}".format(new_randomization_factor))
-                env.randomization_factor = new_randomization_factor
                 
             i_episode += 1
 
@@ -232,6 +225,14 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 print_running_avg_reward = 0
                 print_running_timesteps = 0
 
+            # update randomization factor
+            episode_avg_reward = episode_avg_reward / episode_avg_timesteps
+            if episode_avg_reward > max_reward_for_randomization and not failed_with_null:
+                new_randomization_factor = min(1.0, env.randomization_factor + randomization_increment)
+                if env.randomization_factor < 1.0:  
+                    print(" >> Increased randomization factor to {}".format(new_randomization_factor))
+                env.randomization_factor = new_randomization_factor
+                
             # save model weights
             if i_episode % save_model_freq == 0:
                 print("--------------------------------------------------------------------------------------------")
