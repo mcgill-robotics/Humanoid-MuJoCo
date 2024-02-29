@@ -5,6 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from humanoid import SIM_XML_PATH
+import os
 
 timestep = 0.005
 simulation_time = 100 #seconds
@@ -56,4 +57,7 @@ plt.plot(sim_batch_sizes, gpu_plot_y, label='GPU')
 plt.xlabel('Batch Size')
 plt.ylabel('Seconds simulated per. wall clock seconds')
 plt.legend()
-plt.savefig("data/sim_benchmark.png")
+
+if not os.path.exists("data/benchmarks"):
+    os.makedirs("data/benchmarks")
+plt.savefig("data/benchmarks/sim_benchmark.png")

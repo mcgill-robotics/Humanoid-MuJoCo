@@ -60,7 +60,7 @@ class CPUSimulation:
     mujoco.mjv_defaultOption(self.scene_option)
     self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
     self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
-    self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
+    self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
     self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
     self.model.vis.scale.contactwidth = 0.1
     self.model.vis.scale.contactheight = 0.03

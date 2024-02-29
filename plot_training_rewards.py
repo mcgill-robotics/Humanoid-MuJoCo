@@ -7,7 +7,7 @@ rewards = []
 train_id = input("Enter the integer ID of the training CSV:    ")
 
 # Read the CSV file
-with open("data\PPO_logs\GPUStanding\PPO_GPUStanding_log_{}.csv".format(train_id), 'r') as file:
+with open("data/training_logs/GPUStanding/PPO_GPUStanding_log_{}.csv".format(train_id), 'r') as file:
     # Skip header row
     next(file)
     

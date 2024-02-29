@@ -22,7 +22,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     ###################### logging ######################
 
     #### log files for multiple runs are NOT overwritten
-    log_dir = "data/PPO_logs"
+    log_dir = "data/training_logs"
     if not os.path.exists(log_dir):
           os.makedirs(log_dir)
 
@@ -48,7 +48,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     ################### checkpointing ###################
     run_num_pretrained = 0      #### change this to prevent overwriting weights in same env_name folder
 
-    directory = "PPO_preTrained"
+    directory = "data/trained_weights"
     if not os.path.exists(directory):
           os.makedirs(directory)
 
