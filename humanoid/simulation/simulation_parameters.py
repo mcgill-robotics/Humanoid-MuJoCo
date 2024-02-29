@@ -25,7 +25,7 @@ MIN_EXTERNAL_FORCE_MAGNITUDE = 5 #N
 MAX_EXTERNAL_FORCE_MAGNITUDE = 15 #N
 MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
 MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
-JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
+JOINT_INITIAL_STATE_OFFSET_MAX = 5 # degrees
 IMU_Z_OFFSET_MAX = 0.05 # meters
 PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
 JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
@@ -34,19 +34,19 @@ GYRO_NOISE_STDDEV = 1 # degrees
 ACCELEROMETER_NOISE_STDDEV = 0.05 # m/s^2
 PRESSURE_SENSOR_NOISE_STDDEV = 0.1 #N
 VELOCIMETER_NOISE_STDDEV = 0.05 # m/s
-JOINT_DAMPING_MAX_CHANGE = 0.1 # Nm/(rad/s)
-JOINT_ARMATURE_MAX_CHANGE = 0.05 # kg m2
-JOINT_RANGE_MAX_CHANGE = 1 # radians
+JOINT_ARMATURE_MAX_CHANGE = 0.0005 # kg m2
+JOINT_RANGE_MAX_CHANGE = 0.05 # radians
 JOINT_STIFFNESS_MAX_CHANGE = 0.05 # unit ? TODO
-JOINT_MARGIN_MAX_CHANGE = 0.5 # degrees
-JOINT_FORCE_LIMIT_MAX_CHANGE = 0.05 # N m
+JOINT_MARGIN_MAX_CHANGE = 0.05 # radians
+JOINT_FORCE_LIMIT_MAX_CHANGE = 0.025 # N m
+
 JOINT_PID_P_GAIN = 20 # P gain
 JOINT_PID_V_GAIN = 10 # D gain
 JOINT_PID_GAIN_MAX_CHANGE = 0.1 # PID gain delta
 
 ### URDF REFERENCE NAMES
 
-JOINT_NAMES = ["right_shoulder_pitch", "right_shoulder_roll", "right_elbow", "left_shoulder_pitch", "left_shoulder_roll", "left_elbow", "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle_pitch", "left_ankle_roll", "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle_pitch", "right_ankle_roll", "head_yaw", "head_pitch"]
+JOINT_NAMES = ["right_shoulder_pitch", "right_elbow", "left_shoulder_pitch", "left_elbow", "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle_pitch", "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle_pitch"]
 JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = ["pressure_geom_LLB", "pressure_geom_LRB", "pressure_geom_LRF", "pressure_geom_LLF", "pressure_geom_RLB", "pressure_geom_RRB", "pressure_geom_RRF", "pressure_geom_RLF"]
 TORSO_BODY_NAME = 'humanoid'
