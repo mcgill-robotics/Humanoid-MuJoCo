@@ -70,7 +70,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     print("max timesteps per episode : ", max_ep_len)
     print("model saving frequency : " + str(save_model_freq) + " episodes")
     print("log frequency : " + str(log_freq) + " episodes")
-    print("printing average reward over episodes in last : " + str(print_freq) + " episodes")
+    print("printing average reward over timesteps in last : " + str(print_freq) + " episodes")
     print("--------------------------------------------------------------------------------------------")
     print("state space dimension : ", state_dim)
     print("action space dimension : ", action_dim)
