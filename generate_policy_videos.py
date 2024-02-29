@@ -7,7 +7,7 @@ import os
 import cv2
 
 
-checkpoint = "PPO_preTrained\GPUStanding\PPO_GPUStanding_0_0_episode_400.pth"
+checkpoint = "PPO_preTrained\Standing\PPO_Standing_0_0_episode_400.pth"
 num_videos = 9
 video_duration = 5 # seconds
 

@@ -38,6 +38,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
         with open(previous_checkpoint_info_file, 'rb') as f:
             saved_info = pickle.load(f)
         run_num = saved_info["run_num"]
+    
     #### create new log file for each run
     log_f_name = log_dir + '/PPO_' + env_name + "_log_" + str(run_num) + ".csv"
 
@@ -106,7 +107,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std)
     if previous_checkpoint is not None:
         ppo_agent.load(previous_checkpoint)
-        ppo_agent.set_action_std(saved_info["action_std"])
+        ppo_agent.set_action_std(max(saved_info["action_std"], min_action_std))
 
     # track total training time
     start_time = datetime.now().replace(microsecond=0)
@@ -122,10 +123,11 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
         time_step = 0
         i_episode = 0
     else:
-        log_f = open(log_f_name,"a")
+        log_f = open(log_f_name,"a+")
         # printing and logging variables
         time_step = saved_info["time_step"]
         i_episode = saved_info["i_episode"]
+        env.randomization_factor = saved_info["randomization_factor"]
 
     # printing and logging variables
     print_running_avg_reward = 0
@@ -145,6 +147,11 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
             state = env.getObs()
             state_history = [np.concatenate((state, action), axis=1)] * state_history_length
             
+            episode_avg_reward = 0
+            episode_avg_timesteps = 0
+            
+            failed_with_null = False
+            
             for t in range(1, max_ep_len+1):
                 # select action with policy
                 action = ppo_agent.select_action(np.concatenate(state_history, axis=1))
@@ -161,6 +168,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                     ppo_agent.buffer.actions.pop()
                     ppo_agent.buffer.logprobs.pop()
                     ppo_agent.buffer.state_values.pop()
+                    failed_with_null = True
                     break
                 
                 print_running_avg_reward += np.mean(reward)
@@ -168,6 +176,9 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
                 log_running_avg_reward += np.mean(reward)
                 log_running_timesteps += 1
+                
+                episode_avg_reward += np.mean(reward)
+                episode_avg_timesteps += 1
                 
                 # saving reward and is_terminals
                 ppo_agent.buffer.rewards.append(reward)
@@ -182,6 +193,13 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 # break; if the episode is over
                 if np.all(done):
                     break
+                
+            episode_avg_reward = episode_avg_reward / episode_avg_timesteps
+            if episode_avg_reward > max_reward_for_randomization and not failed_with_null:
+                new_randomization_factor = min(1.0, env.randomization_factor + randomization_increment)
+                if env.randomization_factor < 1.0:  
+                    print(" >> Increased randomization factor to {}".format(new_randomization_factor))
+                env.randomization_factor = new_randomization_factor
                 
             i_episode += 1
 
@@ -218,9 +236,10 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
             if i_episode % save_model_freq == 0:
                 print("--------------------------------------------------------------------------------------------")
                 print("saving model at : " + checkpoint_path(i_episode))
+                print("saving training info at : " + checkpoint_info_path(i_episode))
                 ppo_agent.save(checkpoint_path(i_episode))
                 with open(checkpoint_info_path(i_episode), 'wb') as f:
-                    pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode}, f)
+                    pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode, "randomization_factor":env.randomization_factor}, f)
                 print("model saved")
                 print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
                 print("--------------------------------------------------------------------------------------------")
@@ -233,9 +252,10 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
         
         print("--------------------------------------------------------------------------------------------")
         print("saving model at : " + checkpoint_path(i_episode))
+        print("saving training info at : " + checkpoint_info_path(i_episode))
         ppo_agent.save(checkpoint_path(i_episode))
         with open(checkpoint_info_path(i_episode), 'wb') as f:
-            pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode}, f)
+            pickle.dump({"run_num": run_num, "action_std": ppo_agent.action_std, "time_step": time_step, "i_episode": i_episode, "randomization_factor":env.randomization_factor}, f)
         print("model saved")
         print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
         print("--------------------------------------------------------------------------------------------")
@@ -252,8 +272,8 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
 
 if __name__ == '__main__':
-    train()
-    
+    # train()
+    train("data/trained_weights/Standing/PPO_Standing_0_0_episode_400.pth", "data/trained_weights/Standing/PPO_Standing_0_0_episode_400_INFO.pkl")
     
     
     

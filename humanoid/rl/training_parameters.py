@@ -27,11 +27,14 @@ log_freq = 10           # log avg reward in the interval (in num episodes)
 save_model_freq = 100  # save model frequency (in num episodes)
 
 action_std = 0.1                    # starting std for action distribution (Multivariate Normal)
-action_std_decay_rate = 0.025        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
+action_std_decay_rate = 0.001        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
 min_action_std = 0.0001                # minimum action_std (stop decay after action_std <= min_action_std)
-action_std_decay_freq = 200  # action_std decay frequency (in num episodes)
+action_std_decay_freq = 50  # action_std decay frequency (in num episodes)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
+
+max_reward_for_randomization = -0.1 # if average reward of an episode is greater than this, increase randomization of environment
+randomization_increment = 0.1
 
 #####################################################
 
@@ -47,7 +50,7 @@ env = GPUBatchSimulation(count=256,
 max_ep_len = int(5.0 / env.timestep)                   # max timesteps in one episode
 max_training_timesteps = max_ep_len * 200000000   # break training loop if timeteps > max_training_timesteps
 
-env_name = env.platform + "Standing"
+env_name = "Standing"
 
 print("training environment name : " + env_name)
 
