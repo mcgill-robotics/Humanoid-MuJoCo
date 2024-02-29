@@ -191,7 +191,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                     ppo_agent.update()
                 
                 # break; if the episode is over
-                if np.all(done):
+                if np.any(done):
                     break
                 
             episode_avg_reward = episode_avg_reward / episode_avg_timesteps
