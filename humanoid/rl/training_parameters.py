@@ -64,7 +64,7 @@ action_dim = env.action_shape[1]
 
 # HYPERPARAMETER INFO FROM https://arxiv.org/pdf/1910.10620.pdf#page=3&zoom=100,433,952
 ################ PPO hyperparameters ################
-update_timesteps = 128    # update policy every n timesteps
+update_timesteps = 64    # update policy every n timesteps
 K_epochs = 80               # update policy for K epochs in one PPO update
 
 eps_clip = 0.1          # clip parameter for PPO
