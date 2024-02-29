@@ -6,7 +6,7 @@ services:
       - XLA_FLAGS=--xla_gpu_triton_gemm_any=true
     volumes:
       - ../.:/root/Humanoid-MuJoCo
-    image: "mcgillrobotics/mujoco:cuda118"
+    image: "mcgillrobotics/mujoco:latest"
     command: bash -c "tail -f /dev/null"
     deploy:
       resources:
