@@ -39,7 +39,7 @@ randomization_increment = 0.1
 
 #####################################################
 
-env = GPUBatchSimulation(count=256,
+env = GPUBatchSimulation(count=128,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=physics_steps_per_control_step,
@@ -64,7 +64,7 @@ action_dim = env.action_shape[1]
 
 # HYPERPARAMETER INFO FROM https://arxiv.org/pdf/1910.10620.pdf#page=3&zoom=100,433,952
 ################ PPO hyperparameters ################
-update_timesteps = int(4096 / env.count)    # update policy every n timesteps
+update_timesteps = 32    # update policy every n timesteps
 K_epochs = 10               # update policy for K epochs in one PPO update
 batch_size = 64
 
