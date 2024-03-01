@@ -104,7 +104,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     ################# training procedure ################
 
     # initialize a PPO agent
-    ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std)
+    ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std, batch_size)
     if previous_checkpoint is not None:
         ppo_agent.load(previous_checkpoint)
         ppo_agent.set_action_std(max(saved_info["action_std"], min_action_std))
@@ -191,7 +191,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                     ppo_agent.update()
                 
                 # break; if the episode is over
-                if np.all(done):
+                if np.any(done):
                     break
                 
             i_episode += 1

@@ -121,7 +121,7 @@ class ActorCritic(nn.Module):
 
 
 class PPO:
-    def __init__(self, state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std_init=0.6):
+    def __init__(self, state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space, action_std_init=0.6, batch_size=64):
 
         self.has_continuous_action_space = has_continuous_action_space
 
@@ -130,6 +130,7 @@ class PPO:
 
         self.gamma = gamma
         self.eps_clip = eps_clip
+        self.batch_size = batch_size
         self.K_epochs = K_epochs
         
         self.buffer = RolloutBuffer()
@@ -229,24 +230,26 @@ class PPO:
 
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):
+            # split into batches for optimization
+            for batch_start_index in range(0, rewards.shape[0], self.batch_size):
+                batch_end_index = min(batch_start_index + self.batch_size, rewards.shape[0])
+                # Evaluating old actions and values
+                logprobs, state_values, dist_entropy = self.policy.evaluate(old_states[batch_start_index:batch_end_index], old_actions[batch_start_index:batch_end_index])
+                
+                # Finding the ratio (pi_theta / pi_theta__old)
+                ratios = torch.exp(logprobs - old_logprobs[batch_start_index:batch_end_index].detach())
 
-            # Evaluating old actions and values
-            logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
-            
-            # Finding the ratio (pi_theta / pi_theta__old)
-            ratios = torch.exp(logprobs - old_logprobs.detach())
+                # Finding Surrogate Loss  
+                surr1 = ratios * advantages[batch_start_index:batch_end_index]
+                surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
 
-            # Finding Surrogate Loss  
-            surr1 = ratios * advantages
-            surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
-
-            # final loss of clipped objective PPO
-            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards) - 0.01 * dist_entropy
-            
-            # take gradient step
-            self.optimizer.zero_grad()
-            loss.mean().backward()
-            self.optimizer.step()
+                # final loss of clipped objective PPO
+                loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards[batch_start_index:batch_end_index]) - 0.01 * dist_entropy
+                
+                # take gradient step
+                self.optimizer.zero_grad()
+                loss.mean().backward()
+                self.optimizer.step()
             
         # Copy new weights into old policy
         self.policy_old.load_state_dict(self.policy.state_dict())
