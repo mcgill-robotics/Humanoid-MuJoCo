@@ -76,6 +76,7 @@ class CPUSimulation:
     self.previous_torso_local_velocity = jp.zeros((3))
     # save gravity vector
     self.gravity_vector = self.model.opt.gravity
+    self.gravity_vector[2] = -self.gravity_vector[2] # invert since we want -9.81 not 9.81
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # save joint addresses
@@ -150,17 +151,17 @@ class CPUSimulation:
     self.pressure_values_buffer = []
     
     for i in range((int)(self.joint_angles_observation_delay/actual_timestep)):
-      self.joint_angles_buffer.append(jp.array([0]*20))
+      self.joint_angles_buffer.append(jp.array([0]*len(JOINT_NAMES)))
     for i in range((int)(self.local_ang_vel_delay/actual_timestep)):
       self.local_ang_vel_buffer.append(jp.array([0]*3))
     for i in range((int)(self.torso_global_velocity_delay/actual_timestep)):
-      self.torso_global_velocity_buffer.append(jp.array([0]*3))
+      self.torso_global_velocity_buffer.append(jp.array([0]*2))
     for i in range((int)(self.torso_local_accel_delay/actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([0]*3))
     for i in range((int)(self.local_gravity_vector_delay/actual_timestep)):
       self.local_gravity_vector_buffer.append(jp.array([0, 0, -9.81]))
     for i in range((int)(self.pressure_values_delay/actual_timestep)):
-      self.pressure_values_buffer.append(jp.array([0]*8))
+      self.pressure_values_buffer.append(jp.array([0]*len(PRESSURE_GEOM_NAMES)))
     
     # initialize environment properties
     self.observation_shape = self.getObs().shape

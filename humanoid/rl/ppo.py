@@ -241,7 +241,7 @@ class PPO:
 
                 # Finding Surrogate Loss  
                 surr1 = ratios * advantages[batch_start_index:batch_end_index]
-                surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
+                surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages[batch_start_index:batch_end_index]
 
                 # final loss of clipped objective PPO
                 loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards[batch_start_index:batch_end_index]) - 0.01 * dist_entropy

@@ -88,6 +88,7 @@ class GPUBatchSimulation:
     self.joint_torque_idx = jp.array(self.joint_torque_idx)
     # save gravity vector
     self.gravity_vector = self.model.opt.gravity
+    self.gravity_vector[2] = -self.gravity_vector[2] # invert since we want -9.81 not 9.81
     self.gravity_vector_batch = jp.array([self.gravity_vector]*self.count)
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
@@ -157,17 +158,17 @@ class GPUBatchSimulation:
     self.pressure_values_buffer = []
     
     for i in range((int)(self.joint_angles_observation_delay/self.actual_timestep)):
-      self.joint_angles_buffer.append(jp.array([[0]*20]*self.count))
+      self.joint_angles_buffer.append(jp.array([[0]*len(JOINT_NAMES)]*self.count))
     for i in range((int)(self.local_ang_vel_delay/self.actual_timestep)):
       self.local_ang_vel_buffer.append(jp.array([[0]*3]*self.count))
     for i in range((int)(self.torso_global_velocity_delay/self.actual_timestep)):
-      self.torso_global_velocity_buffer.append(jp.array([[0]*3]*self.count))
+      self.torso_global_velocity_buffer.append(jp.array([[0]*2]*self.count))
     for i in range((int)(self.torso_local_accel_delay/self.actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.count))
     for i in range((int)(self.local_gravity_vector_delay/self.actual_timestep)):
       self.local_gravity_vector_buffer.append(jp.array([[0, 0, -9.81]]*self.count))
     for i in range((int)(self.pressure_values_delay/self.actual_timestep)):
-      self.pressure_values_buffer.append(jp.array([[0]*8]*self.count))
+      self.pressure_values_buffer.append(jp.array([[0]*len(PRESSURE_GEOM_NAMES)]*self.count))
     
     # initialize environment properties
     self.observation_shape = self.getObs().shape
@@ -229,7 +230,7 @@ class GPUBatchSimulation:
     local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
     pressure_values = self.pressure_values_buffer.pop(0)
     
-    delayed_observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity[:, 0:2], torso_local_accel, local_gravity_vector, pressure_values))
+    delayed_observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
         
     if self.verbose: print("Observations collected.")
     

@@ -29,7 +29,7 @@ save_model_freq = 100  # save model frequency (in num episodes)
 action_std = 0.1                    # starting std for action distribution (Multivariate Normal)
 action_std_decay_rate = 0.001        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
 min_action_std = 0.0001                # minimum action_std (stop decay after action_std <= min_action_std)
-action_std_decay_freq = 50  # action_std decay frequency (in num episodes)
+action_std_decay_freq = 5000  # action_std decay frequency (in num timesteps)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 physics_steps_per_control_step = 5

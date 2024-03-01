@@ -81,7 +81,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
         print("starting std of action distribution : ", action_std)
         print("decay rate of std of action distribution : ", action_std_decay_rate)
         print("minimum std of action distribution : ", min_action_std)
-        print("decay frequency of std of action distribution : " + str(action_std_decay_freq) + " episodes")
+        print("decay frequency of std of action distribution : " + str(action_std_decay_freq) + " timesteps")
     else:
         print("Initializing a discrete action space policy")
     print("--------------------------------------------------------------------------------------------")
@@ -139,13 +139,11 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     # training loop
     try: # wrap in try-except so we can stop training with Ctrl+C and not lose the trained model
         while time_step <= max_training_timesteps:
-
-            # TODO -> implement increasing randomization factor as time goes on (when avg. reward stagnates or something)
             
             env.reset()
             action = env.lastAction
-            state = env.getObs()
-            state_history = [np.concatenate((state, action), axis=1)] * state_history_length
+            obs = env.getObs()
+            state_history = [np.concatenate((obs, action), axis=1)] * state_history_length
             
             episode_avg_reward = 0
             episode_avg_timesteps = 0
@@ -194,11 +192,11 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 if np.any(done):
                     break
                 
+                # if continuous action space; then decay action std of ouput action distribution
+                if has_continuous_action_space and time_step % action_std_decay_freq == 0:
+                    ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
+                
             i_episode += 1
-
-            # if continuous action space; then decay action std of ouput action distribution
-            if has_continuous_action_space and i_episode % action_std_decay_freq == 0:
-                ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
 
             # log in logging file
             if i_episode % log_freq == 0 and log_running_timesteps > 0:
