@@ -88,7 +88,6 @@ class GPUBatchSimulation:
     self.joint_torque_idx = jp.array(self.joint_torque_idx)
     # save gravity vector
     self.gravity_vector = self.model.opt.gravity
-    self.gravity_vector[2] = -self.gravity_vector[2] # invert since we want -9.81 not 9.81
     self.gravity_vector_batch = jp.array([self.gravity_vector]*self.count)
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
@@ -166,7 +165,7 @@ class GPUBatchSimulation:
     for i in range((int)(self.torso_local_accel_delay/self.actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.count))
     for i in range((int)(self.local_gravity_vector_delay/self.actual_timestep)):
-      self.local_gravity_vector_buffer.append(jp.array([[0, 0, -9.81]]*self.count))
+      self.local_gravity_vector_buffer.append(jp.array([self.gravity_vector]*self.count))
     for i in range((int)(self.pressure_values_delay/self.actual_timestep)):
       self.pressure_values_buffer.append(jp.array([[0]*len(PRESSURE_GEOM_NAMES)]*self.count))
     

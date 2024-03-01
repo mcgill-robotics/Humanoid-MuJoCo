@@ -22,7 +22,7 @@ from humanoid import SIM_XML_PATH
     # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
     # previous action     5 · 20          Action filter state (stacked)
     
-inverseRotateVectors = lambda q, v : Rotation.from_quat(q).inv().apply(v)
+inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
 
 class CPUSimulation:
   def __init__(self, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
@@ -76,7 +76,6 @@ class CPUSimulation:
     self.previous_torso_local_velocity = jp.zeros((3))
     # save gravity vector
     self.gravity_vector = self.model.opt.gravity
-    self.gravity_vector[2] = -self.gravity_vector[2] # invert since we want -9.81 not 9.81
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # save joint addresses
@@ -159,7 +158,7 @@ class CPUSimulation:
     for i in range((int)(self.torso_local_accel_delay/actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([0]*3))
     for i in range((int)(self.local_gravity_vector_delay/actual_timestep)):
-      self.local_gravity_vector_buffer.append(jp.array([0, 0, -9.81]))
+      self.local_gravity_vector_buffer.append(self.gravity_vector)
     for i in range((int)(self.pressure_values_delay/actual_timestep)):
       self.pressure_values_buffer.append(jp.array([0]*len(PRESSURE_GEOM_NAMES)))
     

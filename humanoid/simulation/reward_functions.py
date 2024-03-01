@@ -18,7 +18,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     # ALL IN NWU
     # velocity in m/s
     # z_pos in meters
-    # quat is quaternion of torso
+    # quat is quaternion of torso (wxyz)
     # joint torques in N m
     
     ### REWARD PARAMETERS
@@ -26,15 +26,11 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     HORIZONTAL_VELOCITY_REWARD_WEIGHT = -0.1
     VERTICAL_VELOCITY_REWARD_WEIGHT = -0.1
     # Termination A penalty, equal to −1 if the player is on the ground - 0.5
+    # MODIFICATION: +0.5 reward for torso being above or at Z=0, linearly interpolated to -0.5 if the torso is under -0.4
     GROUNDED_PENALTY_WEIGHT = -0.5
-    NOT_GROUNDED_REWARD_WEIGHT = 1.0 # added this so that staying not grounded is rewarded (rather than terminating quickly to avoid future penalties)
+    NOT_GROUNDED_REWARD_WEIGHT = 0.5 # added this so that staying not grounded is rewarded (rather than terminating quickly to avoid future penalties)
     MIN_Z_BEFORE_GROUNDED = -0.4
-    # Upright 0 if the robot is upside down or if the tilt angle is greater
-        # than 0.4 radians. Increases linearly, and is equal to +1 if the
-        # tilt angle is less than 0.2 radians. - 0.02
-    UPRIGHT_REWARD_WEIGHT = 0.02
-    MIN_TILT_FOR_REWARD = 0.2
-    MAX_TILT_FOR_REWARD = 0.4
+    MAX_Z = -0.2
     # Joint torque A penalty, equal to the magnitude of the torque measured at
         # the player’s knees. This discourages the player from learning
         # gaits which cause high forces on the knees, for example
@@ -51,16 +47,13 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques):
     reward += HORIZONTAL_VELOCITY_REWARD_WEIGHT * jp.linalg.norm(abs_velocity[0:2])
     reward += VERTICAL_VELOCITY_REWARD_WEIGHT * abs_velocity[2]
     
+    # Torso height reward
+    z_pos_penalty = jp.interp(z_pos, jp.array([MIN_Z_BEFORE_GROUNDED, MAX_Z]), jp.array([GROUNDED_PENALTY_WEIGHT, NOT_GROUNDED_REWARD_WEIGHT]))
+    reward += z_pos_penalty
+    
     # Termination
-    grounded_penalty = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, NOT_GROUNDED_REWARD_WEIGHT, GROUNDED_PENALTY_WEIGHT)
-    reward += grounded_penalty
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
-      
-    # Upright
-    tilt_angle = jp.abs(2 * jp.arccos(quat[0]))
-    tilt_reward = jp.interp(tilt_angle, jp.array([MIN_TILT_FOR_REWARD, MAX_TILT_FOR_REWARD]), jp.array([0, UPRIGHT_REWARD_WEIGHT]))
-    reward += tilt_reward
-      
+
     # Joint torque
     thresholded_joint_torques = jp.minimum(jp.abs(joint_torques), jp.full(joint_torques.shape, 5.0))
     total_joint_torque = jp.sum(thresholded_joint_torques)

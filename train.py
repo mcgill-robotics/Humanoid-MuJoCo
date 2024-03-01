@@ -189,7 +189,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                     ppo_agent.update()
                 
                 # break; if the episode is over
-                if np.any(done):
+                if np.all(done):
                     break
                 
                 # if continuous action space; then decay action std of ouput action distribution

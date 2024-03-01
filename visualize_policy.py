@@ -4,9 +4,9 @@ from humanoid.simulation.reward_functions import *
 import numpy as np
 from humanoid.rl.ppo import PPO
 
-checkpoint = "PPO_preTrained\Standing\PPO_Standing_0_0_episode_400.pth"
+checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_3.pth"
 
-env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
+env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
 
 state_history_length = 5
 state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length

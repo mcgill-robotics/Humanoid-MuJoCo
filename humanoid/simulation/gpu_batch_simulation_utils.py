@@ -79,4 +79,4 @@ def applyExternalForces(sim_batch):
   return jp.array(xfrc_applied, dtype=float)
 
 # helper functions
-inverseRotateVectors = jax.jit(jax.vmap(lambda q, v : Rotation.from_quat(q).inv().apply(v)))
+inverseRotateVectors = jax.jit(jax.vmap(lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)))
