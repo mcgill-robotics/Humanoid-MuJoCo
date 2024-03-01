@@ -287,8 +287,8 @@ if __name__ == "__main__":
       isTerminal = False
       while not isTerminal:
         state = sim.getObs()[0]
-        action = None
-        # action = [[0]*20]
+        # action = None
+        action = np.array([[0]*14])
         sim.step(action)
         reward, isTerminal = sim.computeReward()
         reward = reward[0]
