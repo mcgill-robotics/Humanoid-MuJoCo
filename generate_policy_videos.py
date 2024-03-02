@@ -7,7 +7,7 @@ import os
 import cv2
 
 
-checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_400.pth"
+checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_700_64.pth"
 num_videos = 9
 video_duration = 5 # seconds
 

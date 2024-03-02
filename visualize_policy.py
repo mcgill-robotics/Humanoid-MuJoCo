@@ -4,7 +4,7 @@ from humanoid.simulation.reward_functions import *
 import numpy as np
 from humanoid.rl.ppo import PPO
 
-checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_400_128.pth"
+checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_700_64.pth"
 
 env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
 
@@ -36,6 +36,7 @@ while True:
         state_history.pop(0)
         state_history.append(state)
         reward, done = env.computeReward()
+        print(reward[0])
         done = done[0]
 
         if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
