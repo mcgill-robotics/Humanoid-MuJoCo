@@ -39,7 +39,7 @@ randomization_increment = 0.1
 
 #####################################################
 
-env = GPUBatchSimulation(count=64,
+env = GPUBatchSimulation(count=128,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=physics_steps_per_control_step,
