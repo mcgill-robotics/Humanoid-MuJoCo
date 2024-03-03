@@ -51,7 +51,7 @@ class CPUSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
-    self.model.opt.solver = mujoco.mjtSolver.mjSOL_CG
+    self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
     self.model.opt.iterations = 5
     self.model.opt.ls_iterations = 5
    
@@ -108,11 +108,9 @@ class CPUSimulation:
     for joint in JOINT_ACTUATOR_NAMES:
       self.model.actuator(joint).forcerange[0] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
       self.model.actuator(joint).forcerange[1] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
-      kp = max(0, JOINT_PID_P_GAIN + random.uniform(-JOINT_PID_GAIN_MAX_CHANGE, JOINT_PID_GAIN_MAX_CHANGE)*self.randomization_factor)
-      kv = max(0, JOINT_PID_V_GAIN + random.uniform(-JOINT_PID_GAIN_MAX_CHANGE, JOINT_PID_GAIN_MAX_CHANGE)*self.randomization_factor)
+      kp = max(0, JOINT_P_GAIN + random.uniform(-JOINT_P_GAIN_MAX_CHANGE, JOINT_P_GAIN_MAX_CHANGE)*self.randomization_factor)
       self.model.actuator(joint).gainprm[0] = kp
       self.model.actuator(joint).biasprm[1] = -kp
-      self.model.actuator(joint).biasprm[2] = -kv
       
     # create data from model
     self.cpu_model = None
@@ -287,8 +285,8 @@ if __name__ == "__main__":
       isTerminal = False
       while not isTerminal:
         state = sim.getObs()[0]
-        # action = None
-        action = np.array([[0]*14])
+        action = None
+        # action = np.array([[0]*16])
         sim.step(action)
         reward, isTerminal = sim.computeReward()
         reward = reward[0]

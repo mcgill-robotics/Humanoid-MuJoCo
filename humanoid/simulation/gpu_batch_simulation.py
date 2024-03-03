@@ -113,11 +113,9 @@ class GPUBatchSimulation:
     for joint in JOINT_ACTUATOR_NAMES:
       self.model.actuator(joint).forcerange[0] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
       self.model.actuator(joint).forcerange[1] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
-      kp = max(0, JOINT_PID_P_GAIN + random.uniform(-JOINT_PID_GAIN_MAX_CHANGE, JOINT_PID_GAIN_MAX_CHANGE)*self.randomization_factor)
-      kv = max(0, JOINT_PID_V_GAIN + random.uniform(-JOINT_PID_GAIN_MAX_CHANGE, JOINT_PID_GAIN_MAX_CHANGE)*self.randomization_factor)
+      kp = max(0, JOINT_P_GAIN + random.uniform(-JOINT_P_GAIN_MAX_CHANGE, JOINT_P_GAIN_MAX_CHANGE)*self.randomization_factor)
       self.model.actuator(joint).gainprm[0] = kp
       self.model.actuator(joint).biasprm[1] = -kp
-      self.model.actuator(joint).biasprm[2] = -kv
       
     # create MJX model/data from CPU model/data
     self.cpu_model = self.model
@@ -270,7 +268,7 @@ if __name__ == "__main__":
       areTerminal = np.array([False])
       while not np.all(areTerminal):
         observations = sim_batch.getObs()
-        actions = [[100]*20]*sim_batch.count
+        actions = [[100]*16]*sim_batch.count
         # actions = None
         sim_batch.step(actions)
         rewards, areTerminal = sim_batch.computeReward()
