@@ -157,6 +157,7 @@ class PPO:
             print("--------------------------------------------------------------------------------------------")
 
     def decay_action_std(self, action_std_decay_rate, min_action_std):
+        if self.action_std <= min_action_std: return
         print("--------------------------------------------------------------------------------------------")
         if self.has_continuous_action_space:
             self.action_std = self.action_std - action_std_decay_rate

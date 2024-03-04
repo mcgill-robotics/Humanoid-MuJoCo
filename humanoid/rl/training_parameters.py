@@ -26,7 +26,7 @@ print_freq = 1        # print avg reward in the interval (in num episodes)
 log_freq = 1           # log avg reward in the interval (in num episodes)
 save_model_freq = 100  # save model frequency (in num episodes)
 
-action_std = 0.025                   # starting std for action distribution (Multivariate Normal)
+action_std = 0.0001                   # starting std for action distribution (Multivariate Normal)
 action_std_decay_rate = 0.001        # linearly decay action_std (action_std = action_std - action_std_decay_rate)
 min_action_std = 0.0001                # minimum action_std (stop decay after action_std <= min_action_std)
 action_std_decay_freq = 5000  # action_std decay frequency (in num timesteps)
@@ -39,7 +39,7 @@ randomization_increment = 0.1
 
 #####################################################
 
-env = GPUBatchSimulation(count=64,
+env = GPUBatchSimulation(count=128,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=physics_steps_per_control_step,

@@ -12,12 +12,7 @@ state_history_length = 5
 state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length
 action_dim = env.action_shape[1]
 
-K_epochs = 10              # update policy for K epochs in one PPO update
-eps_clip = 0.1          # clip parameter for PPO
-gamma = 0.99            # discount factor
-lr_actor = 0.0001       # learning rate for actor network
-lr_critic = 0.0001  
-ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, True, 0.001)
+ppo_agent = PPO(state_dim, action_dim, 0, 0, 0.99, 1, 0.1, True, 0.001)
 ppo_agent.load(checkpoint)
 
 while True:

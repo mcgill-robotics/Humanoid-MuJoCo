@@ -68,8 +68,8 @@ class GPUBatchSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    self.model.opt.iterations = 10
-    self.model.opt.ls_iterations = 10
+    self.model.opt.iterations = 15
+    self.model.opt.ls_iterations = 15
 
     #initialize instance parameters
     self.next_force_start_times = jp.zeros((self.count))
@@ -87,7 +87,7 @@ class GPUBatchSimulation:
     self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
     self.joint_torque_idx = jp.array(self.joint_torque_idx)
     # save gravity vector
-    self.gravity_vector = self.model.opt.gravity
+    self.gravity_vector = jp.array([0,0,-1]) # normalized, so -1 instead of -9.81
     self.gravity_vector_batch = jp.array([self.gravity_vector]*self.count)
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
@@ -195,6 +195,8 @@ class GPUBatchSimulation:
     
     # joint positions     20          Joint positions in radians
     joint_angles = self.data_batch.qpos[:, self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, len(self.joint_qpos_idx))))
+    #normalize
+    joint_angles = joint_angles / jp.pi
     
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[:, 0:3]
@@ -210,6 +212,8 @@ class GPUBatchSimulation:
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector_batch)
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
+    #normalize
+    pressure_values = jp.clip(pressure_values, 0.0, 20.0) / 20.0 # 2kg ~ 20 N
 
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)

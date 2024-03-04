@@ -52,8 +52,8 @@ class CPUSimulation:
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    self.model.opt.iterations = 10
-    self.model.opt.ls_iterations = 10
+    self.model.opt.iterations = 15
+    self.model.opt.ls_iterations = 15
    
     # Visualization Options:
     self.scene_option = mujoco.MjvOption()
@@ -75,7 +75,7 @@ class CPUSimulation:
     self.next_force_body = 0
     self.previous_torso_local_velocity = jp.zeros((3))
     # save gravity vector
-    self.gravity_vector = self.model.opt.gravity
+    self.gravity_vector = jp.array([0,0,-1])
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # save joint addresses
@@ -178,6 +178,8 @@ class CPUSimulation:
     
     # joint positions     20          Joint positions in radians
     joint_angles = self.data.qpos[self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
+    # normalize
+    joint_angles = joint_angles / jp.pi
     
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[0:3]
@@ -199,6 +201,8 @@ class CPUSimulation:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
+    #normalize
+    pressure_values = np.clip(pressure_values, 0, 20) / 20
     
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
