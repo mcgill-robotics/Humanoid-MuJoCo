@@ -41,9 +41,6 @@ JOINT_STIFFNESS_MAX_CHANGE = 0.05 # unit ? TODO
 JOINT_MARGIN_MAX_CHANGE = 0.05 # radians
 JOINT_FORCE_LIMIT_MAX_CHANGE = 0.025 # N m
 
-JOINT_P_GAIN = 20 # P gain
-JOINT_P_GAIN_MAX_CHANGE = 5 # P gain delta
-
 ### URDF REFERENCE NAMES
 
 JOINT_NAMES = ["right_shoulder_pitch", "right_elbow", "left_shoulder_pitch", "left_elbow", "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle_pitch", "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle_pitch", "torso_yaw", "torso_roll"]

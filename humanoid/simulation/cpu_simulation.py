@@ -108,9 +108,6 @@ class CPUSimulation:
     for joint in JOINT_ACTUATOR_NAMES:
       self.model.actuator(joint).forcerange[0] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
       self.model.actuator(joint).forcerange[1] += random.uniform(-JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE)*self.randomization_factor
-      kp = max(0, JOINT_P_GAIN + random.uniform(-JOINT_P_GAIN_MAX_CHANGE, JOINT_P_GAIN_MAX_CHANGE)*self.randomization_factor)
-      self.model.actuator(joint).gainprm[0] = kp
-      self.model.actuator(joint).biasprm[1] = -kp
       
     # create data from model
     self.cpu_model = None
@@ -284,7 +281,7 @@ class CPUSimulation:
     return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=1)
+    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.002, randomization_factor=1)
     
     while True:
       isTerminal = False
