@@ -271,8 +271,8 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
 
 if __name__ == '__main__':
-    # train()
-    train("data/trained_weights/Standing/PPO_Standing_0_0_episode_1100.pth", "data/trained_weights/Standing/PPO_Standing_0_0_episode_1100_INFO.pkl")
+    train()
+    # train("data/trained_weights/Standing/PPO_Standing_0_0_episode_1100.pth", "data/trained_weights/Standing/PPO_Standing_0_0_episode_1100_INFO.pkl")
     
     
     

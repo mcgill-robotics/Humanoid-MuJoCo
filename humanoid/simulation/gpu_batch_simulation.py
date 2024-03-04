@@ -240,10 +240,10 @@ class GPUBatchSimulation:
     # cycle action through action buffer
     if action is None:
       action = self.data_batch.ctrl
-    # TODO: actions should be -1 to 1, we need to map each entry to the corresponding joint limits in radians
     self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
-    self.data_batch = self.data_batch.replace(ctrl=jp.array(action_to_take))
+    action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
+    self.data_batch = self.data_batch.replace(ctrl=action_to_take)
     self.lastAction = action_to_take
     
     # apply forces to the robot to destabilise it

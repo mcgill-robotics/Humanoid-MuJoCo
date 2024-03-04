@@ -246,6 +246,7 @@ class CPUSimulation:
     # TODO: actions should be -1 to 1, we need to map each entry to the corresponding joint limits in radians
     self.action_buffer.append(action[0])
     action_to_take = self.action_buffer.pop(0)
+    action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
     self.data.ctrl = action_to_take
     self.lastAction = jp.expand_dims(action_to_take, axis=0)
         
