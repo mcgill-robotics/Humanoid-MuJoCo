@@ -23,7 +23,7 @@ os.environ["RENDER_SIM"] = "False"
 has_continuous_action_space = True  # continuous action space; else discrete
 
 print_freq = 1        # print avg reward in the interval (in num episodes)
-log_freq = 10           # log avg reward in the interval (in num episodes)
+log_freq = 1           # log avg reward in the interval (in num episodes)
 save_model_freq = 100  # save model frequency (in num episodes)
 
 action_std = 0.025                   # starting std for action distribution (Multivariate Normal)

@@ -170,6 +170,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                             ppo_agent.buffer.state_values.pop()
                             ppo_agent.buffer.rewards.pop()
                             ppo_agent.buffer.is_terminals.pop()
+                            time_step -= 1
                         except: break
                     failed_with_null = True
                     break
@@ -279,7 +280,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
 if __name__ == '__main__':
     train()
-    # train("data/trained_weights/Standing/PPO_Standing_0_0_episode_1100.pth", "data/trained_weights/Standing/PPO_Standing_0_0_episode_1100_INFO.pkl")
+    # train("data/trained_weights/Standing/PPO_Standing_0_0_episode_20.pth", "data/trained_weights/Standing/PPO_Standing_0_0_episode_20_INFO.pkl")
     
     
     
