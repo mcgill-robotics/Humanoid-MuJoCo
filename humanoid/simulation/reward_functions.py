@@ -40,7 +40,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques, ctrl_change):
     # penalty term to minimize the time integral of torque peaks
     # (thresholded above 5 N m)
     # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions (std is 0 to 2)
-    CONTROL_STD_PENALTY = -0.01
+    CONTROL_STD_PENALTY = -0.25
     
     ### COMPUTE REWARD
     reward = 0

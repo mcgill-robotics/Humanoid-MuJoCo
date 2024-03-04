@@ -68,8 +68,8 @@ class GPUBatchSimulation:
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    self.model.opt.iterations = 5
-    self.model.opt.ls_iterations = 5
+    self.model.opt.iterations = 10
+    self.model.opt.ls_iterations = 10
 
     #initialize instance parameters
     self.next_force_start_times = jp.zeros((self.count))
@@ -123,7 +123,7 @@ class GPUBatchSimulation:
     
     # randomize joint initial states (GPU)
     joint_ctrl_range = JOINT_INITIAL_CTRL_OFFSET_MIN + self.randomization_factor * (JOINT_INITIAL_CTRL_OFFSET_MAX - JOINT_INITIAL_CTRL_OFFSET_MIN)
-    self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(ctrl=self.base_mjx_data.ctrl + jax.random.uniform(rng, self.base_mjx_data.ctrl.shape, minval=-joint_ctrl_range, maxval=joint_ctrl_range)))(self.rng)
+    self.data_batch = jax.vmap(lambda rng: self.base_mjx_data.replace(ctrl=jax.random.uniform(rng, self.base_mjx_data.ctrl.shape, minval=-joint_ctrl_range, maxval=joint_ctrl_range)))(self.rng)
 
     #delays in actions and observations (10ms to 50ms)
     #round delays to be multiples of the timestep
@@ -256,11 +256,11 @@ class GPUBatchSimulation:
     if self.verbose: print("Simulations stepped.")
   
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=256,
+    sim_batch = GPUBatchSimulation(count=64,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,
-                                   timestep=0.005,
+                                   timestep=0.002,
                                    randomization_factor=1,
                                    verbose=True)
 
@@ -273,5 +273,7 @@ if __name__ == "__main__":
         # actions = None
         sim_batch.step(actions)
         rewards, areTerminal = sim_batch.computeReward()
+        if np.isnan(observations).any() or np.isnan(rewards).any() or np.isnan(areTerminal).any():
+            print("ERROR: NaN value in observations/rewards/terminals.")
         print(rewards[0])
       sim_batch.reset()

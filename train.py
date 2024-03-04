@@ -163,10 +163,14 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
                     print("ERROR: NaN value in observations. Skipping to next episode.")
                     for _ in range(t):
-                        ppo_agent.buffer.states.pop()
-                        ppo_agent.buffer.actions.pop()
-                        ppo_agent.buffer.logprobs.pop()
-                        ppo_agent.buffer.state_values.pop()
+                        try:
+                            ppo_agent.buffer.states.pop()
+                            ppo_agent.buffer.actions.pop()
+                            ppo_agent.buffer.logprobs.pop()
+                            ppo_agent.buffer.state_values.pop()
+                            ppo_agent.buffer.rewards.pop()
+                            ppo_agent.buffer.is_terminals.pop()
+                        except: break
                     failed_with_null = True
                     break
                 

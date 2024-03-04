@@ -52,8 +52,8 @@ class CPUSimulation:
     if os.environ.get('RENDER_SIM', "True") == "True": self.renderer = mujoco.Renderer(self.model, 720, 1080)
     self.model.opt.timestep = self.timestep
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-    self.model.opt.iterations = 5
-    self.model.opt.ls_iterations = 5
+    self.model.opt.iterations = 10
+    self.model.opt.ls_iterations = 10
    
     # Visualization Options:
     self.scene_option = mujoco.MjvOption()
@@ -117,7 +117,7 @@ class CPUSimulation:
     joint_ctrl_range = JOINT_INITIAL_CTRL_OFFSET_MIN + self.randomization_factor * (JOINT_INITIAL_CTRL_OFFSET_MAX - JOINT_INITIAL_CTRL_OFFSET_MIN)
     for i in range(len(self.data.ctrl)):
       random_val = random.uniform(-joint_ctrl_range, joint_ctrl_range)
-      self.data.ctrl[i] += random_val
+      self.data.ctrl[i] = random_val
 
     #delays in actions and observations (10ms to 50ms)
     #round delays to be multiples of the timestep
