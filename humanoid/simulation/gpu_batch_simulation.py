@@ -260,7 +260,7 @@ if __name__ == "__main__":
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    physics_steps_per_control_step=5,
-                                   timestep=0.002,
+                                   timestep=0.001,
                                    randomization_factor=1,
                                    verbose=True)
 

@@ -43,7 +43,7 @@ env = GPUBatchSimulation(count=64,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         physics_steps_per_control_step=physics_steps_per_control_step,
-                        timestep=0.002,
+                        timestep=0.001,
                         randomization_factor=0)
 
 # env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)

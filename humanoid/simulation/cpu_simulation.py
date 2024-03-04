@@ -281,7 +281,7 @@ class CPUSimulation:
     return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.002, randomization_factor=1)
+    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.001, randomization_factor=1)
     
     while True:
       isTerminal = False
