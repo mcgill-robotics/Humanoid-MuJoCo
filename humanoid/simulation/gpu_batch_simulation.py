@@ -13,11 +13,11 @@ from humanoid import SIM_XML_PATH
 
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
-    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
     # angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
-    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
-    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
     # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
+    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
+    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
+    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
     # previous action     5 · 20          Action filter state (stacked)
 
 class GPUBatchSimulation:
@@ -32,7 +32,7 @@ class GPUBatchSimulation:
     self.randomization_factor = randomization_factor
     self.timestep = timestep
     self.count = count
-    self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt : reward_fn(v, z, q, jt)))
+    self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt, ac : reward_fn(v, z, q, jt, ac)))
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
     self.rng = jax.random.split(self.rng_key, self.count)
@@ -172,6 +172,7 @@ class GPUBatchSimulation:
     self.observation_shape = self.getObs().shape
     self.action_shape = self.data_batch.ctrl.shape
     self.lastAction = self.data_batch.ctrl
+    self.action_change = jp.zeros(self.data_batch.ctrl.shape)
 
     if self.verbose: print("Simulations initialized.")
 
@@ -183,7 +184,7 @@ class GPUBatchSimulation:
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
     joint_torques = self.data_batch.qfrc_constraint[:, self.joint_torque_idx] + self.data_batch.qfrc_smooth[:, self.joint_torque_idx]
     
-    rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques)
+    rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
     
     if self.verbose: print("Rewards computed.")
 
@@ -244,6 +245,8 @@ class GPUBatchSimulation:
     action_to_take = self.action_buffer.pop(0)
     action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
     self.data_batch = self.data_batch.replace(ctrl=action_to_take)
+    
+    self.action_change = action_to_take - self.lastAction
     self.lastAction = action_to_take
     
     # apply forces to the robot to destabilise it

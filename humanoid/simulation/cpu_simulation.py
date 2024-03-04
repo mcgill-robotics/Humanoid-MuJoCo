@@ -15,11 +15,11 @@ from humanoid import SIM_XML_PATH
 
 # STATE
     # joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
-    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
     # angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
-    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
-    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
     # agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
+    # linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
+    # gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
+    # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
     # previous action     5 · 20          Action filter state (stacked)
     
 inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
@@ -166,6 +166,7 @@ class CPUSimulation:
     self.observation_shape = self.getObs().shape
     self.action_shape = jp.expand_dims(self.data.ctrl, axis=0).shape
     self.lastAction = jp.expand_dims(self.data.ctrl, axis=0)
+    self.action_change = jp.zeros(self.data.ctrl.shape)
 
     # clean up any unreferenced variables
     gc.collect()
@@ -232,7 +233,7 @@ class CPUSimulation:
     torso_quat = self.data.xquat[self.torso_idx]
     joint_torques = self.data.qfrc_constraint[self.joint_torque_idx] + self.data.qfrc_smooth[self.joint_torque_idx]
     
-    reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques)
+    reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
     
     if self.verbose: print("Reward computed.")
 
@@ -248,6 +249,7 @@ class CPUSimulation:
     action_to_take = self.action_buffer.pop(0)
     action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
     self.data.ctrl = action_to_take
+    self.action_change = action_to_take - self.lastAction[0]
     self.lastAction = jp.expand_dims(action_to_take, axis=0)
         
     # apply forces to the robot to destabilise it
