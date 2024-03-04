@@ -25,7 +25,8 @@ MIN_EXTERNAL_FORCE_MAGNITUDE = 5 #N
 MAX_EXTERNAL_FORCE_MAGNITUDE = 15 #N
 MIN_EXTERNAL_FORCE_INTERVAL = 1 #s
 MAX_EXTERNAL_FORCE_INTERVAL = 3 #s
-JOINT_INITIAL_STATE_OFFSET_MAX = 7 # degrees
+JOINT_INITIAL_CTRL_OFFSET_MIN = 0.1 # degrees 
+JOINT_INITIAL_CTRL_OFFSET_MAX = 0.4 # degrees
 IMU_Z_OFFSET_MAX = 0.05 # meters
 PRESSURE_SENSOR_POS_OFFSET_MAX = 0.025 # meters
 JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
@@ -45,7 +46,7 @@ JOINT_P_GAIN_MAX_CHANGE = 5 # P gain delta
 
 ### URDF REFERENCE NAMES
 
-JOINT_NAMES = ["right_shoulder_pitch", "right_elbow", "left_shoulder_pitch", "left_elbow", "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle_pitch", "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle_pitch"]
+JOINT_NAMES = ["right_shoulder_pitch", "right_elbow", "left_shoulder_pitch", "left_elbow", "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle_pitch", "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle_pitch", "torso_yaw", "torso_roll"]
 JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = ["pressure_geom_LLB", "pressure_geom_LRB", "pressure_geom_LRF", "pressure_geom_LLF", "pressure_geom_RLB", "pressure_geom_RRB", "pressure_geom_RRF", "pressure_geom_RLF"]
 TORSO_BODY_NAME = 'humanoid'

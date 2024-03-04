@@ -117,8 +117,10 @@ class CPUSimulation:
     self.data = mujoco.MjData(self.model)
     mujoco.mj_kinematics(self.model, self.data)
     # randomize joint initial states (CPU)
-    for i in range(len(self.data.qpos)):
-      self.data.qpos[i] += random.uniform(-JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi, JOINT_INITIAL_STATE_OFFSET_MAX/180.0*jp.pi)*self.randomization_factor
+    joint_ctrl_range = JOINT_INITIAL_CTRL_OFFSET_MIN + self.randomization_factor * (JOINT_INITIAL_CTRL_OFFSET_MAX - JOINT_INITIAL_CTRL_OFFSET_MIN)
+    for i in range(len(self.data.ctrl)):
+      random_val = random.uniform(-joint_ctrl_range, joint_ctrl_range)
+      self.data.ctrl[i] += random_val
 
     #delays in actions and observations (10ms to 50ms)
     #round delays to be multiples of the timestep

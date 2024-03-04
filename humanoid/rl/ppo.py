@@ -228,23 +228,26 @@ class PPO:
         # calculate advantages
         advantages = rewards.detach() - old_state_values.detach()
 
+        sample_indices = np.arange(rewards.shape[0])
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):
+            # shuffle batches
+            np.random.shuffle(sample_indices)
             # split into batches for optimization
             for batch_start_index in range(0, rewards.shape[0], self.batch_size):
                 batch_end_index = min(batch_start_index + self.batch_size, rewards.shape[0])
                 # Evaluating old actions and values
-                logprobs, state_values, dist_entropy = self.policy.evaluate(old_states[batch_start_index:batch_end_index], old_actions[batch_start_index:batch_end_index])
+                logprobs, state_values, dist_entropy = self.policy.evaluate(old_states[sample_indices][batch_start_index:batch_end_index], old_actions[sample_indices][batch_start_index:batch_end_index])
                 
                 # Finding the ratio (pi_theta / pi_theta__old)
-                ratios = torch.exp(logprobs - old_logprobs[batch_start_index:batch_end_index].detach())
+                ratios = torch.exp(logprobs - old_logprobs[sample_indices][batch_start_index:batch_end_index].detach())
 
                 # Finding Surrogate Loss  
-                surr1 = ratios * advantages[batch_start_index:batch_end_index]
-                surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages[batch_start_index:batch_end_index]
+                surr1 = ratios * advantages[sample_indices][batch_start_index:batch_end_index]
+                surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages[sample_indices][batch_start_index:batch_end_index]
 
                 # final loss of clipped objective PPO
-                loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards[batch_start_index:batch_end_index]) - 0.01 * dist_entropy
+                loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards[sample_indices][batch_start_index:batch_end_index]) - 0.01 * dist_entropy
                 
                 # take gradient step
                 self.optimizer.zero_grad()
