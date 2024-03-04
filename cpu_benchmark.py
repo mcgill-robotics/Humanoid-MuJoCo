@@ -5,7 +5,7 @@ from humanoid import SIM_XML_PATH
 
 
 def estimateCPUSimSpeed():
-    timestep = 0.005
+    timestep = 0.001
     simulation_time = 100 #seconds
     physics_steps_per_control_step = 5
 

@@ -7,7 +7,7 @@ import numpy as np
 from humanoid import SIM_XML_PATH
 import os
 
-timestep = 0.005
+timestep = 0.001
 simulation_time = 100 #seconds
 upper_bound_training_time = 50112000
 physics_steps_per_control_step = 5
