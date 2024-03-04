@@ -46,7 +46,7 @@ env = GPUBatchSimulation(count=128,
                         timestep=0.001,
                         randomization_factor=0)
 
-# env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.005, randomization_factor=0)
+# env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.001, randomization_factor=0)
 
 max_ep_len = int(5.0 / (physics_steps_per_control_step * env.timestep))                   # max timesteps in one episode
 max_training_timesteps = max_ep_len * 200000000   # break training loop if timeteps > max_training_timesteps
