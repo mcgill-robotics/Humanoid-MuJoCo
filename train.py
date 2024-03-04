@@ -162,10 +162,11 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
                 if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
                     print("ERROR: NaN value in observations. Skipping to next episode.")
-                    ppo_agent.buffer.states.pop()
-                    ppo_agent.buffer.actions.pop()
-                    ppo_agent.buffer.logprobs.pop()
-                    ppo_agent.buffer.state_values.pop()
+                    for _ in range(t):
+                        ppo_agent.buffer.states.pop()
+                        ppo_agent.buffer.actions.pop()
+                        ppo_agent.buffer.logprobs.pop()
+                        ppo_agent.buffer.state_values.pop()
                     failed_with_null = True
                     break
                 
@@ -195,7 +196,9 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 # if continuous action space; then decay action std of ouput action distribution
                 if has_continuous_action_space and time_step % action_std_decay_freq == 0:
                     ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
-                
+            
+            if failed_with_null: continue
+            
             i_episode += 1
 
             # log in logging file
@@ -225,7 +228,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
             # update randomization factor
             episode_avg_reward = episode_avg_reward / episode_avg_timesteps
-            if episode_avg_reward > max_reward_for_randomization and not failed_with_null:
+            if episode_avg_reward > max_reward_for_randomization:
                 new_randomization_factor = min(1.0, env.randomization_factor + randomization_increment)
                 if env.randomization_factor < 1.0:  
                     print(" >> Increased randomization factor to {}".format(new_randomization_factor))
