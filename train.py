@@ -238,7 +238,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
 
             # update randomization factor
             episode_avg_reward = episode_avg_reward / episode_avg_timesteps
-            if episode_avg_reward > max_reward_for_randomization:
+            if episode_avg_reward > reward_threshold_increase_randomization:
                 new_randomization_factor = min(1.0, env.randomization_factor + randomization_increment)
                 if env.randomization_factor < 1.0:  
                     print(" >> Increased randomization factor to {}".format(new_randomization_factor))
