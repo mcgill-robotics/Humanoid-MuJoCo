@@ -1,5 +1,5 @@
 from humanoid.simulation.gpu_batch_simulation import GPUBatchSimulation
-from humanoid.simulation.reward_functions import *
+from humanoid.rl.reward_functions import *
 from cpu_benchmark import estimateCPUSimSpeed
 import time
 import matplotlib.pyplot as plt

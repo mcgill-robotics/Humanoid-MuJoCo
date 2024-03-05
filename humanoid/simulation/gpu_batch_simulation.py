@@ -3,7 +3,7 @@ from jax import numpy as jp
 import mujoco
 from mujoco import mjx
 from .simulation_parameters import *
-from .reward_functions import *
+from humanoid.rl.reward_functions import *
 import gc
 import random
 from .gpu_batch_simulation_utils import *

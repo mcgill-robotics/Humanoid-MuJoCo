@@ -203,23 +203,22 @@ class PPO:
         rewards = []
         discounted_reward = np.array([0]*len(self.buffer.is_terminals[0]))
         # for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
-        #     discounted_reward[is_terminal] = -1
+        #     discounted_reward[is_terminal] = 0
         #     discounted_reward = reward + (self.gamma * discounted_reward)
-        #     rewards.insert(0, discounted_reward)
-        for reward in reversed(self.buffer.rewards):
+        #     rewards.insert(0, torch.tensor(discounted_reward, dtype=torch.float32))
+        for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
             discounted_reward = reward + (self.gamma * discounted_reward)
-            rewards.insert(0, discounted_reward)
+            discounted_reward[is_terminal] = 0
+            rewards.insert(0, torch.tensor(discounted_reward, dtype=torch.float32))
             
-        # Normalizing the rewards
-        rewards = torch.tensor(np.array(rewards), dtype=torch.float32).to(device)
-        rewards = (rewards - torch.mean(rewards, dim=0)) / (torch.std(rewards, dim=0) + 1e-7)
+        rewards = torch.stack(rewards, dim=0).to(device)
         rewards = rewards.reshape(-1, 1)
         
         # convert list to tensor
-        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
-        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
-        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
-        old_state_values = torch.squeeze(torch.stack(self.buffer.state_values, dim=0)).detach().to(device)
+        old_states = torch.stack(self.buffer.states, dim=0).detach().to(device)
+        old_actions = torch.stack(self.buffer.actions, dim=0).detach().to(device)
+        old_logprobs = torch.stack(self.buffer.logprobs, dim=0).detach().to(device)
+        old_state_values = torch.stack(self.buffer.state_values, dim=0).detach().to(device)
 
         old_states = old_states.reshape(-1, old_states.shape[-1])
         old_actions = old_actions.reshape(-1, old_actions.shape[-1])
@@ -229,14 +228,17 @@ class PPO:
         # calculate advantages
         advantages = rewards.detach() - old_state_values.detach()
 
-        sample_indices = np.arange(rewards.shape[0])
+        sample_indices = torch.arange(rewards.shape[0]).to(device)
+        non_terminal_samples = rewards[:,0] != 0
+        sample_indices = sample_indices[non_terminal_samples]
+        
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):
             # shuffle batches
-            np.random.shuffle(sample_indices)
+            sample_indices = sample_indices[torch.randperm(sample_indices.shape[0])]
             # split into batches for optimization
-            for batch_start_index in range(0, rewards.shape[0], self.batch_size):
-                batch_end_index = min(batch_start_index + self.batch_size, rewards.shape[0])
+            for batch_start_index in range(0, sample_indices.shape[0], self.batch_size):
+                batch_end_index = min(batch_start_index + self.batch_size, sample_indices.shape[0])
                 # Evaluating old actions and values
                 logprobs, state_values, dist_entropy = self.policy.evaluate(old_states[sample_indices][batch_start_index:batch_end_index], old_actions[sample_indices][batch_start_index:batch_end_index])
                 

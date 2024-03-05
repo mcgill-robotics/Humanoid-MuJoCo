@@ -5,7 +5,7 @@ import mujoco
 import cv2
 import random
 from .simulation_parameters import *
-from .reward_functions import *
+from humanoid.rl.reward_functions import *
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os

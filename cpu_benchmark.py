@@ -1,5 +1,5 @@
 from humanoid.simulation.cpu_simulation import CPUSimulation
-from humanoid.simulation.reward_functions import *
+from humanoid.rl.reward_functions import *
 import time
 from humanoid import SIM_XML_PATH
 

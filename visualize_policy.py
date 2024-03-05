@@ -1,6 +1,6 @@
 from humanoid.simulation.cpu_simulation import CPUSimulation
 from humanoid import SIM_XML_PATH
-from humanoid.simulation.reward_functions import *
+from humanoid.rl.reward_functions import *
 import numpy as np
 from humanoid.rl.ppo import PPO
 

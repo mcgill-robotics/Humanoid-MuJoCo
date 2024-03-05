@@ -1,4 +1,4 @@
-from humanoid.simulation.reward_functions import *
+from humanoid.rl.reward_functions import *
 from humanoid.simulation.gpu_batch_simulation import GPUBatchSimulation
 from humanoid.simulation.cpu_simulation import CPUSimulation
 from humanoid import SIM_XML_PATH
@@ -64,7 +64,8 @@ action_dim = env.action_shape[1]
 
 # HYPERPARAMETER INFO FROM https://arxiv.org/pdf/1910.10620.pdf#page=3&zoom=100,433,952
 ################ PPO hyperparameters ################
-update_timesteps = 32 # int(4096 / env.count)    # update policy every n timesteps
+# update_timesteps = 256 # int(4096 / env.count)    # update policy every n timesteps
+update_episodes = 1
 K_epochs = 10               # update policy for K epochs in one PPO update
 batch_size = 64
 

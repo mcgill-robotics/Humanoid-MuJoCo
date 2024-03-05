@@ -1,4 +1,3 @@
-from .simulation_parameters import *
 from jax import numpy as jp
 
 # REWARD INFO FROM https://arxiv.org/pdf/2304.13653.pdf
