@@ -296,6 +296,7 @@ if __name__ == "__main__":
         sim.step(action)
         reward, isTerminal = sim.computeReward()
         reward = reward[0]
+        # print(reward)
         isTerminal = isTerminal[0]
         sim.render()
       sim.reset()

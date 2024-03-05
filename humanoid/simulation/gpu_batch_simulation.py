@@ -273,11 +273,11 @@ if __name__ == "__main__":
       areTerminal = np.array([False])
       while not np.all(areTerminal):
         observations = sim_batch.getObs()
-        actions = [[100]*16]*sim_batch.count
-        # actions = None
+        # actions = [[1]*16]*sim_batch.count
+        actions = None
         sim_batch.step(actions)
         rewards, areTerminal = sim_batch.computeReward()
         if np.isnan(observations).any() or np.isnan(rewards).any() or np.isnan(areTerminal).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
-        print(rewards[0])
+        # print(rewards[0])
       sim_batch.reset()

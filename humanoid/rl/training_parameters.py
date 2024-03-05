@@ -34,7 +34,7 @@ action_std_decay_freq = 5000  # action_std decay frequency (in num timesteps)
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
 physics_steps_per_control_step = 5
 
-max_reward_for_randomization = 0.3 # if average reward of an episode is greater than this, increase randomization of environment
+max_reward_for_randomization = 0.8 # if average reward of an episode is greater than this, increase randomization of environment
 randomization_increment = 0.1
 
 #####################################################

@@ -42,6 +42,9 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques, ctrl_change):
     # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions (std is 0 to 2)
     CONTROL_STD_PENALTY = -0.25
     
+    # CUSTOM: offset the reward by 0.5 since, through testing, 0.5 is ideal reward and -0.5 is worst state possible
+    CONSTANT_REWARD_OFFSET = 0.5
+    
     ### COMPUTE REWARD
     reward = 0
     
@@ -66,5 +69,7 @@ def standingRewardFn(velocity, z_pos, quat, joint_torques, ctrl_change):
     # Control change
     control_std = jp.std(ctrl_change)
     reward += CONTROL_STD_PENALTY * control_std
+    
+    reward += CONSTANT_REWARD_OFFSET
     
     return reward, isTouchingGround

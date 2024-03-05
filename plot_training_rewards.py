@@ -25,7 +25,7 @@ def smoothMAconv(depth, data, scale=1): # Moving average by numpy convolution
     smoothed=0
     return smoothed
 
-window_size = 10
+window_size = 100
 running_avgs = []
 for i in range(len(rewards)):
     running_avg = 0
