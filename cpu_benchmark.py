@@ -5,14 +5,10 @@ from humanoid import SIM_XML_PATH
 
 
 def estimateCPUSimSpeed():
-    timestep = 0.001
     simulation_time = 100 #seconds
-    physics_steps_per_control_step = 5
 
     sim = CPUSimulation(SIM_XML_PATH,
                         reward_fn=standingRewardFn,
-                        timestep=timestep,
-                        physics_steps_per_control_step=physics_steps_per_control_step,
                         randomization_factor=1)
     
     sim_time_executed = 0
@@ -24,7 +20,7 @@ def estimateCPUSimSpeed():
             sim.getObs()
             sim.step()
             _, isTerminal = sim.computeReward()
-            sim_time_executed += timestep * physics_steps_per_control_step
+            sim_time_executed += sim.timestep * sim.physics_steps_per_control_step
             print("{}%                   ".format(100 * sim_time_executed / simulation_time), end='\r')
         sim.reset()
             

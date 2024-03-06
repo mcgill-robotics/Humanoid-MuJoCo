@@ -206,9 +206,8 @@ class PPO:
         #     discounted_reward[is_terminal] = 0
         #     discounted_reward = reward + (self.gamma * discounted_reward)
         #     rewards.insert(0, torch.tensor(discounted_reward, dtype=torch.float32))
-        for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
+        for reward in reversed(self.buffer.rewards):
             discounted_reward = reward + (self.gamma * discounted_reward)
-            discounted_reward[is_terminal] = 0
             rewards.insert(0, torch.tensor(discounted_reward, dtype=torch.float32))
             
         rewards = torch.stack(rewards, dim=0).to(device)

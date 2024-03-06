@@ -85,8 +85,8 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     else:
         print("Initializing a discrete action space policy")
     print("--------------------------------------------------------------------------------------------")
-    # print("PPO update frequency : " + str(update_timesteps) + " timesteps")
-    print("PPO update frequency : " + str(update_episodes) + " episode(s)")
+    if update_timesteps is not None: print("PPO update frequency : " + str(update_timesteps) + " timesteps")
+    if update_episodes is not None: print("PPO update frequency : " + str(update_episodes) + " episode(s)")
     print("PPO K epochs : ", K_epochs)
     print("PPO epsilon clip : ", eps_clip)
     print("discount factor (gamma) : ", gamma)
@@ -183,20 +183,20 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 time_step += 1
                 
                 # update PPO agent
-                # if time_step % update_timesteps == 0:
-                #     ppo_agent.update()
+                if update_timesteps is not None and time_step % update_timesteps == 0:
+                    ppo_agent.update()
                 
                 # break; if the episode is over
                 if np.all(done):
                     break
                 
-                print_running_avg_reward += np.mean(reward[done == False])
+                print_running_avg_reward += np.mean(reward)
                 print_running_timesteps += 1
 
-                log_running_avg_reward += np.mean(reward[done == False])
+                log_running_avg_reward += np.mean(reward)
                 log_running_timesteps += 1
                 
-                episode_avg_reward += np.mean(reward[done == False])
+                episode_avg_reward += np.mean(reward)
                 episode_avg_timesteps += 1
                 
                 # if continuous action space; then decay action std of ouput action distribution
@@ -208,7 +208,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
             i_episode += 1
             
             # update PPO agent
-            if i_episode % update_episodes == 0:
+            if update_episodes is not None and i_episode % update_episodes == 0:
                 ppo_agent.update()
 
             # log in logging file

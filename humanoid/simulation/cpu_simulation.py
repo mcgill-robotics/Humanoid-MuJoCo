@@ -6,6 +6,7 @@ import cv2
 import random
 from .simulation_parameters import *
 from humanoid.rl.reward_functions import *
+from humanoid.simulation.simulation_parameters import physics_steps_per_control_step, timestep
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os
@@ -25,7 +26,7 @@ from humanoid import SIM_XML_PATH
 inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
 
 class CPUSimulation:
-  def __init__(self, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
+  def __init__(self, xml_path, reward_fn, randomization_factor=0, verbose=False):
     
     print("INFO: Running MuJoCo on CPU.")
     self.platform = "CPU"
@@ -285,7 +286,7 @@ class CPUSimulation:
     return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.001, randomization_factor=1)
+    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
     
     while True:
       isTerminal = False

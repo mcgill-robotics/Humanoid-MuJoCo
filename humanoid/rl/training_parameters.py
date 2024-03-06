@@ -32,23 +32,20 @@ min_action_std = 0.001                # minimum action_std (stop decay after act
 action_std_decay_freq = 5000  # action_std decay frequency (in num timesteps)
 
 state_history_length = 5 # how many iterations of the history of state observations is included in the current state observation
-physics_steps_per_control_step = 5
 
 reward_threshold_increase_randomization = 0.8 # if average reward of an episode is greater than this, increase randomization of environment
 randomization_increment = 0.1
 
 #####################################################
 
-env = GPUBatchSimulation(count=512,
+env = GPUBatchSimulation(count=64,
                         xml_path=SIM_XML_PATH,
                         reward_fn=standingRewardFn,
-                        physics_steps_per_control_step=physics_steps_per_control_step,
-                        timestep=0.001,
                         randomization_factor=0)
 
-# env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.001, randomization_factor=0)
+# env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=0)
 
-max_ep_len = int(5.0 / (physics_steps_per_control_step * env.timestep))                   # max timesteps in one episode
+max_ep_len = int(8.0 / (env.physics_steps_per_control_step * env.timestep))                   # max timesteps in one episode
 max_training_timesteps = max_ep_len * 200000000   # break training loop if timeteps > max_training_timesteps
 
 env_name = "Standing"
@@ -64,8 +61,8 @@ action_dim = env.action_shape[1]
 
 # HYPERPARAMETER INFO FROM https://arxiv.org/pdf/1910.10620.pdf#page=3&zoom=100,433,952
 ################ PPO hyperparameters ################
-# update_timesteps = 256 # int(4096 / env.count)    # update policy every n timesteps
-update_episodes = 1
+update_timesteps = 4096    # update policy every n timesteps
+update_episodes = None     # update policy every n episodes (one or the other from this and above parameter, set the unused one to None)
 K_epochs = 10               # update policy for K epochs in one PPO update
 batch_size = 64
 

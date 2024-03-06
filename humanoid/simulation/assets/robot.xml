@@ -2,7 +2,7 @@
   <compiler angle="radian"/>
   <worldbody>
     <!-- CUSTOM -->
-    <body name="humanoid" pos="0 0 0">
+    <body name="humanoid" pos="0 0 -0.1">
       <joint range="-1.5708 1.5708" limited="true" name="humanoid_free" type="free"/>
       <!-- CUSTOM -->
       <geom size="0.0665 0.0565 0.003" pos="0.057869 0 0.0595" quat="0.499998 0.5 0.500002 0.5" type="box"/>
@@ -69,7 +69,7 @@
                 <geom size="0.075 0.0175 0.0015" pos="-0.065 -0.0025 -0.0085" type="box" rgba="0.615686 0.811765 0.929412 1"/>
                 <body name="mx106_with_u_l" pos="-0.14 0 0" quat="1 0 0 0">
                   <inertial pos="0.016034 -0.0223173 0.0184793" quat="0.446427 0.567351 -0.484463 0.494077" mass="0.136461" diaginertia="0.000149093 0.000138281 7.97197e-05"/>
-                  <joint range="-1.5708 1.5708" limited="true" name="left_ankle_pitch" pos="0 0 0" axis="0 0 1"/>
+                  <joint range="-0.785398 0.785398" limited="true" name="left_ankle_pitch" pos="0 0 0" axis="0 0 1"/>
                   <geom size="0.0135 0.029 0.013" pos="0.01515 0.00015 0.0165" quat="9.38184e-07 -0.707105 0.707108 -9.38187e-07" type="box" rgba="0.647059 0.647059 0.647059 1"/>
                   <body name="left_foot_asm" pos="0 0.0201 0.016" quat="9.38184e-07 9.38187e-07 -0.707108 -0.707105">
                     <inertial pos="0.0312589 0.00414298 0.000817452" quat="0.690732 0.0174038 0.027193 0.72239" mass="0.12139" diaginertia="0.000968473 0.000774227 0.000470766"/>
@@ -106,7 +106,7 @@
                 <geom size="0.075 0.0175 0.0015" pos="-0.065 0 -0.0435" quat="1 0 0 0" type="box" rgba="0.615686 0.811765 0.929412 1"/>
                 <body name="mx106_with_u_r_2" pos="-0.14 0 0" quat="1 0 0 0">
                   <inertial pos="0.016034 -0.0223236 -0.0184855" quat="0.482706 0.494004 -0.448596 0.5672" mass="0.136461" diaginertia="0.000148998 0.000138253 7.97586e-05"/>
-                  <joint range="-1.5708 1.5708" limited="true" name="right_ankle_pitch" pos="0 0 0" axis="0 0 1"/>
+                  <joint range="-0.785398 0.785398" limited="true" name="right_ankle_pitch" pos="0 0 0" axis="0 0 1"/>
                   <geom size="0.0135 0.029 0.013" pos="0.01515 -0.00015 -0.0165" quat="0.707105 0 0 0.707108" type="box"/>
                   
                   <body name="right_foot_asm" pos="0 0.0201 -0.016" quat="9.38184e-07 9.38187e-07 0.707108 0.707105">

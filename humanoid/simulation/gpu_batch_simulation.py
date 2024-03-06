@@ -4,6 +4,7 @@ import mujoco
 from mujoco import mjx
 from .simulation_parameters import *
 from humanoid.rl.reward_functions import *
+from humanoid.simulation.simulation_parameters import physics_steps_per_control_step, timestep
 import gc
 import random
 from .gpu_batch_simulation_utils import *
@@ -21,7 +22,7 @@ from humanoid import SIM_XML_PATH
     # previous action     5 · 20          Action filter state (stacked)
 
 class GPUBatchSimulation:
-  def __init__(self, count, xml_path, reward_fn, physics_steps_per_control_step=5, timestep=0.001, randomization_factor=0, verbose=False):
+  def __init__(self, count, xml_path, reward_fn, randomization_factor=0, verbose=False):
     if jax.default_backend() != 'gpu':
       print("ERROR: Failed to find GPU device.")
       exit()
@@ -263,8 +264,6 @@ if __name__ == "__main__":
     sim_batch = GPUBatchSimulation(count=64,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
-                                   physics_steps_per_control_step=5,
-                                   timestep=0.001,
                                    randomization_factor=1,
                                    verbose=True)
 

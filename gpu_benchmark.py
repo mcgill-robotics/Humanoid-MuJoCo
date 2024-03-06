@@ -7,10 +7,8 @@ import numpy as np
 from humanoid import SIM_XML_PATH
 import os
 
-timestep = 0.001
 simulation_time = 100 #seconds
 upper_bound_training_time = 50112000
-physics_steps_per_control_step = 5
 sim_batch_sizes = [64, 128, 256, 512]
 # for reference, DeepMind's longest training took approximately 50,112,000 Seconds (580 days) simulation time
 
@@ -21,8 +19,6 @@ for sim_batch_size in sim_batch_sizes:
     sim_batch = GPUBatchSimulation(count=sim_batch_size,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
-                                   physics_steps_per_control_step=physics_steps_per_control_step,
-                                   timestep=timestep,
                                    randomization_factor=1)
     # step once because the first one takes significantly longer than subsequent ones
     sim_batch.step()
@@ -37,7 +33,7 @@ for sim_batch_size in sim_batch_sizes:
             observations = sim_batch.getObs()
             sim_batch.step()
             _, areTerminal = sim_batch.computeReward()
-            sim_time_executed += timestep * sim_batch_size * physics_steps_per_control_step
+            sim_time_executed += sim.timestep * sim_batch_size * sim.physics_steps_per_control_step
             print("{}%           ".format(100 * sim_time_executed / simulation_time), end='\r')
         sim_batch.reset()
             

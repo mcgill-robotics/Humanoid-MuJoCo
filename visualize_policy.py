@@ -1,12 +1,15 @@
 from humanoid.simulation.cpu_simulation import CPUSimulation
 from humanoid import SIM_XML_PATH
 from humanoid.rl.reward_functions import *
+from humanoid.simulation.simulation_parameters import physics_steps_per_control_step
 import numpy as np
 from humanoid.rl.ppo import PPO
 
-checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_69.pth"
+checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_1597.pth"
 
-env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, timestep=0.001, randomization_factor=0)
+env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=0)
+env.physics_steps_per_control_step = 1
+
 
 state_history_length = 5
 state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length
@@ -25,7 +28,9 @@ while True:
     while not done:
         # select action with policy
         action = ppo_agent.select_action(np.concatenate(state_history, axis=1).reshape(-1))
-        env.step(action)
+        for _ in range(physics_steps_per_control_step):
+            env.step(action)
+            env.render()
         obs = env.getObs()
         state = np.concatenate((obs, action), axis=1)
         state_history.pop(0)
@@ -37,5 +42,3 @@ while True:
         if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
             print("ERROR: NaN value in observations. Skipping to next episode.")
             break
-        
-        env.render()
