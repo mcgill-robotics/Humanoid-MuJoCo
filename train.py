@@ -107,5 +107,10 @@ eval_callback = EvalCallback(eval_env, best_model_save_path=eval_log_dir,
                               n_eval_episodes=10, deterministic=False,
                               render=False)
 
-model.learn(total_timesteps=25_000, callback=eval_callback)
+model.learn(total_timesteps=25_000,
+            callback=eval_callback,
+            log_interval = 1,
+            tb_log_name = "PPOStanding",
+            reset_num_timesteps = True,
+            progress_bar = True)
 

@@ -18,7 +18,7 @@ RUN pip3 install opencv-python
 RUN pip3 install matplotlib
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 RUN pip3 install nvidia-cudnn-cu11==8.9.6.50
-RUN pip3 install stable-baselines3
+RUN pip3 install stable-baselines3[extra]
 RUN pip3 install tensorflow
 
 RUN apt-get autoremove -y
