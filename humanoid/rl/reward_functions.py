@@ -32,7 +32,6 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     NOT_GROUNDED_REWARD_WEIGHT = 0.5 # added this so that staying not grounded is rewarded (rather than terminating quickly to avoid future penalties)
     MIN_Z_BEFORE_GROUNDED = -0.4
     MAX_Z = -0.1
-    print(z_pos)
     # Joint torque A penalty, equal to the magnitude of the torque measured at
         # the player’s knees. This discourages the player from learning
         # gaits which cause high forces on the knees, for example
@@ -82,10 +81,10 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     # Upright
     tilt_vector = Rotation.from_quat([torso_quat[1], torso_quat[2], torso_quat[3], torso_quat[0]]).inv().apply(jp.array([0,0,1]))
     tilt_amt = jp.arcsin(jp.max(jp.abs(tilt_vector[0:2])))
-    if tilt_vector[2] <= 0: tilt_amt = UPRIGHT_REWARD_MAX_TILT_FOR_REWARD
+    tilt_amt = jp.where(tilt_vector[2] <= 0, UPRIGHT_REWARD_MAX_PENALTY_TILT, tilt_amt)
     tilt_reward = jp.interp(tilt_amt, jp.array([UPRIGHT_REWARD_MIN_TILT, UPRIGHT_REWARD_MAX_TILT_FOR_REWARD, UPRIGHT_REWARD_MAX_PENALTY_TILT]), jp.array([UPRIGHT_MAX_REWARD, 0, UPRIGHT_MAX_PENALTY]))
     reward += tilt_reward
 
-    if isTouchingGround: reward = 0
+    reward = jp.where(isTouchingGround, 0, reward)
     
     return reward, isTouchingGround

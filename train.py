@@ -69,7 +69,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
     print("max training timesteps : ", max_training_timesteps)
     print("max timesteps per episode : ", max_ep_len)
     print("model saving frequency : " + str(save_model_freq) + " episodes")
-    print("log frequency : " + str(log_freq) + " episodes")
+    # print("log frequency : " + str(log_freq) + " episodes")
     print("printing average reward over timesteps in last : " + str(print_freq) + " episodes")
     print("--------------------------------------------------------------------------------------------")
     print("state space dimension : ", state_dim)
@@ -179,16 +179,12 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 # saving reward and is_terminals
                 ppo_agent.buffer.rewards.append(reward)
                 ppo_agent.buffer.is_terminals.append(done)
-
-                time_step += 1
-                
-                # update PPO agent
-                if update_timesteps is not None and time_step % update_timesteps == 0:
-                    ppo_agent.update()
                 
                 # break; if the episode is over
                 if np.all(done):
                     break
+
+                time_step += 1
                 
                 print_running_avg_reward += np.mean(reward)
                 print_running_timesteps += 1
@@ -198,6 +194,20 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 
                 episode_avg_reward += np.mean(reward)
                 episode_avg_timesteps += 1
+                
+                # update PPO agent
+                if update_timesteps is not None and time_step % update_timesteps == 0:
+                    ppo_agent.update()
+
+                    # log average reward
+                    log_avg_reward = log_running_avg_reward / log_running_timesteps
+                    log_avg_reward = round(log_avg_reward, 4)
+
+                    log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
+                    log_f.flush()
+
+                    log_running_avg_reward = 0
+                    log_running_timesteps = 0
                 
                 # if continuous action space; then decay action std of ouput action distribution
                 if has_continuous_action_space and time_step % action_std_decay_freq == 0:
@@ -210,20 +220,7 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
             # update PPO agent
             if update_episodes is not None and i_episode % update_episodes == 0:
                 ppo_agent.update()
-
-            # log in logging file
-            if i_episode % log_freq == 0 and log_running_timesteps > 0:
-
-                # log average reward till last episode
-                log_avg_reward = log_running_avg_reward / log_running_timesteps
-                log_avg_reward = round(log_avg_reward, 4)
-
-                log_f.write('{},{},{}\n'.format(i_episode, time_step, log_avg_reward))
-                log_f.flush()
-
-                log_running_avg_reward = 0
-                log_running_timesteps = 0
-
+                
             # printing average reward
             if i_episode % print_freq == 0 and print_running_timesteps > 0:
 
@@ -242,6 +239,8 @@ def train(previous_checkpoint=None, previous_checkpoint_info_file=None):
                 new_randomization_factor = min(1.0, env.randomization_factor + randomization_increment)
                 if env.randomization_factor < 1.0:  
                     print(" >> Increased randomization factor to {}".format(new_randomization_factor))
+                log_f.write('randomization_factor {}\n'.format(new_randomization_factor))
+                log_f.flush()
                 env.randomization_factor = new_randomization_factor
                 
             # save model weights

@@ -231,12 +231,15 @@ class PPO:
         non_terminal_samples = rewards[:,0] != 0
         sample_indices = sample_indices[non_terminal_samples]
         
+        batch_indices = range(0, sample_indices.shape[0], self.batch_size)
+                
         # Optimize policy for K epochs
-        for _ in range(self.K_epochs):
+        for e in range(self.K_epochs):
             # shuffle batches
             sample_indices = sample_indices[torch.randperm(sample_indices.shape[0])]
             # split into batches for optimization
-            for batch_start_index in range(0, sample_indices.shape[0], self.batch_size):
+            for batch_start_index in batch_indices:
+                print("Updating policy...        {}%".format(100 * ((e * len(batch_indices)) + batch_indices.index(batch_start_index)) / (self.K_epochs * len(batch_indices))), end='\r')
                 batch_end_index = min(batch_start_index + self.batch_size, sample_indices.shape[0])
                 # Evaluating old actions and values
                 logprobs, state_values, dist_entropy = self.policy.evaluate(old_states[sample_indices][batch_start_index:batch_end_index], old_actions[sample_indices][batch_start_index:batch_end_index])
