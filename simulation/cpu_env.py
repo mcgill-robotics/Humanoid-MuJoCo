@@ -1,16 +1,18 @@
 import jax
 from jax import numpy as jp
+import gymnasium as gym
 import numpy as np
+from gymnasium import spaces
 import mujoco
 import cv2
 import random
 from .simulation_parameters import *
-from humanoid.rl.reward_functions import *
-from humanoid.simulation.simulation_parameters import physics_steps_per_control_step, timestep
+from reward_functions import *
+from simulation.simulation_parameters import physics_steps_per_control_step, timestep
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os
-from humanoid import SIM_XML_PATH
+from simulation import SIM_XML_PATH
 
 # STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
@@ -25,7 +27,8 @@ from humanoid import SIM_XML_PATH
     
 inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
 
-class CPUSimulation:
+class CPUEnv(gym.Env):
+  metadata = {"render_modes": ["rgb_array"], "render_fps": 30}
   def __init__(self, xml_path, reward_fn, randomization_factor=0, verbose=False):
     
     print("INFO: Running MuJoCo on CPU.")
@@ -35,16 +38,21 @@ class CPUSimulation:
     self.timestep = timestep
     self.reward_fn = reward_fn
     self.physics_steps_per_control_step = physics_steps_per_control_step
-    self.rng_key = jax.random.PRNGKey(42)
     self.verbose = verbose
-    self.count = 1
+    self.num_envs = 1
+    self.rng_key = jax.random.PRNGKey(0)
+
+    self.action_space = spaces.Box(-1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32)
+    observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
+    self.observation_space = spaces.Box(-1000, 1000, shape=(observation_size,), dtype=np.float32)
     
-    self.reset()
-    
-  def reset(self):
+  def reset(self, seed=0, options=None):
     try:
       del self.renderer
     except: pass
+    
+    super().reset(seed=seed)
+    if seed is not None: self.rng_key = jax.random.PRNGKey(seed)
     
     if self.verbose: print("Creating new simulation...")
     
@@ -161,17 +169,19 @@ class CPUSimulation:
       self.pressure_values_buffer.append(jp.array([0]*len(PRESSURE_GEOM_NAMES)))
     
     # initialize environment properties
-    self.observation_shape = self.getObs().shape
-    self.action_shape = jp.expand_dims(self.data.ctrl, axis=0).shape
+    
+    
     self.lastAction = jp.expand_dims(self.data.ctrl, axis=0)
     self.action_change = jp.zeros(self.data.ctrl.shape)
-
+    
     # clean up any unreferenced variables
     gc.collect()
     
     if self.verbose: print("Simulation initialized.")
+    
+    return self._get_obs(), {}
       
-  def getObs(self):
+  def _get_obs(self):
     if self.verbose: print("Collecting observations...")
     
     torso_quat = self.data.xquat[self.torso_idx]
@@ -224,9 +234,9 @@ class CPUSimulation:
   
     if self.verbose: print("Observations collected.")
     
-    return np.array(jp.expand_dims(delayed_observations, axis=0))
+    return np.array(delayed_observations)
     
-  def computeReward(self):
+  def _get_reward(self):
     if self.verbose: print("Computing reward...")
     
     torso_global_velocity = self.data.cvel[self.torso_idx][3:]
@@ -239,7 +249,7 @@ class CPUSimulation:
     
     if self.verbose: print("Reward computed.")
 
-    return np.array(jp.expand_dims(reward, axis=0)), np.array(jp.expand_dims(isTerminal, axis=0))
+    return np.array(reward), isTerminal
     
   def step(self, action=None):
     if self.verbose: print("Stepping simulation...")
@@ -247,7 +257,7 @@ class CPUSimulation:
     if action is None:
       action = self.data.ctrl
     # TODO: actions should be -1 to 1, we need to map each entry to the corresponding joint limits in radians
-    self.action_buffer.append(action[0])
+    self.action_buffer.append(action)
     action_to_take = self.action_buffer.pop(0)
     action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
     self.data.ctrl = action_to_take
@@ -276,28 +286,30 @@ class CPUSimulation:
       
     if self.verbose: print("Simulation stepped.")
     
-  def render(self, display=True):
+    reward, terminated = self._get_reward()
+    
+    return self._get_obs(), reward, terminated, False, {}
+    
+  def render(self, mode="rgb_array"):
     if not os.environ.get('RENDER_SIM', "True") == "True": return None
     self.renderer.update_scene(self.data, camera="track", scene_option=self.scene_option)
     frame = self.renderer.render()
-    if display:
+    if mode == "human":
       cv2.imshow("Sim View", frame)
       cv2.waitKey(1)
-    return frame
+    else:
+      return frame
     
 if __name__ == "__main__":
-    sim = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
+    sim = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
+    obs = sim.reset()
     
     while True:
       isTerminal = False
       while not isTerminal:
-        state = sim.getObs()[0]
         action = None
-        # action = np.array([[0]*16])
-        sim.step(action)
-        reward, isTerminal = sim.computeReward()
-        reward = reward[0]
-        # print(reward)
-        isTerminal = isTerminal[0]
+        # action = np.array([0]*16)
+        obs, reward, isTerminal, _, _ = sim.step(action)
+        print(reward)
         sim.render()
-      sim.reset()
+      obs = sim.reset()

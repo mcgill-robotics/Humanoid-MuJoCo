@@ -1,13 +1,13 @@
-from humanoid.simulation.cpu_simulation import CPUSimulation
-from humanoid.rl.reward_functions import *
+from simulation.cpu_env import CPUEnv
+from reward_functions import *
 import time
-from humanoid import SIM_XML_PATH
+from simulation import SIM_XML_PATH
 
 
 def estimateCPUSimSpeed():
     simulation_time = 100 #seconds
 
-    sim = CPUSimulation(SIM_XML_PATH,
+    sim = CPUEnv(SIM_XML_PATH,
                         reward_fn=standingRewardFn,
                         randomization_factor=1)
     

@@ -1,6 +1,6 @@
-from humanoid.simulation.cpu_simulation import CPUSimulation
-from humanoid import GREEN_SCREEN_SIM_XML_PATH
-from humanoid.rl.reward_functions import *
+from simulation.cpu_env import CPUEnv
+from simulation import GREEN_SCREEN_SIM_XML_PATH
+from reward_functions import *
 import numpy as np
 from humanoid.rl.ppo import PPO
 import os
@@ -18,7 +18,7 @@ if not os.path.exists(video_dir):
 video_file_name = os.path.splitext(os.path.basename(checkpoint))[0]
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-env = CPUSimulation(xml_path=GREEN_SCREEN_SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
+env = CPUEnv(xml_path=GREEN_SCREEN_SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
 
 state_history_length = 5
 state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length

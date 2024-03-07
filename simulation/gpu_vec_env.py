@@ -2,13 +2,16 @@ import jax
 from jax import numpy as jp
 import mujoco
 from mujoco import mjx
+import numpy as np
+from gymnasium import spaces
+from stable_baselines3.common.vec_env import VecEnv
 from .simulation_parameters import *
-from humanoid.rl.reward_functions import *
-from humanoid.simulation.simulation_parameters import physics_steps_per_control_step, timestep
+from reward_functions import *
+from simulation.simulation_parameters import physics_steps_per_control_step, timestep
 import gc
 import random
-from .gpu_batch_simulation_utils import *
-from humanoid import SIM_XML_PATH
+from .gpu_vec_env_utils import *
+from simulation import SIM_XML_PATH
 
 # STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
@@ -21,8 +24,9 @@ from humanoid import SIM_XML_PATH
     # foot pressure       5 · 8           Pressure values from foot sensors (stacked)
     # previous action     5 · 20          Action filter state (stacked)
 
-class GPUBatchSimulation:
-  def __init__(self, count, xml_path, reward_fn, randomization_factor=0, verbose=False):
+class GPUVecEnv(VecEnv):
+  metadata = {"render_modes": None}
+  def __init__(self, num_envs, xml_path, reward_fn, randomization_factor=0, verbose=False):
     if jax.default_backend() != 'gpu':
       print("ERROR: Failed to find GPU device.")
       exit()
@@ -32,11 +36,11 @@ class GPUBatchSimulation:
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
-    self.count = count
+    self.num_envs = num_envs
     self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt, ac : reward_fn(v, z, q, jt, ac)))
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
-    self.rng = jax.random.split(self.rng_key, self.count)
+    self.rng = jax.random.split(self.rng_key, self.num_envs)
     self.verbose = verbose
     
     # define jax step function
@@ -49,9 +53,13 @@ class GPUBatchSimulation:
     #define contact force function
     self.getFootForces = jax.jit(jax.vmap(getFootForces, in_axes=(None, 0)))
     
-    self.reset()
+    self.action_space = spaces.Box(-1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32)
+    observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
+    self.observation_space = spaces.Box(-1000, 1000, shape=(observation_size,), dtype=np.float32)
     
-  def reset(self):
+    super().__init__(num_envs, self.observation_space, self.action_space)
+  
+  def close(self): 
     try: del self.model
     except: pass
     try: del self.cpu_model
@@ -63,6 +71,47 @@ class GPUBatchSimulation:
     # clean up any unreferenced variables
     gc.collect()
     
+  def render(self, mode=None): pass
+  
+  def env_is_wrapped(self): return [False]*self.num_envs
+    
+  def step_async(self, actions):
+      self.async_result = self.step(actions)
+
+  def step_wait(self):
+      return self.async_result
+
+  def get_attr(self, attr_name, indices=None):
+    if indices is None:
+      return getattr(self, attr_name)
+    else:
+      return [getattr(self, attr_name)]*len(indices)
+      
+  def set_attr(self, attr_name, value, indices=None):
+      setattr(self, attr_name, value)
+
+  def env_method(self, method_name, *method_args, indices=None, **method_kwargs):
+      if method_name == "reset":
+        print("Attempted reset on envs [{}]".format(indices))
+      elif method_name == "step":
+        print("Attempted step on envs [{}]".format(indices))
+      else:
+        func = getattr(self, method_name)
+        if indices is not None:
+          return [func(*method_args)]
+        else:
+          return func(*method_args)
+
+  def seed(self, seed):
+    self.rng_key = jax.random.PRNGKey(seed)
+    self.rng = jax.random.split(self.rng_key, self.num_envs)
+
+  def env_is_wrapped(self):
+      pass
+    
+  def reset(self):
+    self.close()
+    
     if self.verbose: print("\nInitializing new simulations...")
     
     #load model from XML
@@ -73,12 +122,12 @@ class GPUBatchSimulation:
     self.model.opt.ls_iterations = 15
 
     #initialize instance parameters
-    self.next_force_start_times = jp.zeros((self.count))
-    self.next_force_durations = jp.zeros((self.count))
-    self.next_force_magnitudes = jp.zeros((self.count))
-    self.next_force_bodies = jp.zeros((self.count))
-    self.next_force_directions = jp.zeros((self.count, 2))
-    self.previous_torso_local_velocity = jp.zeros((self.count, 3))
+    self.next_force_start_times = jp.zeros((self.num_envs))
+    self.next_force_durations = jp.zeros((self.num_envs))
+    self.next_force_magnitudes = jp.zeros((self.num_envs))
+    self.next_force_bodies = jp.zeros((self.num_envs))
+    self.next_force_directions = jp.zeros((self.num_envs, 2))
+    self.previous_torso_local_velocity = jp.zeros((self.num_envs, 3))
     # save joint addresses
     self.joint_qpos_idx = []
     self.joint_torque_idx = []
@@ -89,7 +138,7 @@ class GPUBatchSimulation:
     self.joint_torque_idx = jp.array(self.joint_torque_idx)
     # save gravity vector
     self.gravity_vector = jp.array([0,0,-1]) # normalized, so -1 instead of -9.81
-    self.gravity_vector_batch = jp.array([self.gravity_vector]*self.count)
+    self.gravity_vector_batch = jp.array([self.gravity_vector]*self.num_envs)
     # save torso body index
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # get pressure sensor geom ids
@@ -103,7 +152,7 @@ class GPUBatchSimulation:
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
     self.model.body(random.randint(1, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
     # randomize IMU Z
-    self.imu_z_offset = jax.random.uniform(key=self.rng_key, shape=(self.count,), minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
+    self.imu_z_offset = jax.random.uniform(key=self.rng_key, shape=(self.num_envs,), minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
     for joint in JOINT_NAMES:
       self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
@@ -154,27 +203,27 @@ class GPUBatchSimulation:
     self.pressure_values_buffer = []
     
     for i in range((int)(self.joint_angles_observation_delay/self.actual_timestep)):
-      self.joint_angles_buffer.append(jp.array([[0]*len(JOINT_NAMES)]*self.count))
+      self.joint_angles_buffer.append(jp.array([[0]*len(JOINT_NAMES)]*self.num_envs))
     for i in range((int)(self.local_ang_vel_delay/self.actual_timestep)):
-      self.local_ang_vel_buffer.append(jp.array([[0]*3]*self.count))
+      self.local_ang_vel_buffer.append(jp.array([[0]*3]*self.num_envs))
     for i in range((int)(self.torso_global_velocity_delay/self.actual_timestep)):
-      self.torso_global_velocity_buffer.append(jp.array([[0]*2]*self.count))
+      self.torso_global_velocity_buffer.append(jp.array([[0]*2]*self.num_envs))
     for i in range((int)(self.torso_local_accel_delay/self.actual_timestep)):
-      self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.count))
+      self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.num_envs))
     for i in range((int)(self.local_gravity_vector_delay/self.actual_timestep)):
-      self.local_gravity_vector_buffer.append(jp.array([self.gravity_vector]*self.count))
+      self.local_gravity_vector_buffer.append(jp.array([self.gravity_vector]*self.num_envs))
     for i in range((int)(self.pressure_values_delay/self.actual_timestep)):
-      self.pressure_values_buffer.append(jp.array([[0]*len(PRESSURE_GEOM_NAMES)]*self.count))
+      self.pressure_values_buffer.append(jp.array([[0]*len(PRESSURE_GEOM_NAMES)]*self.num_envs))
     
     # initialize environment properties
-    self.observation_shape = self.getObs().shape
-    self.action_shape = self.data_batch.ctrl.shape
     self.lastAction = self.data_batch.ctrl
     self.action_change = jp.zeros(self.data_batch.ctrl.shape)
 
     if self.verbose: print("Simulations initialized.")
+    
+    return self._get_obs()
 
-  def computeReward(self):
+  def _get_rewards(self):
     if self.verbose: print("Computing rewards...")
     
     torso_global_velocity = self.data_batch.cvel[:, self.torso_idx][:, 3:]
@@ -188,28 +237,28 @@ class GPUBatchSimulation:
 
     return np.array(rewards), np.array(areTerminal)
     
-  def getObs(self):
+  def _get_obs(self):
     if self.verbose: print("Collecting observations...")
     
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
     torso_global_vel = self.data_batch.cvel[:, self.torso_idx]
     
     # joint positions     20          Joint positions in radians
-    joint_angles = self.data_batch.qpos[:, self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, len(self.joint_qpos_idx))))
+    joint_angles = self.data_batch.qpos[:, self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, len(self.joint_qpos_idx))))
     #normalize
     joint_angles = joint_angles / jp.pi
     
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[:, 0:3]
-    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
+    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     # agent velocity      2           X and Y velocity of robot torso (global, NWU)
-    torso_global_velocity = torso_global_vel[:, 3:] + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
+    torso_global_velocity = torso_global_vel[:, 3:] + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     # linear acceleration 3           Linear acceleration from IMU (local to torso)
     torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
-    torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.actual_timestep) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.count, 3)))
+    torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.actual_timestep) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     self.previous_torso_local_velocity = torso_local_velocity
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-    noisy_torso_quat = torso_quat + (self.randomization_factor * (IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.count, 4)))
+    noisy_torso_quat = torso_quat + (self.randomization_factor * (IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 4)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector_batch)
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
@@ -258,10 +307,14 @@ class GPUBatchSimulation:
     # step sims, update data batch
     self.data_batch = self.jax_step(self.model, self.data_batch)
     
+    rewards, terminals = self._get_rewards()
+    
     if self.verbose: print("Simulations stepped.")
+    
+    return self._get_obs(), rewards, terminals, [{}]*self.num_envs
   
 if __name__ == "__main__":
-    sim_batch = GPUBatchSimulation(count=64,
+    sim_batch = GPUVecEnv(num_envs=64,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    randomization_factor=1,
@@ -271,11 +324,11 @@ if __name__ == "__main__":
     while True:
       areTerminal = np.array([False])
       while not np.all(areTerminal):
-        observations = sim_batch.getObs()
-        # actions = [[1]*16]*sim_batch.count
+        observations = sim_batch._get_obs()
+        # actions = [[1]*16]*sim_batch.num_envs
         actions = None
         sim_batch.step(actions)
-        rewards, areTerminal = sim_batch.computeReward()
+        rewards, areTerminal = sim_batch._get_rewards()
         if np.isnan(observations).any() or np.isnan(rewards).any() or np.isnan(areTerminal).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
         # print(rewards[0])

@@ -2,7 +2,7 @@
   <compiler angle="radian"/>
   <worldbody>
     <!-- CUSTOM -->
-    <body name="humanoid" pos="0 0 -0.1">
+    <body name="humanoid" pos="0 0 -0.075">
       <joint range="-1.5708 1.5708" limited="true" name="humanoid_free" type="free"/>
       <!-- CUSTOM -->
       <geom size="0.0665 0.0565 0.003" pos="0.057869 0 0.0595" quat="0.499998 0.5 0.500002 0.5" type="box"/>

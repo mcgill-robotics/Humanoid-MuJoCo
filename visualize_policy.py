@@ -1,13 +1,13 @@
-from humanoid.simulation.cpu_simulation import CPUSimulation
-from humanoid import SIM_XML_PATH
-from humanoid.rl.reward_functions import *
-from humanoid.simulation.simulation_parameters import physics_steps_per_control_step
+from simulation.cpu_env import CPUEnv
+from simulation import SIM_XML_PATH
+from reward_functions import *
+from simulation.simulation_parameters import physics_steps_per_control_step
 import numpy as np
 from humanoid.rl.ppo import PPO
 
 checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_1597.pth"
 
-env = CPUSimulation(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=0)
+env = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=0)
 env.physics_steps_per_control_step = 1
 
 

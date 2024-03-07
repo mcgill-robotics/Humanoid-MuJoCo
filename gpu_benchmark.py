@@ -1,10 +1,10 @@
-from humanoid.simulation.gpu_batch_simulation import GPUBatchSimulation
-from humanoid.rl.reward_functions import *
+from simulation.gpu_vec_env import GPUVecEnv
+from reward_functions import *
 from cpu_benchmark import estimateCPUSimSpeed
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-from humanoid import SIM_XML_PATH
+from simulation import SIM_XML_PATH
 import os
 
 simulation_time = 100 #seconds
@@ -16,7 +16,7 @@ gpu_plot_y = []
 
 for sim_batch_size in sim_batch_sizes:
     print("Loading GPU w/ batch size {}...".format(sim_batch_size))
-    sim_batch = GPUBatchSimulation(count=sim_batch_size,
+    sim_batch = GPUVecEnv(num_envs=sim_batch_size,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    randomization_factor=1)
