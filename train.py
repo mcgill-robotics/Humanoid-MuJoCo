@@ -9,6 +9,8 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.torch_layers import FlattenExtractor
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv
 
 ###########################
 ##  TRAINING PARAMETERS  ##
@@ -26,24 +28,26 @@ os.makedirs(log_dir, exist_ok=True)
 ##    HYPERPARAMETERS   ##
 ##########################
 
-# env = GPUVecEnv(
-#     num_envs=64,
+NUM_ENVS = 64
+
+# env = VecMonitor(GPUVecEnv(
+#     num_envs=NUM_ENVS,
 #     xml_path=SIM_XML_PATH,
 #     reward_fn=standingRewardFn,
 #     randomization_factor=0
-# )
+# ))
 
-env = CPUEnv(
-    xml_path=SIM_XML_PATH,
-    reward_fn=standingRewardFn,
-    randomization_factor=0
-)
+env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
+                                xml_path=SIM_XML_PATH,
+                                reward_fn=standingRewardFn,
+                                randomization_factor=0
+                            )]*NUM_ENVS))
 
-eval_env = CPUEnv(
-    xml_path=SIM_XML_PATH,
-    reward_fn=standingRewardFn,
-    randomization_factor=0
-)
+eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
+                                    xml_path=SIM_XML_PATH,
+                                    reward_fn=standingRewardFn,
+                                    randomization_factor=0
+                                )]*NUM_ENVS))
 
 policy = lambda : ActorCriticPolicy(
     observation_space = env.observation_space,
@@ -68,17 +72,17 @@ policy = lambda : ActorCriticPolicy(
 model = PPO(
     policy = "MlpPolicy",
     env = env,
-    learning_rate = 3e-4,
+    learning_rate = 0.0001,
     n_steps = 24,
-    batch_size = 24, # 64 for GPU
+    batch_size = 64,
     n_epochs = 10,
     gamma = 0.99,
     gae_lambda = 0.95,
     clip_range = 0.2,
     clip_range_vf = None,
     normalize_advantage = True,
-    ent_coef = 0.0,
-    vf_coef = 0.5,
+    ent_coef = 0.1,
+    vf_coef = 1.0,
     max_grad_norm = 0.5,
     use_sde = False,
     sde_sample_freq = -1,
@@ -99,8 +103,8 @@ model = PPO(
 ##########################
 
 eval_callback = EvalCallback(eval_env, best_model_save_path=eval_log_dir,
-                              log_path=log_dir, eval_freq=max(500 // env.num_envs, 1),
-                              n_eval_episodes=5, deterministic=False,
+                              log_path=log_dir, eval_freq=max(500 // NUM_ENVS, 1),
+                              n_eval_episodes=10, deterministic=False,
                               render=False)
 
 model.learn(total_timesteps=25_000, callback=eval_callback)

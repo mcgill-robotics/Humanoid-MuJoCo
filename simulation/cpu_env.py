@@ -30,8 +30,6 @@ inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]
 class CPUEnv(gym.Env):
   metadata = {"render_modes": ["rgb_array"], "render_fps": 30}
   def __init__(self, xml_path, reward_fn, randomization_factor=0, verbose=False):
-    
-    print("INFO: Running MuJoCo on CPU.")
     self.platform = "CPU"
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor

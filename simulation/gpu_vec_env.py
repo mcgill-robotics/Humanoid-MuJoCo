@@ -25,7 +25,6 @@ from simulation import SIM_XML_PATH
     # previous action     5 · 20          Action filter state (stacked)
 
 class GPUVecEnv(VecEnv):
-  metadata = {"render_modes": None}
   def __init__(self, num_envs, xml_path, reward_fn, randomization_factor=0, verbose=False):
     if jax.default_backend() != 'gpu':
       print("ERROR: Failed to find GPU device.")
@@ -42,6 +41,7 @@ class GPUVecEnv(VecEnv):
     self.rng_key = jax.random.PRNGKey(42)
     self.rng = jax.random.split(self.rng_key, self.num_envs)
     self.verbose = verbose
+    self.render_mode = [[None]] * self.num_envs
     
     # define jax step function
     def rollout(m,d):
@@ -57,7 +57,7 @@ class GPUVecEnv(VecEnv):
     observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
     self.observation_space = spaces.Box(-1000, 1000, shape=(observation_size,), dtype=np.float32)
     
-    super().__init__(num_envs, self.observation_space, self.action_space)
+    super().__init__(self.num_envs, self.observation_space, self.action_space)
   
   def close(self): 
     try: del self.model
@@ -73,7 +73,7 @@ class GPUVecEnv(VecEnv):
     
   def render(self, mode=None): pass
   
-  def env_is_wrapped(self): return [False]*self.num_envs
+  def env_is_wrapped(self, wrapper_class, indices=None): return [False]*self.num_envs
     
   def step_async(self, actions):
       self.async_result = self.step(actions)
@@ -105,14 +105,15 @@ class GPUVecEnv(VecEnv):
   def seed(self, seed):
     self.rng_key = jax.random.PRNGKey(seed)
     self.rng = jax.random.split(self.rng_key, self.num_envs)
-
-  def env_is_wrapped(self):
-      pass
     
-  def reset(self):
+  def reset(self, seed=None):
     self.close()
     
     if self.verbose: print("\nInitializing new simulations...")
+    
+    if seed is not None: 
+      self.rng_key = jax.random.PRNGKey(seed)
+      self.rng = jax.random.split(self.rng_key, self.num_envs)
     
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
@@ -320,16 +321,15 @@ if __name__ == "__main__":
                                    randomization_factor=1,
                                    verbose=True)
 
+    obs = sim_batch.reset()
 
     while True:
       areTerminal = np.array([False])
       while not np.all(areTerminal):
-        observations = sim_batch._get_obs()
         # actions = [[1]*16]*sim_batch.num_envs
         actions = None
-        sim_batch.step(actions)
-        rewards, areTerminal = sim_batch._get_rewards()
-        if np.isnan(observations).any() or np.isnan(rewards).any() or np.isnan(areTerminal).any():
-            print("ERROR: NaN value in observations/rewards/terminals.")
+        obs, rewards, terminals, _ = sim_batch.step(actions)
         # print(rewards[0])
+        if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
+            print("ERROR: NaN value in observations/rewards/terminals.")
       sim_batch.reset()
