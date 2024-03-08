@@ -152,8 +152,6 @@ class GPUVecEnv(VecEnv):
     for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
     self.model.body(random.randint(1, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
-    # randomize IMU Z
-    self.imu_z_offset = jax.random.uniform(key=self.rng_key, shape=(self.num_envs,), minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
     for joint in JOINT_NAMES:
       self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
@@ -228,7 +226,7 @@ class GPUVecEnv(VecEnv):
     if self.verbose: print("Computing rewards...")
     
     torso_global_velocity = self.data_batch.cvel[:, self.torso_idx][:, 3:]
-    torso_z_pos = self.data_batch.xpos[:, self.torso_idx, 2] + self.imu_z_offset
+    torso_z_pos = self.data_batch.xpos[:, self.torso_idx, 2]
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
     joint_torques = self.data_batch.qfrc_constraint[:, self.joint_torque_idx] + self.data_batch.qfrc_smooth[:, self.joint_torque_idx]
     
@@ -264,7 +262,7 @@ class GPUVecEnv(VecEnv):
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
     #normalize
-    pressure_values = jp.clip(pressure_values, 0.0, 20.0) / 20.0 # 2kg ~ 20 N
+    pressure_values = jp.clip(pressure_values, 0.0, 5.0) / 5.0 # 5kg ~ 5N
 
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)

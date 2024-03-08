@@ -103,8 +103,6 @@ class CPUEnv(gym.Env):
     for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
     self.model.body(random.randint(1, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
-    # randomize IMU Z
-    self.imu_z_offset = jax.random.uniform(key=self.rng_key, minval=-IMU_Z_OFFSET_MAX, maxval=IMU_Z_OFFSET_MAX)
     # randomize joint properties  
     for joint in JOINT_NAMES:
       self.model.joint(joint).armature[0] += random.uniform(0, JOINT_ARMATURE_MAX_CHANGE)*self.randomization_factor
@@ -211,7 +209,7 @@ class CPUEnv(gym.Env):
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
     #normalize
-    pressure_values = np.clip(pressure_values, 0, 20) / 20
+    pressure_values = np.clip(pressure_values, 0, 5) / 5
     
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
@@ -239,7 +237,6 @@ class CPUEnv(gym.Env):
     
     torso_global_velocity = self.data.cvel[self.torso_idx][3:]
     torso_z_pos = self.data.xpos[self.torso_idx, 2]
-    torso_z_pos += self.imu_z_offset
     torso_quat = self.data.xquat[self.torso_idx]
     joint_torques = self.data.qfrc_constraint[self.joint_torque_idx] + self.data.qfrc_smooth[self.joint_torque_idx]
     
