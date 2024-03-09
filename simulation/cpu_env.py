@@ -171,7 +171,7 @@ class CPUEnv(gym.Env):
     # clean up any unreferenced variables
     gc.collect()
     
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
     
     return self._get_obs(), {}
       
@@ -230,7 +230,7 @@ class CPUEnv(gym.Env):
     
     delayed_observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
   
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
     
     return np.array(delayed_observations)
     
@@ -244,7 +244,7 @@ class CPUEnv(gym.Env):
     
     reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
     
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
 
     return np.array(reward), isTerminal
     
@@ -287,7 +287,7 @@ class CPUEnv(gym.Env):
     
     mujoco.mj_step(self.model, self.data)
       
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
     
     reward, terminated = self._get_reward()
     

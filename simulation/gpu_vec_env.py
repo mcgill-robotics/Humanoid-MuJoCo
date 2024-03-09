@@ -220,7 +220,7 @@ class GPUVecEnv(VecEnv):
     self.lastAction = self.data_batch.ctrl
     self.action_change = jp.zeros(self.data_batch.ctrl.shape)
 
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
     
     return self._get_obs()
 
@@ -234,7 +234,7 @@ class GPUVecEnv(VecEnv):
     
     rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
     
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
 
     return np.array(rewards), np.array(areTerminal)
     
@@ -287,7 +287,7 @@ class GPUVecEnv(VecEnv):
     
     delayed_observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
         
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
     
     return np.array(delayed_observations)
   
@@ -318,7 +318,7 @@ class GPUVecEnv(VecEnv):
     
     rewards, terminals = self._get_rewards()
     
-    if self.verbose: print("Done")
+    if self.verbose: print("       Done")
     
     return self._get_obs(), rewards, terminals, [{}]*self.num_envs
   
