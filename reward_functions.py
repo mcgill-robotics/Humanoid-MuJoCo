@@ -30,7 +30,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     # MODIFICATION: +0.5 reward for torso being above or at Z=0, linearly interpolated to -0.5 if the torso is under -0.4
     GROUNDED_PENALTY_WEIGHT = -0.5
     NOT_GROUNDED_REWARD_WEIGHT = 0.5 # added this so that staying not grounded is rewarded (rather than terminating quickly to avoid future penalties)
-    MIN_Z_BEFORE_GROUNDED = -0.4
+    MIN_Z_BEFORE_GROUNDED = -0.3
     MIN_Z_FOR_REWARD = -0.2
     MAX_Z = -0.1
     # Joint torque A penalty, equal to the magnitude of the torque measured at

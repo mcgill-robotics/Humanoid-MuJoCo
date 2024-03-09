@@ -28,7 +28,9 @@ os.makedirs(log_dir, exist_ok=True)
 ##    HYPERPARAMETERS   ##
 ##########################
 
-NUM_ENVS = 256
+NUM_ENVS = 512
+N_EVAL_EPISODES = 20
+POLICY_ITERATIONS = 1000
 
 env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,
@@ -36,6 +38,12 @@ env = VecMonitor(GPUVecEnv(
     reward_fn=standingRewardFn,
     randomization_factor=0
 ))
+
+env.verbose = True
+env.reset()
+env.step(None)
+env.verbose = False
+print("Beginning training.\n")
 
 # env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
 #                                 xml_path=SIM_XML_PATH,
@@ -47,7 +55,7 @@ eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
                                     reward_fn=standingRewardFn,
                                     randomization_factor=0
-                                )]*NUM_ENVS))
+                                )] * N_EVAL_EPISODES))
 
 policy = lambda : ActorCriticPolicy(
     observation_space = env.observation_space,
@@ -103,11 +111,11 @@ model = PPO(
 ##########################
 
 eval_callback = EvalCallback(eval_env, best_model_save_path=eval_log_dir,
-                              log_path=log_dir, eval_freq=max(500 // NUM_ENVS, 1),
-                              n_eval_episodes=10, deterministic=False,
+                              log_path=log_dir, eval_freq=model.n_steps,
+                              n_eval_episodes=N_EVAL_EPISODES, deterministic=False,
                               render=False)
 
-model.learn(total_timesteps=25_000,
+model.learn(total_timesteps=POLICY_ITERATIONS * model.n_steps,
             callback=eval_callback,
             log_interval = 1,
             tb_log_name = "PPOStanding",
