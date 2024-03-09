@@ -28,7 +28,7 @@ os.makedirs(log_dir, exist_ok=True)
 ##    HYPERPARAMETERS   ##
 ##########################
 
-NUM_ENVS = 512
+NUM_ENVS = 256
 
 env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,

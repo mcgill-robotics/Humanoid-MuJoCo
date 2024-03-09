@@ -323,7 +323,7 @@ class GPUVecEnv(VecEnv):
     return self._get_obs(), rewards, terminals, [{}]*self.num_envs
   
 if __name__ == "__main__":
-    sim_batch = GPUVecEnv(num_envs=64,
+    sim_batch = GPUVecEnv(num_envs=256,
                                    xml_path=SIM_XML_PATH,
                                    reward_fn=standingRewardFn,
                                    randomization_factor=1,
