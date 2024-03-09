@@ -39,10 +39,13 @@ env = VecMonitor(GPUVecEnv(
     randomization_factor=0
 ))
 
-env.verbose = True
+print("Initializing environment...      ", end='')
 env.reset()
+print("Done")
+print("Stepping environment...          ", end='')
 env.step(None)
-env.verbose = False
+print("Done")
+
 print("Beginning training.\n")
 
 # env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(

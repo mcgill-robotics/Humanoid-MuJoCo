@@ -52,7 +52,7 @@ class CPUEnv(gym.Env):
     super().reset(seed=seed)
     if seed is not None: self.rng_key = jax.random.PRNGKey(seed)
     
-    if self.verbose: print("Creating new simulation...", end='')
+    if self.verbose: print("Creating new simulation...       ", end='')
     
     #load model from XML
     self.model = mujoco.MjModel.from_xml_path(self.xml_path)
@@ -171,12 +171,12 @@ class CPUEnv(gym.Env):
     # clean up any unreferenced variables
     gc.collect()
     
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
     
     return self._get_obs(), {}
       
   def _get_obs(self):
-    if self.verbose: print("Collecting observations...", end='')
+    if self.verbose: print("Collecting observations...       ", end='')
     
     torso_quat = self.data.xquat[self.torso_idx]
     torso_global_vel = self.data.cvel[self.torso_idx]
@@ -230,12 +230,12 @@ class CPUEnv(gym.Env):
     
     delayed_observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
   
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
     
     return np.array(delayed_observations)
     
   def _get_reward(self):
-    if self.verbose: print("Computing reward...", end='')
+    if self.verbose: print("Computing reward...              ", end='')
     
     torso_global_velocity = self.data.cvel[self.torso_idx][3:]
     torso_z_pos = self.data.xpos[self.torso_idx, 2]
@@ -244,12 +244,12 @@ class CPUEnv(gym.Env):
     
     reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
     
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
 
     return np.array(reward), isTerminal
     
   def step(self, action=None):
-    if self.verbose: print("Stepping simulation...", end='')
+    if self.verbose: print("Stepping simulation...           ", end='')
     # cycle action through action buffer
     if action is None:
       action = self.data.ctrl
@@ -287,7 +287,7 @@ class CPUEnv(gym.Env):
     
     mujoco.mj_step(self.model, self.data)
       
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
     
     reward, terminated = self._get_reward()
     

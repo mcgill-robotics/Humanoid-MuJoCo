@@ -111,7 +111,7 @@ class GPUVecEnv(VecEnv):
   def reset(self, seed=None):
     self.close()
     
-    if self.verbose: print("Initializing new simulations...", end='')
+    if self.verbose: print("Initializing simulations...      ", end='')
     
     if seed is not None: 
       self.rng_key = jax.random.PRNGKey(seed)
@@ -220,12 +220,12 @@ class GPUVecEnv(VecEnv):
     self.lastAction = self.data_batch.ctrl
     self.action_change = jp.zeros(self.data_batch.ctrl.shape)
 
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
     
     return self._get_obs()
 
   def _get_rewards(self):
-    if self.verbose: print("Computing rewards...", end='')
+    if self.verbose: print("Computing rewards...             ", end='')
     
     torso_global_velocity = self.data_batch.cvel[:, self.torso_idx][:, 3:]
     torso_z_pos = self.data_batch.xpos[:, self.torso_idx, 2]
@@ -234,12 +234,12 @@ class GPUVecEnv(VecEnv):
     
     rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
     
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
 
     return np.array(rewards), np.array(areTerminal)
     
   def _get_obs(self):
-    if self.verbose: print("Collecting observations...", end='')
+    if self.verbose: print("Collecting observations...       ", end='')
     
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
     torso_global_vel = self.data_batch.cvel[:, self.torso_idx]
@@ -287,12 +287,12 @@ class GPUVecEnv(VecEnv):
     
     delayed_observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
         
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
     
     return np.array(delayed_observations)
   
   def step(self, action=None):
-    if self.verbose: print("Stepping simulations...", end='')
+    if self.verbose: print("Stepping simulations...          ", end='')
     
     # cycle action through action buffer
     if action is None:
@@ -318,7 +318,7 @@ class GPUVecEnv(VecEnv):
     
     rewards, terminals = self._get_rewards()
     
-    if self.verbose: print("       Done")
+    if self.verbose: print("Done")
     
     return self._get_obs(), rewards, terminals, [{}]*self.num_envs
   
