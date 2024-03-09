@@ -39,7 +39,7 @@ JOINT_STIFFNESS_MAX_CHANGE = 0.05 # unit ? TODO
 JOINT_MARGIN_MAX_CHANGE = 0.05 # radians
 JOINT_FORCE_LIMIT_MAX_CHANGE = 0.025 # N m
 
-physics_steps_per_control_step = 20
+physics_steps_per_control_step = 10
 timestep = 0.001
 
 ### URDF REFERENCE NAMES

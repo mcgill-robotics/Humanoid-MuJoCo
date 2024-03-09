@@ -28,9 +28,11 @@ os.makedirs(log_dir, exist_ok=True)
 ##    HYPERPARAMETERS   ##
 ##########################
 
-NUM_ENVS = 512
+NUM_ENVS = 256
 N_EVAL_EPISODES = 20
 POLICY_ITERATIONS = 1000
+POLICY_UPDATE_TIMESTEPS = 24
+TOTAL_TIMESTEPS = int(4096/NUM_ENVS) * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
 
 env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,
@@ -39,14 +41,14 @@ env = VecMonitor(GPUVecEnv(
     randomization_factor=0
 ))
 
-print("Initializing environment...      ", end='')
+print("\nInitializing environment...      ", end='')
 env.reset()
 print("Done")
-print("Stepping environment...          ", end='')
+print("\nStepping environment...          ", end='')
 env.step(None)
 print("Done")
 
-print("Beginning training.\n")
+print("\nBeginning training.\n")
 
 # env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
 #                                 xml_path=SIM_XML_PATH,
@@ -84,7 +86,7 @@ model = PPO(
     policy = "MlpPolicy",
     env = env,
     learning_rate = 0.00001,
-    n_steps = 12,
+    n_steps = POLICY_UPDATE_TIMESTEPS,
     batch_size = 64,
     n_epochs = 10,
     gamma = 0.99,
@@ -118,7 +120,7 @@ eval_callback = EvalCallback(eval_env, best_model_save_path=eval_log_dir,
                               n_eval_episodes=N_EVAL_EPISODES, deterministic=False,
                               render=False)
 
-model.learn(total_timesteps=POLICY_ITERATIONS * model.n_steps,
+model.learn(total_timesteps=TOTAL_TIMESTEPS,
             callback=eval_callback,
             log_interval = 1,
             tb_log_name = "PPOStanding",
