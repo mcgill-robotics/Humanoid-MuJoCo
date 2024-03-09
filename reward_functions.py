@@ -31,6 +31,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     GROUNDED_PENALTY_WEIGHT = -0.5
     NOT_GROUNDED_REWARD_WEIGHT = 0.5 # added this so that staying not grounded is rewarded (rather than terminating quickly to avoid future penalties)
     MIN_Z_BEFORE_GROUNDED = -0.4
+    MIN_Z_FOR_REWARD = -0.2
     MAX_Z = -0.1
     # Joint torque A penalty, equal to the magnitude of the torque measured at
         # the player’s knees. This discourages the player from learning
@@ -60,7 +61,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     reward += VERTICAL_VELOCITY_REWARD_WEIGHT * abs_velocity[2]
     
     # Torso height reward
-    z_pos_penalty = jp.interp(z_pos, jp.array([MIN_Z_BEFORE_GROUNDED, MAX_Z]), jp.array([GROUNDED_PENALTY_WEIGHT, NOT_GROUNDED_REWARD_WEIGHT]))
+    z_pos_penalty = jp.interp(z_pos, jp.array([MIN_Z_FOR_REWARD, MAX_Z]), jp.array([GROUNDED_PENALTY_WEIGHT, NOT_GROUNDED_REWARD_WEIGHT]))
     reward += z_pos_penalty
     
     # Termination

@@ -28,20 +28,20 @@ os.makedirs(log_dir, exist_ok=True)
 ##    HYPERPARAMETERS   ##
 ##########################
 
-NUM_ENVS = 64
+NUM_ENVS = 128
 
-# env = VecMonitor(GPUVecEnv(
-#     num_envs=NUM_ENVS,
-#     xml_path=SIM_XML_PATH,
-#     reward_fn=standingRewardFn,
-#     randomization_factor=0
-# ))
+env = VecMonitor(GPUVecEnv(
+    num_envs=NUM_ENVS,
+    xml_path=SIM_XML_PATH,
+    reward_fn=standingRewardFn,
+    randomization_factor=0
+))
 
-env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
-                                xml_path=SIM_XML_PATH,
-                                reward_fn=standingRewardFn,
-                                randomization_factor=0
-                            )]*NUM_ENVS))
+# env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
+#                                 xml_path=SIM_XML_PATH,
+#                                 reward_fn=standingRewardFn,
+#                                 randomization_factor=0
+#                             )]*NUM_ENVS))
 
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
@@ -58,7 +58,7 @@ policy = lambda : ActorCriticPolicy(
     ortho_init = True,
     use_sde = False,
     log_std_init = 0.0,
-    full_std = True,
+    full_std = False,
     use_expln = False,
     squash_output = False,
     features_extractor_class = FlattenExtractor,
@@ -73,7 +73,7 @@ model = PPO(
     policy = "MlpPolicy",
     env = env,
     learning_rate = 0.00001,
-    n_steps = 24,
+    n_steps = 12,
     batch_size = 64,
     n_epochs = 10,
     gamma = 0.99,

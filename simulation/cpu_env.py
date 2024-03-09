@@ -186,20 +186,24 @@ class CPUEnv(gym.Env):
     # joint positions     20          Joint positions in radians
     joint_angles = self.data.qpos[self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
     # normalize
-    joint_angles = joint_angles / jp.pi
-    
+    joint_angles = joint_angles / (jp.pi / 2)
+
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[0:3]
-    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
+    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * (GYRO_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(3,)))
+    
     # agent velocity      2           X and Y velocity of robot torso (global, NWU)
     torso_global_velocity = torso_global_vel[3:] + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
+   
     # linear acceleration 3           Linear acceleration from IMU (local to torso)
-    torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
-    torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/(self.timestep * self.physics_steps_per_control_step)) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
+    torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[3:])
+    torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.timestep) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     self.previous_torso_local_velocity = torso_local_velocity
+    
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + (self.randomization_factor * (IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector)
+    
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = np.zeros((8))
     for i in range(len(self.pressure_sensor_ids)):
@@ -209,7 +213,7 @@ class CPUEnv(gym.Env):
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
     #normalize
-    pressure_values = np.clip(pressure_values, 0, 5) / 5
+    pressure_values = np.clip(pressure_values, 0.0, 5.0) / 5.0 # 500 grams ~ 5N
     
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
@@ -276,8 +280,14 @@ class CPUEnv(gym.Env):
       self.data.xfrc_applied[self.next_force_body][1] = self.next_force_direction[1] * self.next_force_magnitude
     
     # step simulation
-    for _ in range(self.physics_steps_per_control_step):
+    for _ in range(self.physics_steps_per_control_step - 1):
       mujoco.mj_step(self.model, self.data)
+      
+    torso_quat = self.data.xquat[self.torso_idx]
+    torso_global_vel = self.data.cvel[self.torso_idx]
+    self.previous_torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[3:])
+    
+    mujoco.mj_step(self.model, self.data)
       
     if self.verbose: print("Simulation stepped.")
     
@@ -302,9 +312,9 @@ if __name__ == "__main__":
     while True:
       isTerminal = False
       while not isTerminal:
+        # action = np.random.uniform(-1, 1, 16)
         action = None
-        # action = np.array([0]*16)
         obs, reward, isTerminal, _, _ = sim.step(action)
         print(reward)
-        sim.render()
+        sim.render("human")
       obs = sim.reset()
