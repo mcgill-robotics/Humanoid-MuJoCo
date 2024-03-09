@@ -45,10 +45,12 @@ class GPUVecEnv(VecEnv):
     
     # define jax step function
     def rollout(m,d):
-      for _ in range(self.physics_steps_per_control_step):
+      for _ in range(self.physics_steps_per_control_step - 1):
         d = mjx.step(m,d)
       return d
-    self.jax_step = jax.jit(jax.vmap(rollout, in_axes=(None, 0)))
+    
+    self.jax_step_minus_one = jax.jit(jax.vmap(rollout, in_axes=(None, 0)))
+    self.jax_single_step = jax.jit(jax.vmap(lambda m,d : mjx.step(m,d), in_axes=(None, 0)))
     
     #define contact force function
     self.getFootForces = jax.jit(jax.vmap(getFootForces, in_axes=(None, 0)))
@@ -245,24 +247,28 @@ class GPUVecEnv(VecEnv):
     # joint positions     20          Joint positions in radians
     joint_angles = self.data_batch.qpos[:, self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, len(self.joint_qpos_idx))))
     #normalize
-    joint_angles = joint_angles / jp.pi
+    joint_angles = joint_angles / (jp.pi / 2)
     
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[:, 0:3]
-    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * GYRO_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
+    local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * (GYRO_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
+    
     # agent velocity      2           X and Y velocity of robot torso (global, NWU)
     torso_global_velocity = torso_global_vel[:, 3:] + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
+    
     # linear acceleration 3           Linear acceleration from IMU (local to torso)
-    torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_velocity)
+    torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[:, 3:])
     torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.actual_timestep) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     self.previous_torso_local_velocity = torso_local_velocity
+    
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + (self.randomization_factor * (IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 4)))
     local_gravity_vector = inverseRotateVectors(noisy_torso_quat, self.gravity_vector_batch)
+    
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
     #normalize
-    pressure_values = jp.clip(pressure_values, 0.0, 5.0) / 5.0 # 5kg ~ 5N
+    pressure_values = jp.clip(pressure_values, 0.0, 5.0) / 5.0 # 500 grams ~ 5N
 
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
@@ -304,7 +310,11 @@ class GPUVecEnv(VecEnv):
     self.data_batch = self.data_batch.replace(xfrc_applied=xfrc_applied)
 
     # step sims, update data batch
-    self.data_batch = self.jax_step(self.model, self.data_batch)
+    self.data_batch = self.jax_step_minus_one(self.model, self.data_batch)
+    torso_quat = self.data_batch.xquat[:, self.torso_idx]
+    torso_global_vel = self.data_batch.cvel[:, self.torso_idx]
+    self.previous_torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[:, 3:])
+    self.data_batch = self.jax_single_step(self.model, self.data_batch)
     
     rewards, terminals = self._get_rewards()
     
@@ -324,7 +334,7 @@ if __name__ == "__main__":
     while True:
       areTerminal = np.array([False])
       while not np.all(areTerminal):
-        # actions = [[1]*16]*sim_batch.num_envs
+        actions = np.random.uniform(-1, 1, (sim_batch.num_envs, 16))
         actions = None
         obs, rewards, terminals, _ = sim_batch.step(actions)
         # print(rewards[0])
