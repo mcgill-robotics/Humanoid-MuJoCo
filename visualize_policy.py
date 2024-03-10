@@ -1,44 +1,30 @@
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 from reward_functions import *
-from simulation.simulation_parameters import physics_steps_per_control_step
-import numpy as np
-from humanoid.rl.ppo import PPO
+import torch
+from stable_baselines3 import PPO
 
-checkpoint = "data/trained_weights/Standing/PPO_Standing_0_0_episode_1597.pth"
+checkpoint = "./data/training_weights/best_model"
 
-env = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=0)
-env.physics_steps_per_control_step = 1
+env = CPUEnv(
+    xml_path=SIM_XML_PATH,
+    reward_fn=standingRewardFn,
+    randomization_factor=0
+)
 
-
-state_history_length = 5
-state_dim = (env.observation_shape[1] + env.action_shape[1]) * state_history_length
-action_dim = env.action_shape[1]
-
-ppo_agent = PPO(state_dim, action_dim, 0, 0, 0.99, 1, 0.1, True, 0.001)
-ppo_agent.load(checkpoint)
+ppo_agent = PPO.load(
+    path=checkpoint,
+    env=env,
+)
+params = ppo_agent.get_parameters()
+params["policy"]["log_std"] = torch.full(env.action_space.shape, -5)
+ppo_agent.set_parameters(params)
 
 while True:
-    env.reset()
-    action = env.lastAction
-    state = env.getObs()
-    state_history = [np.concatenate((state, action), axis=1)] * state_history_length
     done = False
-    
+    obs, _ = env.reset()
     while not done:
-        # select action with policy
-        action = ppo_agent.select_action(np.concatenate(state_history, axis=1).reshape(-1))
-        for _ in range(physics_steps_per_control_step):
-            env.step(action)
-            env.render()
-        obs = env.getObs()
-        state = np.concatenate((obs, action), axis=1)
-        state_history.pop(0)
-        state_history.append(state)
-        reward, done = env.computeReward()
-        print(reward[0])
-        done = done[0]
-
-        if np.isnan(state).any() or np.isnan(reward).any() or np.isnan(done).any():
-            print("ERROR: NaN value in observations. Skipping to next episode.")
-            break
+        action, _ = ppo_agent.predict(obs)
+        obs, reward, done, _, _ = env.step(action)
+        print(reward)
+        env.render("human")
