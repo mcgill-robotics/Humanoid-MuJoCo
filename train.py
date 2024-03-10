@@ -105,7 +105,7 @@ if CHECKPOINT is None:
         rollout_buffer_class = None,
         rollout_buffer_kwargs = None,
         target_kl = None,
-        stats_window_size = N_EVAL_EPISODES,
+        stats_window_size = 100,
         tensorboard_log = None,
         policy_kwargs = None,
         verbose = 1,
