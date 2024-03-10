@@ -22,9 +22,6 @@ ppo_agent = PPO.load(
     path=checkpoint,
     env=env,
 )
-params = ppo_agent.get_parameters()
-params["policy"]["log_std"] = torch.full(env.action_space.shape, -5)
-ppo_agent.set_parameters(params)
 
 if not os.path.exists(video_dir):
     os.makedirs(video_dir)
@@ -37,7 +34,7 @@ for v in range(num_videos):
     done = False
     obs, _ = env.reset()
     while env.data.time < video_duration:
-        action, _ = ppo_agent.predict(obs)
+        action, _ = ppo_agent.predict(obs, deterministic=True)
         obs, reward, done, _, _ = env.step(action)
         frame = env.render("rgb_array")
         video_writer.write(frame)

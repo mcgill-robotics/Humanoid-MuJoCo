@@ -16,15 +16,12 @@ ppo_agent = PPO.load(
     path=checkpoint,
     env=env,
 )
-params = ppo_agent.get_parameters()
-params["policy"]["log_std"] = torch.full(env.action_space.shape, -5)
-ppo_agent.set_parameters(params)
 
 while True:
     done = False
     obs, _ = env.reset()
     while not done:
-        action, _ = ppo_agent.predict(obs)
+        action, _ = ppo_agent.predict(obs, deterministic=True)
         obs, reward, done, _, _ = env.step(action)
         print(reward)
         env.render("human")
