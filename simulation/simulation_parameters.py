@@ -41,6 +41,7 @@ JOINT_FORCE_LIMIT_MAX_CHANGE = 0.025 # N m
 
 physics_steps_per_control_step = 10
 timestep = 0.001
+max_simulation_time = 20
 
 ### URDF REFERENCE NAMES
 

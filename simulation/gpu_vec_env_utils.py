@@ -54,7 +54,7 @@ def applyExternalForces(sim_batch):
   if jp.any(should_update_force):
     N = jp.sum(should_update_force)
     updated_next_force_start_times = sim_batch.data_batch.time[should_update_force] + jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_INTERVAL, maxval=MAX_EXTERNAL_FORCE_INTERVAL)
-    updated_next_force_durations = jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_DURATION*sim_batch.randomization_factor, maxval=MAX_EXTERNAL_FORCE_DURATION*sim_batch.randomization_factor)
+    updated_next_force_durations = jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_DURATION, maxval=MAX_EXTERNAL_FORCE_DURATION)
     updated_next_force_magnitudes = jax.random.uniform(key=sim_batch.rng_key, shape=(N,), minval=MIN_EXTERNAL_FORCE_MAGNITUDE*sim_batch.randomization_factor, maxval=MAX_EXTERNAL_FORCE_MAGNITUDE*sim_batch.randomization_factor)
     updated_next_force_bodies = jax.random.randint(key=sim_batch.rng_key, shape=(N,), minval=1, maxval=sim_batch.data_batch.xfrc_applied.shape[1] - 1)
     updated_next_force_directions = jax.random.ball(key=sim_batch.rng_key, d=2, shape=(N,))

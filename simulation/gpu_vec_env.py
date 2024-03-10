@@ -318,6 +318,8 @@ class GPUVecEnv(VecEnv):
     
     rewards, terminals = self._get_rewards()
     
+    terminals[self.data_batch.time >= max_simulation_time] = True
+    
     if self.verbose: print("Done")
     
     return self._get_obs(), rewards, terminals, [{}]*self.num_envs

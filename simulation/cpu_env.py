@@ -264,7 +264,7 @@ class CPUEnv(gym.Env):
     # apply forces to the robot to destabilise it
     if self.data.time >= self.next_force_start_time + self.next_force_duration:
       self.next_force_start_time = self.data.time + random.uniform(MIN_EXTERNAL_FORCE_INTERVAL, MAX_EXTERNAL_FORCE_INTERVAL)
-      self.next_force_duration = random.uniform(MIN_EXTERNAL_FORCE_DURATION*self.randomization_factor, MAX_EXTERNAL_FORCE_DURATION*self.randomization_factor)
+      self.next_force_duration = random.uniform(MIN_EXTERNAL_FORCE_DURATION, MAX_EXTERNAL_FORCE_DURATION)
       self.next_force_magnitude = random.uniform(MIN_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor, MAX_EXTERNAL_FORCE_MAGNITUDE*self.randomization_factor)
       self.next_force_direction = np.array([random.uniform(-1, 1), random.uniform(-1, 1)])
       self.data.xfrc_applied[self.next_force_body][0] = 0
@@ -290,6 +290,8 @@ class CPUEnv(gym.Env):
     if self.verbose: print("Done")
     
     reward, terminated = self._get_reward()
+    
+    if self.data.time >= max_simulation_time: terminated = True
     
     return self._get_obs(), reward, terminated, False, {}
     

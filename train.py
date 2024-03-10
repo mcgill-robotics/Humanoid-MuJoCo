@@ -32,7 +32,7 @@ NUM_ENVS = 256
 N_EVAL_EPISODES = 20
 POLICY_ITERATIONS = 1000
 POLICY_UPDATE_TIMESTEPS = 24
-TOTAL_TIMESTEPS = int(4096/NUM_ENVS) * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
+TOTAL_TIMESTEPS = 4096 * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
 CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 100
@@ -125,7 +125,7 @@ else:
 
 
 checkpoint_callback = CheckpointCallback(
-  save_freq=max(CHECKPOINT_FREQ // NUM_ENVS, 1),
+  save_freq=POLICY_ITERATIONS // 10,
   save_path=checkpoint_log_dir,
   name_prefix="checkpoint"
 )
@@ -133,7 +133,7 @@ checkpoint_callback = CheckpointCallback(
 randomization_increase_callback = IncreaseRandomizationOnNoModelImprovement(max_no_improvement_evals=15, envs=[env, eval_env], randomization_increment=0.1, min_evals=50)
 
 eval_callback = EvalCallback(eval_env, best_model_save_path=checkpoint_log_dir,
-                              log_path=log_dir, eval_freq=max(EVAL_FREQ // NUM_ENVS, 1),
+                              log_path=log_dir, eval_freq=1,
                               n_eval_episodes=N_EVAL_EPISODES, deterministic=True,
                               render=False, callback_after_eval=randomization_increase_callback)
 
@@ -141,6 +141,6 @@ eval_callback = EvalCallback(eval_env, best_model_save_path=checkpoint_log_dir,
 model.learn(total_timesteps=TOTAL_TIMESTEPS,
             callback=[checkpoint_callback, eval_callback],
             log_interval = 1,
-            tb_log_name = "PPOStanding",
+            tb_log_name = "Standing",
             reset_num_timesteps = True,
             progress_bar = True)
