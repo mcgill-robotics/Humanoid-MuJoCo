@@ -50,3 +50,4 @@ JOINT_NAMES = ["right_shoulder_pitch", "right_elbow", "left_shoulder_pitch", "le
 JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = ["pressure_geom_LLB", "pressure_geom_LRB", "pressure_geom_LRF", "pressure_geom_LLF", "pressure_geom_RLB", "pressure_geom_RRB", "pressure_geom_RRF", "pressure_geom_RLF"]
 TORSO_BODY_NAME = 'humanoid'
+NON_ROBOT_GEOMS = ['floor']

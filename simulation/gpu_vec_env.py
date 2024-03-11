@@ -146,6 +146,12 @@ class GPUVecEnv(VecEnv):
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # get pressure sensor geom ids
     self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
+    self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
+
+    def checkSelfCollision(non_robot_geom_ids, d):
+      return jp.where((jp.where(d.contact.geom1 not in non_robot_geom_ids, 1, 0) + jp.where(d.contact.geom2 not in non_robot_geom_ids, 1, 0)) == 2, True, False)
+  
+    self.isSelfColliding = jax.jit(jax.vmap(checkSelfCollision, in_axes=(None, 0)))
     
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
@@ -231,8 +237,9 @@ class GPUVecEnv(VecEnv):
     torso_z_pos = self.data_batch.xpos[:, self.torso_idx, 2]
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
     joint_torques = self.data_batch.qfrc_constraint[:, self.joint_torque_idx] + self.data_batch.qfrc_smooth[:, self.joint_torque_idx]
-    
-    rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
+    self_collisions = self.isSelfColliding(self.non_robot_geom_ids, self.data_batch)
+        
+    rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change, self_collisions)
     
     if self.verbose: print("Done")
 
@@ -319,7 +326,7 @@ class GPUVecEnv(VecEnv):
     obs = self._get_obs()
     rewards, terminals = self._get_rewards()
     truncated = np.any(self.data_batch.time >= max_simulation_time)
-    done = truncated or np.all(terminals)
+    done = truncated or np.any(terminals)
     dones = np.full(terminals.shape, done)
     infos = [{}]*self.num_envs    
     

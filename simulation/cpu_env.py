@@ -95,6 +95,7 @@ class CPUEnv(gym.Env):
     self.joint_torque_idx = jp.array(self.joint_torque_idx)
     # get pressure sensor geometries
     self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
+    self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
     
     # RANDOMIZATION
     # floor friction (0.5 to 1.0)
@@ -241,8 +242,12 @@ class CPUEnv(gym.Env):
     torso_z_pos = self.data.xpos[self.torso_idx, 2]
     torso_quat = self.data.xquat[self.torso_idx]
     joint_torques = self.data.qfrc_constraint[self.joint_torque_idx] + self.data.qfrc_smooth[self.joint_torque_idx]
+    self_collision = False
+    for i in range(len(self.data.contact.geom1)):
+      if self.data.contact.geom1[i] not in self.non_robot_geom_ids and self.data.contact.geom2[i] not in self.non_robot_geom_ids:
+        self_collision = True
     
-    reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change)
+    reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change, self_collision)
     
     if self.verbose: print("Done")
 

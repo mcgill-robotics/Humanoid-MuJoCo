@@ -15,7 +15,7 @@ from jax.scipy.spatial.transform import Rotation
     # during ground impacts, which can damage a physical robot. - 0.01
 # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions - 0.1
 
-def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
+def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, isSelfColliding):
     # ALL IN NWU
     # velocity in m/s
     # z_pos in meters
@@ -51,7 +51,6 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     # CUSTOM: offset the reward by 0.5 since, through testing, 0.5 is ideal reward and -0.5 is worst state possible
     CONSTANT_REWARD_OFFSET = 0.5
     
-    
     ### COMPUTE REWARD
     reward = 0
     
@@ -86,6 +85,6 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change):
     tilt_reward = jp.interp(tilt_amt, jp.array([UPRIGHT_REWARD_MIN_TILT, UPRIGHT_REWARD_MAX_TILT_FOR_REWARD, UPRIGHT_REWARD_MAX_PENALTY_TILT]), jp.array([UPRIGHT_MAX_REWARD, 0, UPRIGHT_MAX_PENALTY]))
     reward += tilt_reward
 
-    reward = jp.where(isTouchingGround, 0, reward)
+    reward = jp.where(isTouchingGround or isSelfColliding, 0, reward)
     
-    return reward, isTouchingGround
+    return reward, isTouchingGround or isSelfColliding
