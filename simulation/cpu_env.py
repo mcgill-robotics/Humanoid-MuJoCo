@@ -296,6 +296,7 @@ class CPUEnv(gym.Env):
       truncated = True
     
     if terminated or truncated: info = {"is_success": truncated}
+    else: info = {}
     
     return self._get_obs(), reward, terminated, truncated, info
     
@@ -310,15 +311,12 @@ class CPUEnv(gym.Env):
       return frame
     
 if __name__ == "__main__":
-    sim = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
-    obs = sim.reset()
-    
-    while True:
-      isTerminal = False
-      while not isTerminal:
-        # action = np.random.uniform(-1, 1, 16)
-        action = None
-        obs, reward, isTerminal, _, _ = sim.step(action)
-        print(reward)
-        sim.render("human")
-      obs = sim.reset()
+  sim = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
+  obs = sim.reset()
+  
+  while True:
+    # action = np.random.uniform(-1, 1, 16)
+    action = None
+    obs, reward, isTerminal, _, _ = sim.step(action)
+    print(reward)
+    sim.render("human")

@@ -41,7 +41,7 @@ env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,
     xml_path=SIM_XML_PATH,
     reward_fn=standingRewardFn,
-    randomization_factor=1
+    randomization_factor=0
 ))
 
 print("\nInitializing environment...      ", end='')
@@ -60,7 +60,7 @@ print("Done")
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
                                     reward_fn=standingRewardFn,
-                                    randomization_factor=1
+                                    randomization_factor=0
                                 )]))
 
 print("\nBeginning training.\n")
@@ -126,7 +126,7 @@ else:
 ##########################
 
 checkpoint_callback = CheckpointCallback(
-  save_freq=POLICY_ITERATIONS // 10,
+  save_freq=POLICY_UPDATE_TIMESTEPS * 50,
   save_path=checkpoint_log_dir,
   name_prefix="checkpoint",
   verbose=2
@@ -135,7 +135,7 @@ checkpoint_callback = CheckpointCallback(
 randomization_increase_callback = IncreaseRandomizationOnNoModelImprovement(envs=[env, eval_env], randomization_increment=0.1)
 
 eval_callback = EvalCallback(eval_env, best_model_save_path=checkpoint_log_dir,
-                              log_path=log_dir, eval_freq=POLICY_ITERATIONS // 100,
+                              log_path=log_dir, eval_freq=POLICY_UPDATE_TIMESTEPS * 10,
                               n_eval_episodes=N_EVAL_EPISODES, deterministic=True,
                               render=False, callback_after_eval=randomization_increase_callback, verbose=0)
 

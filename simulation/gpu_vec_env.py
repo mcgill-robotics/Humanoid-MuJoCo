@@ -319,7 +319,7 @@ class GPUVecEnv(VecEnv):
     obs = self._get_obs()
     rewards, terminals = self._get_rewards()
     truncated = np.any(self.data_batch.time >= max_simulation_time)
-    done = truncated or np.any(terminals)
+    done = truncated or np.all(terminals)
     dones = np.full(terminals.shape, done)
     infos = [{}]*self.num_envs    
     
@@ -335,21 +335,18 @@ class GPUVecEnv(VecEnv):
     return obs, rewards, dones, infos
   
 if __name__ == "__main__":
-    sim_batch = GPUVecEnv(num_envs=256,
-                                   xml_path=SIM_XML_PATH,
-                                   reward_fn=standingRewardFn,
-                                   randomization_factor=1,
-                                   verbose=True)
+  sim_batch = GPUVecEnv(num_envs=256,
+                                  xml_path=SIM_XML_PATH,
+                                  reward_fn=standingRewardFn,
+                                  randomization_factor=1,
+                                  verbose=True)
 
-    obs = sim_batch.reset()
+  obs = sim_batch.reset()
 
-    while True:
-      areTerminal = np.array([False])
-      while not np.all(areTerminal):
-        actions = np.random.uniform(-1, 1, (sim_batch.num_envs, 16))
-        actions = None
-        obs, rewards, terminals, _ = sim_batch.step(actions)
-        # print(rewards[0])
-        if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
-            print("ERROR: NaN value in observations/rewards/terminals.")
-      sim_batch.reset()
+  while True:
+    actions = np.random.uniform(-1, 1, (sim_batch.num_envs, 16))
+    actions = None
+    obs, rewards, terminals, _ = sim_batch.step(actions)
+    # print(rewards[0])
+    if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
+        print("ERROR: NaN value in observations/rewards/terminals.")
