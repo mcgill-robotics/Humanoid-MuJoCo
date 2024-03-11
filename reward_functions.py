@@ -85,6 +85,10 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     tilt_reward = jp.interp(tilt_amt, jp.array([UPRIGHT_REWARD_MIN_TILT, UPRIGHT_REWARD_MAX_TILT_FOR_REWARD, UPRIGHT_REWARD_MAX_PENALTY_TILT]), jp.array([UPRIGHT_MAX_REWARD, 0, UPRIGHT_MAX_PENALTY]))
     reward += tilt_reward
 
-    reward = jp.where(isTouchingGround or isSelfColliding, 0, reward)
+    reward = jp.where(isTouchingGround, 0, reward)
+    reward = jp.where(isSelfColliding, 0, reward)
     
-    return reward, isTouchingGround or isSelfColliding
+    terminal = jp.where(isTouchingGround, True, False)
+    terminal = jp.where(isSelfColliding, True, terminal)
+    
+    return reward, terminal

@@ -36,7 +36,7 @@ class GPUVecEnv(VecEnv):
     self.randomization_factor = randomization_factor
     self.timestep = timestep
     self.num_envs = num_envs
-    self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt, ac : reward_fn(v, z, q, jt, ac)))
+    self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt, ac, sc : reward_fn(v, z, q, jt, ac, sc)))
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
     self.rng = jax.random.split(self.rng_key, self.num_envs)
@@ -147,9 +147,6 @@ class GPUVecEnv(VecEnv):
     # get pressure sensor geom ids
     self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
     self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
-
-    def checkSelfCollision(non_robot_geom_ids, d):
-      return jp.where((jp.where(d.contact.geom1 not in non_robot_geom_ids, 1, 0) + jp.where(d.contact.geom2 not in non_robot_geom_ids, 1, 0)) == 2, True, False)
   
     self.isSelfColliding = jax.jit(jax.vmap(checkSelfCollision, in_axes=(None, 0)))
     
@@ -325,7 +322,7 @@ class GPUVecEnv(VecEnv):
     
     obs = self._get_obs()
     rewards, terminals = self._get_rewards()
-    truncated = np.any(self.data_batch.time >= max_simulation_time)
+    truncated = np.all(self.data_batch.time >= max_simulation_time)
     done = truncated or np.any(terminals)
     dones = np.full(terminals.shape, done)
     infos = [{}]*self.num_envs    
@@ -334,7 +331,7 @@ class GPUVecEnv(VecEnv):
     if done:
       for env_idx in range(self.num_envs):
         infos[env_idx]["terminal_observation"] = obs[env_idx]
-        infos[env_idx]["TimeLimit.truncated"] = truncated and not terminals[env_idx]
+        infos[env_idx]["TimeLimit.truncated"] = not terminals[env_idx]
       obs = self.reset()
           
     if self.verbose: print("Done")

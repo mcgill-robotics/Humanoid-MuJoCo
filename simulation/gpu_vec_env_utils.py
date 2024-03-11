@@ -78,5 +78,12 @@ def applyExternalForces(sim_batch):
 
   return jp.array(xfrc_applied, dtype=float)
 
+def checkSelfCollision(non_robot_geom_ids, d):
+  robot_collisions = jp.full(d.contact.geom1.shape, 0.0)
+  for id in non_robot_geom_ids:
+    robot_collisions += jp.where(d.contact.geom1 == id, 1, 0)
+    robot_collisions += jp.where(d.contact.geom2 == id, 1, 0)
+  return jp.any(robot_collisions >= 2)
+
 # helper functions
 inverseRotateVectors = jax.jit(jax.vmap(lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)))
