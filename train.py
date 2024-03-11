@@ -29,9 +29,9 @@ os.makedirs(log_dir, exist_ok=True)
 ##########################
 
 NUM_ENVS = 256
-N_EVAL_EPISODES = 20
+N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 24
+POLICY_UPDATE_TIMESTEPS = 24 # paper did policy iteration every ~0.24 seconds, our control frequency is 20Hz so that equates to 5 iterations of the sim 
 TOTAL_TIMESTEPS = 4096 * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
@@ -41,13 +41,8 @@ env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,
     xml_path=SIM_XML_PATH,
     reward_fn=standingRewardFn,
-    randomization_factor=0
+    randomization_factor=1
 ))
-# env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
-#                                 xml_path=SIM_XML_PATH,
-#                                 reward_fn=standingRewardFn,
-#                                 randomization_factor=0
-#                             )]*NUM_ENVS))
 
 print("\nInitializing environment...      ", end='')
 env.reset()
@@ -56,13 +51,20 @@ print("\nStepping environment...          ", end='')
 env.step(None)
 print("Done")
 
-print("\nBeginning training.\n")
+# env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
+#                                     xml_path=SIM_XML_PATH,
+#                                     reward_fn=standingRewardFn,
+#                                     randomization_factor=0
+#                                 )] * NUM_ENVS))
 
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
                                     reward_fn=standingRewardFn,
-                                    randomization_factor=0
-                                )] * N_EVAL_EPISODES))
+                                    randomization_factor=1
+                                )]))
+
+print("\nBeginning training.\n")
+
 
 if CHECKPOINT is None:
     policy = lambda : ActorCriticPolicy(
@@ -123,20 +125,19 @@ else:
 ##  TRAINING CALLBACKS  ##
 ##########################
 
-
 checkpoint_callback = CheckpointCallback(
   save_freq=POLICY_ITERATIONS // 10,
   save_path=checkpoint_log_dir,
-  name_prefix="checkpoint"
+  name_prefix="checkpoint",
+  verbose=2
 )
 
-randomization_increase_callback = IncreaseRandomizationOnNoModelImprovement(max_no_improvement_evals=15, envs=[env, eval_env], randomization_increment=0.1, min_evals=50)
+randomization_increase_callback = IncreaseRandomizationOnNoModelImprovement(envs=[env, eval_env], randomization_increment=0.1)
 
 eval_callback = EvalCallback(eval_env, best_model_save_path=checkpoint_log_dir,
-                              log_path=log_dir, eval_freq=1,
+                              log_path=log_dir, eval_freq=10,
                               n_eval_episodes=N_EVAL_EPISODES, deterministic=True,
-                              render=False, callback_after_eval=randomization_increase_callback)
-
+                              render=False, callback_after_eval=randomization_increase_callback, verbose=0)
 
 model.learn(total_timesteps=TOTAL_TIMESTEPS,
             callback=[checkpoint_callback, eval_callback],

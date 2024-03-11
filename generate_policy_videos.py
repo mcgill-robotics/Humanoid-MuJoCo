@@ -15,7 +15,7 @@ video_dir = "data/policy_videos/"
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
     reward_fn=standingRewardFn,
-    randomization_factor=0
+    randomization_factor=1
 )
 
 ppo_agent = PPO.load(

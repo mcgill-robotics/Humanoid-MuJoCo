@@ -100,7 +100,7 @@ class CPUEnv(gym.Env):
     # floor friction (0.5 to 1.0)
     self.model.geom('floor').friction = [coef * (1.0*(1.0-self.randomization_factor) + random.uniform(FLOOR_FRICTION_MIN_MULTIPLIER, FLOOR_FRICTION_MAX_MULTIPLIER)*self.randomization_factor) for coef in self.model.geom('floor').friction]    
     # vary the mass of all limbs randomly
-    for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] += random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor)
+    for i in range(self.model.nbody-1): self.model.body(i+1).mass[0] = max(0.01, self.model.body(i+1).mass[0] + random.uniform(-MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor, MAX_MASS_CHANGE_PER_LIMB*self.randomization_factor))
     # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
     self.model.body(random.randint(1, self.model.nbody - 1)).mass[0] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED*self.randomization_factor)
     # randomize joint properties  
@@ -291,9 +291,11 @@ class CPUEnv(gym.Env):
     
     reward, terminated = self._get_reward()
     
-    if self.data.time >= max_simulation_time: terminated = True
+    truncated = False
+    if self.data.time >= max_simulation_time:
+      truncated = True
     
-    return self._get_obs(), reward, terminated, False, {}
+    return self._get_obs(), reward, terminated, truncated, {}
     
   def render(self, mode="rgb_array"):
     if not os.environ.get('RENDER_SIM', "True") == "True": return None
