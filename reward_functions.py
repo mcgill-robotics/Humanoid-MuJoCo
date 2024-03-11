@@ -50,6 +50,9 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     UPRIGHT_MAX_PENALTY = -0.1 # CUSTOM -> paper does not penalize high tilts
     # CUSTOM: offset the reward by 0.5 since, through testing, 0.5 is ideal reward and -0.5 is worst state possible
     CONSTANT_REWARD_OFFSET = 0.5
+    # CUSTOM: penalize self-collisions
+    TERMINATE_ON_SELF_COLLISION = False
+    SELF_COLLISION_PENALTY = -0.1
     
     ### COMPUTE REWARD
     reward = 0
@@ -85,10 +88,11 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     tilt_reward = jp.interp(tilt_amt, jp.array([UPRIGHT_REWARD_MIN_TILT, UPRIGHT_REWARD_MAX_TILT_FOR_REWARD, UPRIGHT_REWARD_MAX_PENALTY_TILT]), jp.array([UPRIGHT_MAX_REWARD, 0, UPRIGHT_MAX_PENALTY]))
     reward += tilt_reward
 
+    if TERMINATE_ON_SELF_COLLISION: reward = jp.where(isSelfColliding, 0, reward)
+    else: reward = jp.where(isSelfColliding, reward + SELF_COLLISION_PENALTY, reward)
     reward = jp.where(isTouchingGround, 0, reward)
-    reward = jp.where(isSelfColliding, 0, reward)
     
     terminal = jp.where(isTouchingGround, True, False)
-    terminal = jp.where(isSelfColliding, True, terminal)
+    if TERMINATE_ON_SELF_COLLISION: terminal = jp.where(isSelfColliding, True, terminal)
     
     return reward, terminal
