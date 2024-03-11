@@ -295,7 +295,9 @@ class CPUEnv(gym.Env):
     if self.data.time >= max_simulation_time:
       truncated = True
     
-    return self._get_obs(), reward, terminated, truncated, {}
+    if terminated or truncated: info = {"is_success": truncated}
+    
+    return self._get_obs(), reward, terminated, truncated, info
     
   def render(self, mode="rgb_array"):
     if not os.environ.get('RENDER_SIM', "True") == "True": return None

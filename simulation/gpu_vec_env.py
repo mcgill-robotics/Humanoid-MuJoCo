@@ -316,13 +316,23 @@ class GPUVecEnv(VecEnv):
     self.previous_torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[:, 3:])
     self.data_batch = self.jax_single_step(self.model, self.data_batch)
     
+    obs = self._get_obs()
     rewards, terminals = self._get_rewards()
+    truncated = np.any(self.data_batch.time >= max_simulation_time)
+    done = truncated or np.any(terminals)
+    dones = np.full(terminals.shape, done)
+    infos = [{}]*self.num_envs    
     
-    terminals[self.data_batch.time >= max_simulation_time] = True
-    
+    # automatically reset environment if any instance terminates
+    if done:
+      for env_idx in range(self.num_envs):
+        infos[env_idx]["terminal_observation"] = obs[env_idx]
+        infos[env_idx]["TimeLimit.truncated"] = truncated and not terminals[env_idx]
+      obs = self.reset()
+          
     if self.verbose: print("Done")
     
-    return self._get_obs(), rewards, terminals, [{}]*self.num_envs
+    return obs, rewards, dones, infos
   
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(num_envs=256,
