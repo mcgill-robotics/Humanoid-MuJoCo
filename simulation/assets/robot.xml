@@ -74,12 +74,12 @@
                   <body name="left_foot_asm" pos="0 0.0201 0.016" quat="9.38184e-07 9.38187e-07 -0.707108 -0.707105">
                     <inertial pos="0.0312589 0.00414298 0.000817452" quat="0.690732 0.0174038 0.027193 0.72239" mass="0.12139" diaginertia="0.000968473 0.000774227 0.000470766"/>
                     <!-- CUSTOM -->
-                    <geom name="pressure_geom_LRB" size="0.002 0.002" pos="0.052 -0.0435 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
-                    <geom name="pressure_geom_LRF" size="0.002 0.002" pos="0.052 -0.0435 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
-                    <geom name="pressure_geom_LLB" size="0.002 0.002" pos="0.052 0.0325 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
-                    <geom name="pressure_geom_LLF" size="0.002 0.002" pos="0.052 0.0325 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_LRB" size="0.002 0.002" pos="0.052 -0.02175 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_LRF" size="0.002 0.002" pos="0.052 -0.02175 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_LLB" size="0.002 0.002" pos="0.052 0.01625 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_LLF" size="0.002 0.002" pos="0.052 0.01625 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
                     <!-- CUSTOM -->
-                    <geom size="0.046 0.046 0.0015" pos="0.0415 0.0055 -0.00483" quat="0.499998 -0.5 -0.500002 0.5" type="box" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom size="0.023 0.046 0.0015" pos="0.0415 0.0055 -0.00483" quat="0.499998 -0.5 -0.500002 0.5" type="box" rgba="0.301961 0.290196 0.262745 1"/>
                   </body>
                 </body>
               </body>
@@ -112,12 +112,12 @@
                   <body name="right_foot_asm" pos="0 0.0201 -0.016" quat="9.38184e-07 9.38187e-07 0.707108 0.707105">
                     <inertial pos="0.0312589 -0.00414302 0.000817452" quat="0.72044 0.0321563 0.0127286 0.692654" mass="0.12139" diaginertia="0.000968674 0.000774326 0.000470465"/>
                     <!-- CUSTOM -->
-                    <geom name="pressure_geom_RRB" size="0.002 0.002" pos="0.052 -0.0435 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
-                    <geom name="pressure_geom_RRF" size="0.002 0.002" pos="0.052 -0.0435 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
-                    <geom name="pressure_geom_RLB" size="0.002 0.002" pos="0.052 0.0325 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
-                    <geom name="pressure_geom_RLF" size="0.002 0.002" pos="0.052 0.0325 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_RRB" size="0.002 0.002" pos="0.052 -0.02175 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_RRF" size="0.002 0.002" pos="0.052 -0.02175 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_RLB" size="0.002 0.002" pos="0.052 0.01625 -0.03781" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom name="pressure_geom_RLF" size="0.002 0.002" pos="0.052 0.01625 0.03298" quat="0.0210188 0.706794 0.021024 0.706794" type="capsule" rgba="0.301961 0.290196 0.262745 1"/>
                     <!-- CUSTOM -->
-                    <geom size="0.046 0.046 0.0015" pos="0.0415 -0.0055 -0.00483" quat="0.499998 -0.5 -0.500002 0.5" type="box" rgba="0.301961 0.290196 0.262745 1"/>
+                    <geom size="0.023 0.046 0.0015" pos="0.0415 -0.0055 -0.00483" quat="0.499998 -0.5 -0.500002 0.5" type="box" rgba="0.301961 0.290196 0.262745 1"/>
                   </body>
                 </body>
               </body>
@@ -131,10 +131,10 @@
   
   <!-- CUSTOM -->
   <actuator>
-    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-0.4 0.4" kp="32" kv="0.1"/>
-    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-0.4 0.4" kp="32" kv="0.1"/>
-    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-0.4 0.4" kp="32" kv="0.1"/>
-    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-0.4 0.4" kp="32" kv="0.1"/>
+    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
+    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
+    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
+    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
     <position name="left_hip_yaw" joint="left_hip_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
     <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
     <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>

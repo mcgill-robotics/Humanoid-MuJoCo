@@ -19,8 +19,14 @@ ppo_agent = PPO.load(
 while True:
     done = False
     obs, _ = env.reset()
+    total_reward = 0
+    episode_length = 0
     while not done:
         action, _ = ppo_agent.predict(obs, deterministic=True)
         obs, reward, done, _, _ = env.step(action)
+        if not done:
+            episode_length += 1
+            total_reward += reward
         print(reward)
         env.render("human")
+    print(" >>> Episode Length {}, Total Reward {}".format(episode_length, total_reward))
