@@ -322,8 +322,8 @@ class GPUVecEnv(VecEnv):
     
     obs = self._get_obs()
     rewards, terminals = self._get_rewards()
-    truncated = np.all(self.data_batch.time >= max_simulation_time)
-    done = truncated or np.any(terminals)
+    truncated = np.any(self.data_batch.time >= max_simulation_time)
+    done = truncated or np.all(terminals)
     dones = np.full(terminals.shape, done)
     infos = [{}]*self.num_envs    
     
