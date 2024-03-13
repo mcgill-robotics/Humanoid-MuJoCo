@@ -40,7 +40,7 @@ PRESSURE_SENSOR_NOISE_STDDEV = 1 #N
 VELOCIMETER_NOISE_STDDEV = 0.05 # m/s
 
 desired_control_frequency = 100
-timestep = 0.0005
+timestep = 0.001
 physics_steps_per_control_step = int((1.0/desired_control_frequency) // timestep)
 max_simulation_time = 10
 

@@ -31,11 +31,11 @@ os.makedirs(log_dir, exist_ok=True)
 NUM_ENVS = 256
 N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 24 # paper did policy iteration every ~0.24 seconds
+POLICY_UPDATE_TIMESTEPS = 1000 #24 # paper did policy iteration every ~0.24 seconds
 TOTAL_TIMESTEPS = 4096 * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
 CHECKPOINT = None
-EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
-CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 100
+EVAL_FREQ = POLICY_UPDATE_TIMESTEPS * 10
+CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 50
 
 env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,
@@ -75,7 +75,7 @@ if CHECKPOINT is None:
         activation_fn = nn.ELU,
         ortho_init = True,
         use_sde = True,
-        log_std_init = 0,
+        log_std_init = -1,
         full_std = False,
         use_expln = False,
         squash_output = False,
@@ -126,7 +126,7 @@ else:
 ##########################
 
 checkpoint_callback = CheckpointCallback(
-  save_freq=POLICY_UPDATE_TIMESTEPS * 50,
+  save_freq=CHECKPOINT_FREQ,
   save_path=checkpoint_log_dir,
   name_prefix="checkpoint",
   verbose=2
@@ -135,7 +135,7 @@ checkpoint_callback = CheckpointCallback(
 randomization_increase_callback = IncreaseRandomizationOnNoModelImprovement(envs=[env, eval_env], randomization_increment=0.1)
 
 eval_callback = EvalCallback(eval_env, best_model_save_path=checkpoint_log_dir,
-                              log_path=log_dir, eval_freq=POLICY_UPDATE_TIMESTEPS * 10,
+                              log_path=log_dir, eval_freq=EVAL_FREQ,
                               n_eval_episodes=N_EVAL_EPISODES, deterministic=True,
                               render=False, callback_after_eval=randomization_increase_callback, verbose=0)
 
