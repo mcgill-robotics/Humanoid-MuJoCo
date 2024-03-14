@@ -351,6 +351,6 @@ if __name__ == "__main__":
     actions = np.random.uniform(-1, 1, (sim_batch.num_envs, 16))
     actions = None
     obs, rewards, terminals, _ = sim_batch.step(actions)
-    # print(rewards[0])
+    print(rewards[0])
     if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
         print("ERROR: NaN value in observations/rewards/terminals.")

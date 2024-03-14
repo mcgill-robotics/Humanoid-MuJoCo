@@ -6,9 +6,7 @@ from simulation import SIM_XML_PATH
 import torch
 from torch import nn
 from stable_baselines3 import PPO
-from stable_baselines3.common.policies import ActorCriticPolicy
-from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
-from ppo_training_randomization_callback import IncreaseRandomizationOnNoModelImprovement
+from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.torch_layers import FlattenExtractor
 from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv
 
@@ -19,10 +17,7 @@ from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv
 # Set environment variable to disable rendering
 os.environ["RENDER_SIM"] = "False"
 
-checkpoint_log_dir = "data/training_weights"
-log_dir = "data/training_logs"
-os.makedirs(checkpoint_log_dir, exist_ok=True)
-os.makedirs(log_dir, exist_ok=True)
+log_dir = "data/training_results"
 
 ##########################
 ##    HYPERPARAMETERS   ##
@@ -31,11 +26,12 @@ os.makedirs(log_dir, exist_ok=True)
 NUM_ENVS = 256
 N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 1000 #24 # paper did policy iteration every ~0.24 seconds
+POLICY_UPDATE_TIMESTEPS = 24 #24 # paper did policy iteration every ~0.24 seconds
 TOTAL_TIMESTEPS = 4096 * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS * 10
 CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 50
+RANDOMIZATION_INCREMENT = 0.1
 
 env = VecMonitor(GPUVecEnv(
     num_envs=NUM_ENVS,
@@ -46,8 +42,6 @@ env = VecMonitor(GPUVecEnv(
 
 print("\nInitializing environment...      ", end='')
 env.reset()
-print("Done")
-print("\nStepping environment...          ", end='')
 env.step(None)
 print("Done")
 
@@ -67,25 +61,21 @@ print("\nBeginning training.\n")
 
 
 if CHECKPOINT is None:
-    policy = lambda : ActorCriticPolicy(
-        observation_space = env.observation_space,
-        action_space = env.action_space,
-        lr_schedule = lambda lr : lr,
-        net_arch = [256,256,256],
-        activation_fn = nn.ELU,
-        ortho_init = True,
-        use_sde = True,
-        log_std_init = -1,
-        full_std = False,
-        use_expln = False,
-        squash_output = False,
-        features_extractor_class = FlattenExtractor,
-        features_extractor_kwargs = None,
-        share_features_extractor = True,
-        normalize_images = False,
-        optimizer_class = torch.optim.Adam,
-        optimizer_kwargs = None
-    )
+    policy_args = {
+        "net_arch": [256,256,256],
+        "activation_fn": nn.ELU,
+        "ortho_init": True,
+        "log_std_init": -2,
+        "full_std": False,
+        "use_expln": True,
+        "squash_output": False,
+        "features_extractor_class": FlattenExtractor,
+        "features_extractor_kwargs": None,
+        "share_features_extractor": True,
+        "normalize_images": False,
+        "optimizer_class": torch.optim.Adam,
+        "optimizer_kwargs": None
+    }
 
     model = PPO(
         policy = "MlpPolicy",
@@ -109,7 +99,7 @@ if CHECKPOINT is None:
         target_kl = None,
         stats_window_size = 100,
         tensorboard_log = None,
-        policy_kwargs = None,
+        policy_kwargs = policy_args,
         verbose = 1,
         seed = None,
         device = "auto",
@@ -122,26 +112,33 @@ else:
     )
 
 ##########################
-##  TRAINING CALLBACKS  ##
+##    TRAINING  LOOP    ##
 ##########################
 
-checkpoint_callback = CheckpointCallback(
-  save_freq=CHECKPOINT_FREQ,
-  save_path=checkpoint_log_dir,
-  name_prefix="checkpoint",
-  verbose=2
-)
+for randomization_factor in [x*RANDOMIZATION_INCREMENT for x in range(0, 11)]:
+    print(" >> TRAINING WITH RANDOMIZATION FACTOR {}".format(randomization_factor))
+    env.set_attr("randomization_factor", randomization_factor)
+    env.reset()
+    eval_env.set_attr("randomization_factor", randomization_factor)
+    eval_env.reset()
 
-randomization_increase_callback = IncreaseRandomizationOnNoModelImprovement(envs=[env, eval_env], randomization_increment=0.1)
+    checkpoint_callback = CheckpointCallback(save_freq=CHECKPOINT_FREQ,
+                                            save_path=log_dir + "_r{}".format(randomization_factor),
+                                            name_prefix="checkpoint",
+                                            verbose=1)
+    
+    stop_training_callback = StopTrainingOnRewardThreshold(reward_threshold=950, verbose=1)
 
-eval_callback = EvalCallback(eval_env, best_model_save_path=checkpoint_log_dir,
-                              log_path=log_dir, eval_freq=EVAL_FREQ,
-                              n_eval_episodes=N_EVAL_EPISODES, deterministic=True,
-                              render=False, callback_after_eval=randomization_increase_callback, verbose=0)
+    eval_callback = EvalCallback(eval_env, best_model_save_path=log_dir + "_r{}".format(randomization_factor),
+                                log_path=log_dir + "_r{}".format(randomization_factor), eval_freq=EVAL_FREQ,
+                                n_eval_episodes=N_EVAL_EPISODES, deterministic=True,
+                                render=False, callback_on_new_best=stop_training_callback, verbose=0)
 
-model.learn(total_timesteps=TOTAL_TIMESTEPS,
-            callback=[checkpoint_callback, eval_callback],
-            log_interval = 1,
-            tb_log_name = "Standing",
-            reset_num_timesteps = True,
-            progress_bar = True)
+    model.learn(total_timesteps=TOTAL_TIMESTEPS,
+                callback=[checkpoint_callback, eval_callback],
+                log_interval = 1,
+                tb_log_name = "Standing_r{}".format(randomization_factor),
+                reset_num_timesteps = False,
+                progress_bar = True)
+    
+    print(" >> COMPLETED TRAINING WITH RANDOMIZATION FACTOR {}".format(randomization_factor))

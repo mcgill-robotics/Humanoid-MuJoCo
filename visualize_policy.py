@@ -3,7 +3,7 @@ from simulation import SIM_XML_PATH
 from reward_functions import *
 from stable_baselines3 import PPO
 
-checkpoint = "./data/training_weights/best_model"
+checkpoint = "./data/training_results_r0/best_model"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,

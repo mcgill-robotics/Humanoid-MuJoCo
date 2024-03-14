@@ -90,6 +90,8 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
 
     if TERMINATE_ON_SELF_COLLISION: reward = jp.where(isSelfColliding, 0, reward)
     else: reward = jp.where(isSelfColliding, reward + SELF_COLLISION_PENALTY, reward)
+    
+    reward = jp.where(reward < 0, 0, reward)
     reward = jp.where(isTouchingGround, 0, reward)
     
     terminal = jp.where(isTouchingGround, True, False)

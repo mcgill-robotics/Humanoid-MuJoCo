@@ -1,16 +1,14 @@
 from simulation.cpu_env import CPUEnv
 from simulation import GREEN_SCREEN_SIM_XML_PATH
 from reward_functions import *
-import torch
 from stable_baselines3 import PPO
 import os
 import cv2
 
 
-checkpoint = "./data/training_weights/best_model"
+dir = "./data/training_results_r0/"
 num_videos = 9
 video_duration = 5 # seconds
-video_dir = "data/policy_videos/"
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
@@ -19,18 +17,18 @@ env = CPUEnv(
 )
 
 ppo_agent = PPO.load(
-    path=checkpoint,
+    path=dir + "best_model",
     env=env,
 )
 
-if not os.path.exists(video_dir):
-    os.makedirs(video_dir)
-video_file_name = os.path.splitext(os.path.basename(checkpoint))[0]
+if not os.path.exists(dir + "policy_videos/"):
+    os.makedirs(dir + "policy_videos/")
+video_file_name = os.path.splitext(os.path.basename(dir + "best_model"))[0]
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
 print("0%", end='\r')
 for v in range(num_videos):
-    video_writer = cv2.VideoWriter(video_dir + video_file_name + "_" + str(v) + ".mp4", fourcc, 30, (1080, 720))
+    video_writer = cv2.VideoWriter(dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4", fourcc, 30, (1080, 720))
     done = False
     obs, _ = env.reset()
     while env.data.time < video_duration:
