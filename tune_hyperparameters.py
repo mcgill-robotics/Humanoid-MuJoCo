@@ -20,7 +20,7 @@ if platform_choice == 0:
                 "--n-jobs", "2",
                 "--sampler", "tpe",
                 "--pruner", "median",
-                "--progress", "True",
+                "--progress",
                 "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 else:
