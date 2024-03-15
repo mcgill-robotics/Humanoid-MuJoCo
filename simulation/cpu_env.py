@@ -7,12 +7,12 @@ import mujoco
 import cv2
 import random
 from .simulation_parameters import *
-from reward_functions import *
+from simulation.reward_functions import *
 from simulation.simulation_parameters import physics_steps_per_control_step, timestep
 from jax.scipy.spatial.transform import Rotation
 import gc
 import os
-from simulation import SIM_XML_PATH
+from simulation import SIM_XML_PATH, reward_functions
 
 # STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
@@ -29,11 +29,12 @@ inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]
 
 class CPUEnv(gym.Env):
   metadata = {"render_modes": ["rgb_array"], "render_fps": 30}
-  def __init__(self, xml_path, reward_fn, randomization_factor=0, verbose=False):
+  def __init__(self, reward_fn, xml_path=SIM_XML_PATH, randomization_factor=0, verbose=False):
     self.platform = "CPU"
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
+    if type(reward_fn) == str: reward_fn = getattr(reward_functions, reward_fn)
     self.reward_fn = reward_fn
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.verbose = verbose

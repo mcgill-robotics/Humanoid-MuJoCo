@@ -6,12 +6,12 @@ import numpy as np
 from gymnasium import spaces
 from stable_baselines3.common.vec_env import VecEnv
 from .simulation_parameters import *
-from reward_functions import *
+from simulation.reward_functions import *
 from simulation.simulation_parameters import physics_steps_per_control_step, timestep
 import gc
 import random
 from .gpu_vec_env_utils import *
-from simulation import SIM_XML_PATH
+from simulation import SIM_XML_PATH, reward_functions
 
 # STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
@@ -25,7 +25,7 @@ from simulation import SIM_XML_PATH
     # previous action     5 · 20          Action filter state (stacked)
 
 class GPUVecEnv(VecEnv):
-  def __init__(self, num_envs, xml_path, reward_fn, randomization_factor=0, verbose=False):
+  def __init__(self, num_envs, reward_fn, xml_path=SIM_XML_PATH, randomization_factor=0, verbose=False):
     if jax.default_backend() != 'gpu':
       print("ERROR: Failed to find GPU device.")
       exit()
@@ -36,6 +36,7 @@ class GPUVecEnv(VecEnv):
     self.randomization_factor = randomization_factor
     self.timestep = timestep
     self.num_envs = num_envs
+    if type(reward_fn) == str: reward_fn = getattr(reward_functions, reward_fn)
     self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt, ac, sc : reward_fn(v, z, q, jt, ac, sc)))
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
@@ -340,10 +341,10 @@ class GPUVecEnv(VecEnv):
   
 if __name__ == "__main__":
   sim_batch = GPUVecEnv(num_envs=256,
-                                  xml_path=SIM_XML_PATH,
-                                  reward_fn=standingRewardFn,
-                                  randomization_factor=1,
-                                  verbose=True)
+                        xml_path=SIM_XML_PATH,
+                        reward_fn=standingRewardFn,
+                        randomization_factor=1,
+                        verbose=True)
 
   obs = sim_batch.reset()
 

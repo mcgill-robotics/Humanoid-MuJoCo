@@ -1,5 +1,5 @@
 import os
-from reward_functions import *
+from simulation.reward_functions import *
 from simulation.gpu_vec_env import GPUVecEnv
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
@@ -8,7 +8,7 @@ from torch import nn
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.torch_layers import FlattenExtractor
-from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv
+from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecNormalize
 
 ###########################
 ##  TRAINING PARAMETERS  ##
@@ -26,8 +26,8 @@ log_dir = "data/training_results"
 NUM_ENVS = 256
 N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 24 #24 # paper did policy iteration every ~0.24 seconds
-TOTAL_TIMESTEPS = 4096 * POLICY_ITERATIONS * POLICY_UPDATE_TIMESTEPS # paper had 4096 agents running
+POLICY_UPDATE_TIMESTEPS = 64
+TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS * 10
 CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 50
@@ -62,12 +62,12 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": [256,256,256],
+        "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
         "activation_fn": nn.ELU,
-        "ortho_init": True,
+        "ortho_init": False,
         "log_std_init": -2,
         "full_std": False,
-        "use_expln": True,
+        "use_expln": False,
         "squash_output": False,
         "features_extractor_class": FlattenExtractor,
         "features_extractor_kwargs": None,
@@ -89,7 +89,7 @@ if CHECKPOINT is None:
         clip_range = 0.2,
         clip_range_vf = None,
         normalize_advantage = True,
-        ent_coef = 0.1,
+        ent_coef = 0.0,
         vf_coef = 1.0,
         max_grad_norm = 0.5,
         use_sde = True,

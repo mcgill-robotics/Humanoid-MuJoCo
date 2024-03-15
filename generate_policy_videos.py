@@ -1,6 +1,6 @@
 from simulation.cpu_env import CPUEnv
 from simulation import GREEN_SCREEN_SIM_XML_PATH
-from reward_functions import *
+from simulation.reward_functions import *
 from stable_baselines3 import PPO
 import os
 import cv2
