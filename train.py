@@ -26,7 +26,7 @@ log_dir = "data/training_results"
 NUM_ENVS = 256
 N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 64
+POLICY_UPDATE_TIMESTEPS = 24
 TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS * 10
@@ -65,7 +65,7 @@ if CHECKPOINT is None:
         "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
         "activation_fn": nn.ELU,
         "ortho_init": False,
-        "log_std_init": -2,
+        "log_std_init": -5,
         "full_std": False,
         "use_expln": False,
         "squash_output": False,
@@ -89,7 +89,7 @@ if CHECKPOINT is None:
         clip_range = 0.2,
         clip_range_vf = None,
         normalize_advantage = True,
-        ent_coef = 0.0,
+        ent_coef = 0.01,
         vf_coef = 1.0,
         max_grad_norm = 0.5,
         use_sde = True,

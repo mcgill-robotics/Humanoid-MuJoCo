@@ -58,7 +58,7 @@ class GPUVecEnv(VecEnv):
     
     self.action_space = spaces.Box(-1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32)
     observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
-    self.observation_space = spaces.Box(-1000, 1000, shape=(observation_size,), dtype=np.float32)
+    self.observation_space = spaces.Box(-10, 10, shape=(observation_size,), dtype=np.float32)
     
     super().__init__(self.num_envs, self.observation_space, self.action_space)
   
@@ -109,7 +109,7 @@ class GPUVecEnv(VecEnv):
     self.rng_key = jax.random.PRNGKey(seed)
     self.rng = jax.random.split(self.rng_key, self.num_envs)
     
-  def reset(self, seed=None):
+  def reset(self, seed=None, options=None):
     self.close()
     
     if self.verbose: print("Initializing simulations...      ", end='')
