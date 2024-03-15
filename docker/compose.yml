@@ -7,7 +7,7 @@ services:
     volumes:
       - ../.:/root/Humanoid-MuJoCo
     image: "mcgillrobotics/mujoco:latest"
-    command: bash -c "pip3 install git+https://github.com/mcgill-robotics/Humanoid-rl-baselines3-zoo.git@master && tail -f /dev/null"
+    command: bash -c "tail -f /dev/null"
     deploy:
       resources:
         reservations:

@@ -20,6 +20,7 @@ RUN pip3 install torch torchvision torchaudio --index-url https://download.pytor
 RUN pip3 install nvidia-cudnn-cu11==8.9.6.50
 RUN pip3 install stable-baselines3[extra]
 RUN pip3 install tensorflow
+RUN pip3 install git+https://github.com/mcgill-robotics/Humanoid-rl-baselines3-zoo.git@master
 
 RUN apt-get autoremove -y
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
