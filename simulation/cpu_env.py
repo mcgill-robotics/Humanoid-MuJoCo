@@ -43,15 +43,16 @@ class CPUEnv(gym.Env):
 
     self.action_space = spaces.Box(-1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32)
     observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
-    self.observation_space = spaces.Box(-1000, 1000, shape=(observation_size,), dtype=np.float32)
+    self.observation_space = spaces.Box(-10, 10, shape=(observation_size,), dtype=np.float32)
     
-  def reset(self, seed=0, options=None):
+  def reset(self, seed=None, options=None):
     try:
       del self.renderer
     except: pass
     
     super().reset(seed=seed)
     if seed is not None: self.rng_key = jax.random.PRNGKey(seed)
+    else: self.rng_key = jax.random.PRNGKey(random.randint(0, 100))
     
     if self.verbose: print("Creating new simulation...       ", end='')
     
@@ -234,7 +235,7 @@ class CPUEnv(gym.Env):
   
     if self.verbose: print("Done")
     
-    return np.array(delayed_observations)
+    return np.array(delayed_observations, dtype=np.float32)
     
   def _get_reward(self):
     if self.verbose: print("Computing reward...              ", end='')
@@ -304,7 +305,7 @@ class CPUEnv(gym.Env):
     if terminated or truncated: info = {"is_success": truncated}
     else: info = {}
     
-    return self._get_obs(), reward, terminated, truncated, info
+    return self._get_obs(), float(reward), bool(terminated), truncated, info
     
   def render(self, mode="rgb_array"):
     if not os.environ.get('RENDER_SIM', "True") == "True": return None

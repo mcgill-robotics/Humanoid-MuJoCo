@@ -5,7 +5,9 @@ from stable_baselines3.common.torch_layers import FlattenExtractor
 # TAKEN FROM RL ZOO HYPERPARAMS FOR Humanoid-v4 mujoco environment
 default_hyperparams = dict(
     policy = 'MlpPolicy',
+    normalize = True,
     n_timesteps = 1e7,
+    n_envs = 32,
     batch_size = 256,
     n_steps = 512,
     gamma = 0.95,

@@ -1,15 +1,10 @@
 import sys
+import os
 from rl_zoo3.train import train
-from gymnasium.envs.registration import register
+import simulation
 
-register(
-    id='GPUHumanoid',
-    entry_point='simulation.gpu_vec_env:GPUVecEnv'
-)
-register(
-    id='CPUHumanoid',
-    entry_point='simulation.cpu_env:CPUEnv'
-)
+# Set environment variable to disable rendering
+os.environ["RENDER_SIM"] = "False"
 
 reward_fn = "standingRewardFn"
 
@@ -25,7 +20,8 @@ if platform_choice == 0:
                 "--n-jobs", "2",
                 "--sampler", "tpe",
                 "--pruner", "median",
-                "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "render_mode:",
+                "--progress", "True",
+                "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 else:
     sys.argv = ["python", "-optimize",
@@ -37,6 +33,7 @@ else:
                 "--n-jobs", "2",
                 "--sampler", "tpe",
                 "--pruner", "median",
-                "--env-kwargs", "num_envs:256", "reward_fn:\"{}\"".format(reward_fn),
+                "--progress",
+                "--env-kwargs", "num_envs:256", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 train()
