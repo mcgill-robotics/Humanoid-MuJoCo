@@ -21,6 +21,7 @@ if platform_choice == 0:
                 "--sampler", "tpe",
                 "--pruner", "median",
                 "-P",
+                "--verbose", "0",
                 "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 else:
@@ -30,11 +31,12 @@ else:
                 "--log-folder", "data/tuning_logs",
                 "-n", "50000",
                 "--n-trials", "1000",
-                "--n-jobs", "16",
+                "--n-jobs", "1",
                 "--sampler", "tpe",
                 "--pruner", "median",
                 "-P",
                 "--env-is-vectorized",
+                "--verbose", "0",
                 "--env-kwargs", "num_envs:256", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 train()
