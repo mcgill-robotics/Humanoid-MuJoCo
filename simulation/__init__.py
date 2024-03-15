@@ -9,7 +9,9 @@ GREEN_SCREEN_SIM_XML_PATH = os.path.dirname(init_file_path) + "/assets/green_scr
 # Register environments
 register(
     id='GPUHumanoid',
+    order_enforce=False,
     entry_point='simulation.gpu_vec_env:GPUVecEnv',
+    vector_entry_point='simulation.gpu_vec_env:GPUVecEnv',
     disable_env_checker = True
 )
 register(

@@ -253,7 +253,7 @@ class CPUEnv(gym.Env):
     
     if self.verbose: print("Done")
 
-    return np.array(reward), isTerminal
+    return float(reward), bool(isTerminal)
     
   def step(self, action=None):
     if self.verbose: print("Stepping simulation...           ", end='')
@@ -305,7 +305,7 @@ class CPUEnv(gym.Env):
     if terminated or truncated: info = {"is_success": truncated}
     else: info = {}
     
-    return self._get_obs(), float(reward), bool(terminated), truncated, info
+    return self._get_obs(), reward, terminated, truncated, info
     
   def render(self, mode="rgb_array"):
     if not os.environ.get('RENDER_SIM', "True") == "True": return None
