@@ -22,6 +22,8 @@ if platform_choice == 0:
                 "--pruner", "median",
                 "-P",
                 "--verbose", "0",
+                "--save-freq", "1",
+                "--log-interval", "1",
                 "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 else:
@@ -37,6 +39,8 @@ else:
                 "-P",
                 "--env-is-vectorized",
                 "--verbose", "0",
+                "--save-freq", "1",
+                "--log-interval", "1",
                 "--env-kwargs", "num_envs:256", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 train()
