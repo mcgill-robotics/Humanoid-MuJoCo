@@ -20,6 +20,8 @@ RUN pip3 install torch torchvision torchaudio --index-url https://download.pytor
 RUN pip3 install nvidia-cudnn-cu11==8.9.6.50
 RUN pip3 install stable-baselines3[extra]
 RUN pip3 install tensorflow
+# THIS LINE IS TO PREVENT DOCKER FROM CACHING THE PIP INSTALL SINCE IT CHANGES WHEN WE PUSH TO THE REPO
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN pip3 install git+https://github.com/mcgill-robotics/Humanoid-rl-baselines3-zoo.git@master
 
 RUN apt-get autoremove -y
