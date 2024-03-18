@@ -33,7 +33,6 @@ else:
                 "--log-folder", "data/tuning_logs",
                 "-n", "4096",
                 "--n-trials", "1000",
-                "--num-threads", "1",
                 "--sampler", "tpe",
                 "--pruner", "median",
                 "-P",
@@ -41,6 +40,6 @@ else:
                 "--verbose", "0",
                 "--save-freq", "1",
                 "--log-interval", "1",
-                "--env-kwargs", "num_envs:256", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
+                "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
                 "--conf-file", "simulation.hyperparam_config"]
 train()
