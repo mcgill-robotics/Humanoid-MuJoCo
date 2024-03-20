@@ -23,10 +23,13 @@ log_dir = "data/training_results"
 ##    HYPERPARAMETERS   ##
 ##########################
 
+# FROM RL ZOO 3 HYPERPARAMETER TUNING
+# Trial 44 finished with value: 452.2629128 and parameters: {'batch_size': 32, 'n_steps': 2048, 'gamma': 0.95, 'learning_rate': 0.00021243303991845677, 'ent_coef': 0.0001223532933316859, 'clip_range': 0.1, 'n_epochs': 5, 'gae_lambda': 0.99, 'max_grad_norm': 0.7, 'vf_coef': 0.6215142166966646, 'net_arch': 'medium', 'log_std_init': -2.9863975746713614, 'sde_sample_freq': -1, 'ortho_init': True, 'activation_fn': 'elu', 'lr_schedule': 'linear'}. Best is trial 44 with value: 452.2629128.
+
 NUM_ENVS = 256
 N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 24
+POLICY_UPDATE_TIMESTEPS = 2048
 TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS * 10
@@ -62,10 +65,11 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
+        "lr_schedule": lambda progress : progress * 0.0002,
+        "net_arch": dict(pi=[256,256], vf=[256,256]),
         "activation_fn": nn.ELU,
-        "ortho_init": False,
-        "log_std_init": -5,
+        "ortho_init": True,
+        "log_std_init": -3,
         "full_std": False,
         "use_expln": False,
         "squash_output": False,
@@ -80,18 +84,18 @@ if CHECKPOINT is None:
     model = PPO(
         policy = "MlpPolicy",
         env = env,
-        learning_rate = 0.00001,
+        learning_rate = 0.0002,
         n_steps = POLICY_UPDATE_TIMESTEPS,
-        batch_size = 64,
-        n_epochs = 10,
-        gamma = 0.99,
-        gae_lambda = 0.95,
-        clip_range = 0.2,
+        batch_size = 32,
+        n_epochs = 5,
+        gamma = 0.95,
+        gae_lambda = 0.99,
+        clip_range = 0.1,
         clip_range_vf = None,
         normalize_advantage = True,
-        ent_coef = 0.01,
-        vf_coef = 1.0,
-        max_grad_norm = 0.5,
+        ent_coef = 0.0001,
+        vf_coef = 0.6,
+        max_grad_norm = 0.7,
         use_sde = True,
         sde_sample_freq = -1,
         rollout_buffer_class = None,
