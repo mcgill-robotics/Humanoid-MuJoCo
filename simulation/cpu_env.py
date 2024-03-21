@@ -213,8 +213,8 @@ class CPUEnv(gym.Env):
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
-    #normalize
-    pressure_values = np.clip(pressure_values, 0.0, 5.0) / 5.0 # 500 grams ~ 5N
+    #convert pressure to binary values
+    pressure_values = np.where(pressure_values > 0.5, 1.0, 0.0) # above 0.5N is considered a contact
     
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)

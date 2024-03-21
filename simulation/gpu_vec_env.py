@@ -272,8 +272,8 @@ class GPUVecEnv(VecEnv):
     
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
-    #normalize
-    pressure_values = jp.clip(pressure_values, 0.0, 5.0) / 5.0 # 500 grams ~ 5N
+    # convert to binary (above 0.5N is considered a contact point)
+    pressure_values = jp.where(pressure_values > 0.5, 1.0, 0.0)
 
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)

@@ -26,33 +26,33 @@ log_dir = "data/training_results"
 # FROM RL ZOO 3 HYPERPARAMETER TUNING
 # Trial 44 finished with value: 452.2629128 and parameters: {'batch_size': 32, 'n_steps': 2048, 'gamma': 0.95, 'learning_rate': 0.00021243303991845677, 'ent_coef': 0.0001223532933316859, 'clip_range': 0.1, 'n_epochs': 5, 'gae_lambda': 0.99, 'max_grad_norm': 0.7, 'vf_coef': 0.6215142166966646, 'net_arch': 'medium', 'log_std_init': -2.9863975746713614, 'sde_sample_freq': -1, 'ortho_init': True, 'activation_fn': 'elu', 'lr_schedule': 'linear'}. Best is trial 44 with value: 452.2629128.
 
-NUM_ENVS = 256
+NUM_ENVS = 32
 N_EVAL_EPISODES = 3
 POLICY_ITERATIONS = 1000
 POLICY_UPDATE_TIMESTEPS = 2048
 TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
 CHECKPOINT = None
-EVAL_FREQ = POLICY_UPDATE_TIMESTEPS * 10
-CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 50
-RANDOMIZATION_INCREMENT = 0.1
+EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
+CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 5
+RANDOMIZATION_INCREMENT = 0.25
 
-env = VecMonitor(GPUVecEnv(
-    num_envs=NUM_ENVS,
-    xml_path=SIM_XML_PATH,
-    reward_fn=standingRewardFn,
-    randomization_factor=0
-))
+# env = VecMonitor(GPUVecEnv(
+#     num_envs=NUM_ENVS,
+#     xml_path=SIM_XML_PATH,
+#     reward_fn=standingRewardFn,
+#     randomization_factor=0
+# ))
 
-print("\nInitializing environment...      ", end='')
-env.reset()
-env.step(None)
-print("Done")
+# print("\nInitializing environment...      ", end='')
+# env.reset()
+# env.step(None)
+# print("Done")
 
-# env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
-#                                     xml_path=SIM_XML_PATH,
-#                                     reward_fn=standingRewardFn,
-#                                     randomization_factor=0
-#                                 )] * NUM_ENVS))
+env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
+                                    xml_path=SIM_XML_PATH,
+                                    reward_fn=standingRewardFn,
+                                    randomization_factor=0
+                                )] * NUM_ENVS))
 
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
@@ -65,7 +65,7 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "lr_schedule": lambda progress : progress * 0.0002,
+        # "lr_schedule": lambda progress : progress * 0.0002,
         "net_arch": dict(pi=[256,256], vf=[256,256]),
         "activation_fn": nn.ELU,
         "ortho_init": True,
