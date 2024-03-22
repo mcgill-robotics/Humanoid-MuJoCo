@@ -37,6 +37,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
         # the player’s knees. This discourages the player from learning
         # gaits which cause high forces on the knees, for example
         # during ground impacts, which can damage a physical robot. - 0.01
+    MAX_JOINT_TORQUE = 1.5
     JOINT_TORQUE_PENALTY_WEIGHT = -0.1 / 16 # divide by N since there are N joints and we consider the sum of joint torques
     # penalty term to minimize the time integral of torque peaks
     # (thresholded above 5 N m)
@@ -70,7 +71,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
 
     # Joint torque
-    thresholded_joint_torques = jp.clip(jp.abs(joint_torques) - 5.0, 0.0, jp.inf)
+    thresholded_joint_torques = jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0.0, jp.inf) / MAX_JOINT_TORQUE
     # thresholded_joint_torques = jp.minimum(jp.abs(joint_torques), jp.full(joint_torques.shape, 5.0))
     total_joint_torque = jp.sum(thresholded_joint_torques)
     reward += total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
