@@ -71,7 +71,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
 
     # Joint torque
-    thresholded_joint_torques = jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0.0, jp.inf) / MAX_JOINT_TORQUE
+    thresholded_joint_torques = jp.clip(jp.abs(joint_torques), 0.0, MAX_JOINT_TORQUE) / MAX_JOINT_TORQUE
     # thresholded_joint_torques = jp.minimum(jp.abs(joint_torques), jp.full(joint_torques.shape, 5.0))
     total_joint_torque = jp.sum(thresholded_joint_torques)
     reward += total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
