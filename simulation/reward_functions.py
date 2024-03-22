@@ -37,7 +37,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
         # the player’s knees. This discourages the player from learning
         # gaits which cause high forces on the knees, for example
         # during ground impacts, which can damage a physical robot. - 0.01
-    JOINT_TORQUE_PENALTY_WEIGHT = -0.01 / 16 # divide by N since there are N joints and we consider the sum of joint torques
+    JOINT_TORQUE_PENALTY_WEIGHT = -0.1 / 16 # divide by N since there are N joints and we consider the sum of joint torques
     # penalty term to minimize the time integral of torque peaks
     # (thresholded above 5 N m)
     # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions (std is 0 to 2)
@@ -48,8 +48,8 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     UPRIGHT_REWARD_MIN_TILT = 0.2
     UPRIGHT_MAX_REWARD = 0.2 # CUSTOM -> paper has it at 0.02
     UPRIGHT_MAX_PENALTY = -0.1 # CUSTOM -> paper does not penalize high tilts
-    # CUSTOM: offset the reward by 0.5 since, through testing, 0.5 is ideal reward and -0.5 is worst state possible
-    CONSTANT_REWARD_OFFSET = 0.5
+    # CUSTOM: add a constant offset to the reward
+    CONSTANT_REWARD_OFFSET = 0.0
     # CUSTOM: penalize self-collisions
     TERMINATE_ON_SELF_COLLISION = False
     SELF_COLLISION_PENALTY = -0.1
