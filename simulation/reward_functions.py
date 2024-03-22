@@ -50,7 +50,7 @@ def standingRewardFn(velocity, z_pos, torso_quat, joint_torques, ctrl_change, is
     UPRIGHT_MAX_REWARD = 0.2 # CUSTOM -> paper has it at 0.02
     UPRIGHT_MAX_PENALTY = -0.1 # CUSTOM -> paper does not penalize high tilts
     # CUSTOM: add a constant offset to the reward
-    CONSTANT_REWARD_OFFSET = 0.0
+    CONSTANT_REWARD_OFFSET = 0.5
     # CUSTOM: penalize self-collisions
     TERMINATE_ON_SELF_COLLISION = False
     SELF_COLLISION_PENALTY = -0.1
