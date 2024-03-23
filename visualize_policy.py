@@ -3,12 +3,12 @@ from simulation import SIM_XML_PATH
 from simulation.reward_functions import *
 from stable_baselines3 import PPO
 
-checkpoint = "./data/training_results_r0.3/best_model"
+checkpoint = "./data/training_results_r1/best_model"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
     reward_fn=standingRewardFn,
-    randomization_factor=0.3
+    randomization_factor=1
 )
 
 ppo_agent = PPO.load(

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-evaluations = np.load("data/training_results_r0.0/evaluations.npz")
+evaluations = np.load("data/training_results_r1/evaluations.npz")
 
 timesteps = evaluations["timesteps"]
 rewards = np.mean(evaluations["results"], axis=1)
