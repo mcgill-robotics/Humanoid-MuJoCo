@@ -7,8 +7,7 @@ import torch
 from torch import nn
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback, StopTrainingOnRewardThreshold
-from stable_baselines3.common.torch_layers import FlattenExtractor
-from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecNormalize
+from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv
 
 ###########################
 ##  TRAINING PARAMETERS  ##
@@ -24,12 +23,12 @@ log_dir = "data/training_results"
 ##########################
 
 # FROM RL ZOO 3 HYPERPARAMETER TUNING
-# Trial 44 finished with value: 452.2629128 and parameters: {'batch_size': 32, 'n_steps': 2048, 'gamma': 0.95, 'learning_rate': 0.00021243303991845677, 'ent_coef': 0.0001223532933316859, 'clip_range': 0.1, 'n_epochs': 5, 'gae_lambda': 0.99, 'max_grad_norm': 0.7, 'vf_coef': 0.6215142166966646, 'net_arch': 'medium', 'log_std_init': -2.9863975746713614, 'sde_sample_freq': -1, 'ortho_init': True, 'activation_fn': 'elu', 'lr_schedule': 'linear'}. Best is trial 44 with value: 452.2629128.
+# Trial 82 finished with value: 290.1548839 and parameters: {'batch_size': 256, 'n_steps': 256, 'gamma': 0.98, 'learning_rate': 4.9908359430203723e-05, 'ent_coef': 0.016977543894004236, 'clip_range': 0.4, 'n_epochs': 20, 'gae_lambda': 1.0, 'max_grad_norm': 0.8, 'vf_coef': 0.06868026097247694, 'net_arch': 'medium', 'log_std_init': 0.4446058424934571, 'sde_sample_freq': 128, 'ortho_init': True, 'activation_fn': 'tanh'}. Best is trial 82 with value: 290.1548839.
 
-NUM_ENVS = 32
+NUM_ENVS = 64
 N_EVAL_EPISODES = 10
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 2048
+POLICY_UPDATE_TIMESTEPS = 256
 TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
@@ -71,13 +70,10 @@ if CHECKPOINT is None:
         "net_arch": dict(pi=[256,256], vf=[256,256]),
         "activation_fn": nn.Tanh,
         "ortho_init": True,
-        "log_std_init": -3,
+        "log_std_init": 0.4,
         "full_std": False,
         "use_expln": False,
         "squash_output": False,
-        "features_extractor_class": FlattenExtractor,
-        "features_extractor_kwargs": None,
-        "share_features_extractor": True,
         "normalize_images": False,
         "optimizer_class": torch.optim.Adam,
         "optimizer_kwargs": None
@@ -86,30 +82,20 @@ if CHECKPOINT is None:
     model = PPO(
         policy = "MlpPolicy",
         env = env,
-        learning_rate = 0.0002,
+        learning_rate = 0.00005,
         n_steps = POLICY_UPDATE_TIMESTEPS,
-        batch_size = 32,
-        n_epochs = 5,
-        gamma = 0.95,
-        gae_lambda = 0.99,
-        clip_range = 0.1,
-        clip_range_vf = None,
-        normalize_advantage = True,
-        ent_coef = 0.0001,
-        vf_coef = 0.625,
-        max_grad_norm = 0.7,
+        batch_size = 256,
+        n_epochs = 20,
+        gamma = 0.98,
+        gae_lambda = 1.0,
+        clip_range = 0.4,
+        ent_coef = 0.0175,
+        vf_coef = 0.07,
+        max_grad_norm = 0.8,
         use_sde = True,
-        sde_sample_freq = -1,
-        rollout_buffer_class = None,
-        rollout_buffer_kwargs = None,
-        target_kl = None,
-        stats_window_size = 100,
-        tensorboard_log = None,
+        sde_sample_freq = 128,
         policy_kwargs = policy_args,
-        verbose = 1,
-        seed = None,
-        device = "auto",
-        _init_setup_model = True,
+        verbose = 1
     )
 else:
     model = PPO.load(
