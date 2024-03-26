@@ -5,7 +5,7 @@ from torch import nn
 hyperparams = {
     "CPUHumanoid": dict(
         policy = 'MlpPolicy',
-        normalize = True,
+        normalize = False,
         n_timesteps = 1e7, # IRRELEVANT, OVERWRITTEN IN TUNING ARGS
         n_envs = 64,
         batch_size = 64,

@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback, StopTrainingOnRewardThreshold
-from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv
+from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecNormalize
 
 ###########################
 ##  TRAINING PARAMETERS  ##
@@ -36,6 +36,7 @@ CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 5
 RANDOMIZATION_INCREMENT = 0.25
 RANDOMIZATION_FACTOR = 1 # starts at this, increments whenever training is successful
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 950
+NORMALIZE = True #whether or not to wrap env in a VecNormalize wrapper
 
 # env = VecMonitor(GPUVecEnv(
 #     num_envs=NUM_ENVS,
@@ -55,11 +56,16 @@ env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     randomization_factor=RANDOMIZATION_FACTOR
                                 )] * NUM_ENVS))
 
+
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
                                     reward_fn=standingRewardFn,
                                     randomization_factor=RANDOMIZATION_FACTOR
                                 )]))
+
+if NORMALIZE:
+    env = VecNormalize(env)
+    eval_env = VecNormalize(eval_env)
 
 print("\nBeginning training.\n")
 
