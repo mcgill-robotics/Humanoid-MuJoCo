@@ -170,7 +170,7 @@ class CPUEnv(gym.Env):
     for i in range((int)(self.local_ang_vel_delay/actual_timestep)):
       self.local_ang_vel_buffer.append(jp.array([0]*3))
     for i in range((int)(self.torso_local_velocity_delay/actual_timestep)):
-      self.torso_local_velocity_buffer.append(jp.array([0]*2))
+      self.torso_local_velocity_buffer.append(jp.array([0]*3))
     for i in range((int)(self.torso_local_accel_delay/actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([0]*3))
     for i in range((int)(self.local_gravity_vector_delay/actual_timestep)):
@@ -253,7 +253,7 @@ class CPUEnv(gym.Env):
     clock_phase_sin = jp.array([jp.sin(self.data.time)])
     clock_phase_cos = jp.array([jp.cos(self.data.time)])
     clock_phase_complex = ((clock_phase_sin) / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))) + 0.5
-    
+        
     delayed_observations = jp.concatenate((joint_angles,
                                            joint_velocities,
                                            local_ang_vel,

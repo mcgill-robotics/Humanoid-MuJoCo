@@ -223,7 +223,7 @@ class GPUVecEnv(VecEnv):
     for i in range((int)(self.local_ang_vel_delay/self.actual_timestep)):
       self.local_ang_vel_buffer.append(jp.array([[0]*3]*self.num_envs))
     for i in range((int)(self.torso_local_velocity_delay/self.actual_timestep)):
-      self.torso_local_velocity_buffer.append(jp.array([[0]*2]*self.num_envs))
+      self.torso_local_velocity_buffer.append(jp.array([[0]*3]*self.num_envs))
     for i in range((int)(self.torso_local_accel_delay/self.actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.num_envs))
     for i in range((int)(self.local_gravity_vector_delay/self.actual_timestep)):
