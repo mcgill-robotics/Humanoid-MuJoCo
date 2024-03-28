@@ -6,7 +6,7 @@ import simulation
 # Set environment variable to disable rendering
 os.environ["RENDER_SIM"] = "False"
 
-reward_fn = "standingRewardFn"
+reward_fn = "controlInputRewardFn"
 
 sys.argv = ["python", "-optimize",
             "--algo", "ppo",
@@ -14,7 +14,7 @@ sys.argv = ["python", "-optimize",
             "--log-folder", "data/tuning_logs",
             "-n", "150000",
             "--n-evaluations", "5",
-            "--n-trials", "500",
+            "--n-trials", "250",
             "--n-jobs", "24",
             "--sampler", "tpe",
             "--pruner", "median",

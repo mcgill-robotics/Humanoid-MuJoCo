@@ -37,7 +37,7 @@ class GPUVecEnv(VecEnv):
     self.timestep = timestep
     self.num_envs = num_envs
     if type(reward_fn) == str: reward_fn = getattr(reward_functions, reward_fn)
-    self.reward_fn = jax.jit(jax.vmap(lambda v, z, q, jt, ac, sc : reward_fn(v, z, q, jt, ac, sc)))
+    self.reward_fn = jax.jit(jax.vmap(lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, ctrl_change, isSelfColliding : reward_fn(velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, ctrl_change, isSelfColliding)))
     self.physics_steps_per_control_step = physics_steps_per_control_step
     self.rng_key = jax.random.PRNGKey(42)
     self.rng = jax.random.split(self.rng_key, self.num_envs)
@@ -57,7 +57,7 @@ class GPUVecEnv(VecEnv):
     self.getFootForces = jax.jit(jax.vmap(getFootForces, in_axes=(None, 0)))
     
     self.action_space = spaces.Box(-1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32)
-    observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
+    observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 3 + 8 + 3 + 3
     self.observation_space = spaces.Box(-10, 10, shape=(observation_size,), dtype=np.float32)
     
     super().__init__(self.num_envs, self.observation_space, self.action_space)
@@ -124,7 +124,15 @@ class GPUVecEnv(VecEnv):
     self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
     self.model.opt.iterations = 15
     self.model.opt.ls_iterations = 15
-
+    
+    # initialize control inputs for each env
+    if USE_CONTROL_INPUTS:
+      self.control_inputs_velocity = jax.random.uniform(self.rng_key, (self.num_envs, 2), minval=-1*MAX_CONTROL_INPUT_VELOCITY*self.randomization_factor, maxval=MAX_CONTROL_INPUT_VELOCITY*self.randomization_factor)
+      self.control_inputs_yaw = jax.random.uniform(self.rng_key, (self.num_envs, 1), minval=-1*jp.pi*self.randomization_factor, maxval=jp.pi*self.randomization_factor)
+    else:
+      self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
+      self.control_inputs_yaw = jp.zeros((self.num_envs, 1))
+      
     #initialize instance parameters
     self.next_force_start_times = jp.zeros((self.num_envs))
     self.next_force_durations = jp.zeros((self.num_envs))
@@ -134,12 +142,12 @@ class GPUVecEnv(VecEnv):
     self.previous_torso_local_velocity = jp.zeros((self.num_envs, 3))
     # save joint addresses
     self.joint_qpos_idx = []
-    self.joint_torque_idx = []
+    self.joint_dof_idx = []
     for joint in JOINT_NAMES:
-      self.joint_torque_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
+      self.joint_dof_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
       self.joint_qpos_idx.append(self.model.jnt_qposadr[self.model.joint(joint).id])
     self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
-    self.joint_torque_idx = jp.array(self.joint_torque_idx)
+    self.joint_dof_idx = jp.array(self.joint_dof_idx)
     # save gravity vector
     self.gravity_vector = jp.array([0,0,-1]) # normalized, so -1 instead of -9.81
     self.gravity_vector_batch = jp.array([self.gravity_vector]*self.num_envs)
@@ -185,12 +193,12 @@ class GPUVecEnv(VecEnv):
     self.actual_timestep = self.timestep * self.physics_steps_per_control_step
     self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.action_delay = round(self.action_delay / self.actual_timestep) * self.actual_timestep
-    self.joint_angles_observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.joint_angles_observation_delay = round(self.joint_angles_observation_delay / self.actual_timestep) * self.actual_timestep
+    self.joint_observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.joint_observation_delay = round(self.joint_observation_delay / self.actual_timestep) * self.actual_timestep
     self.local_ang_vel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.local_ang_vel_delay = round(self.local_ang_vel_delay / self.actual_timestep) * self.actual_timestep
-    self.torso_global_velocity_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.torso_global_velocity_delay = round(self.torso_global_velocity_delay / self.actual_timestep) * self.actual_timestep
+    self.torso_local_velocity_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.torso_local_velocity_delay = round(self.torso_local_velocity_delay / self.actual_timestep) * self.actual_timestep
     self.torso_local_accel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.torso_local_accel_delay = round(self.torso_local_accel_delay / self.actual_timestep) * self.actual_timestep
     self.local_gravity_vector_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
@@ -201,18 +209,21 @@ class GPUVecEnv(VecEnv):
     #make buffers for observations and actions
     self.action_buffer = [self.data_batch.ctrl] * (int)(self.action_delay/self.actual_timestep)
     self.joint_angles_buffer = []
+    self.joint_velocities_buffer = []
     self.local_ang_vel_buffer = []
-    self.torso_global_velocity_buffer = []
+    self.torso_local_velocity_buffer = []
     self.torso_local_accel_buffer = []
     self.local_gravity_vector_buffer = []
     self.pressure_values_buffer = []
     
-    for i in range((int)(self.joint_angles_observation_delay/self.actual_timestep)):
+    for i in range((int)(self.joint_observation_delay/self.actual_timestep)):
       self.joint_angles_buffer.append(jp.array([[0]*len(JOINT_NAMES)]*self.num_envs))
+    for i in range((int)(self.joint_observation_delay/self.actual_timestep)):
+      self.joint_velocities_buffer.append(jp.array([[0]*len(JOINT_NAMES)]*self.num_envs))
     for i in range((int)(self.local_ang_vel_delay/self.actual_timestep)):
       self.local_ang_vel_buffer.append(jp.array([[0]*3]*self.num_envs))
-    for i in range((int)(self.torso_global_velocity_delay/self.actual_timestep)):
-      self.torso_global_velocity_buffer.append(jp.array([[0]*2]*self.num_envs))
+    for i in range((int)(self.torso_local_velocity_delay/self.actual_timestep)):
+      self.torso_local_velocity_buffer.append(jp.array([[0]*2]*self.num_envs))
     for i in range((int)(self.torso_local_accel_delay/self.actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([[0]*3]*self.num_envs))
     for i in range((int)(self.local_gravity_vector_delay/self.actual_timestep)):
@@ -234,10 +245,10 @@ class GPUVecEnv(VecEnv):
     torso_global_velocity = self.data_batch.cvel[:, self.torso_idx][:, 3:]
     torso_z_pos = self.data_batch.xpos[:, self.torso_idx, 2]
     torso_quat = self.data_batch.xquat[:, self.torso_idx]
-    joint_torques = self.data_batch.qfrc_constraint[:, self.joint_torque_idx] + self.data_batch.qfrc_smooth[:, self.joint_torque_idx]
+    joint_torques = self.data_batch.qfrc_constraint[:, self.joint_dof_idx] + self.data_batch.qfrc_smooth[:, self.joint_dof_idx]
     self_collisions = self.isSelfColliding(self.non_robot_geom_ids, self.data_batch)
-        
-    rewards, areTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change, self_collisions)
+    
+    rewards, areTerminal = self.reward_fn(torso_global_velocity, self.control_inputs_velocity, torso_quat, self.control_inputs_yaw, torso_z_pos, joint_torques, self.action_change, self_collisions)
     
     if self.verbose: print("Done")
 
@@ -254,17 +265,20 @@ class GPUVecEnv(VecEnv):
     #normalize
     joint_angles = joint_angles / (jp.pi / 2)
     
+    # joint velocities     20          Joint positions in radians
+    joint_velocities = self.data_batch.qvel[:, self.joint_dof_idx] + (self.randomization_factor * (JOINT_VELOCITY_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, len(self.joint_qpos_idx))))
+
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[:, 0:3]
     local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * (GYRO_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
-    
-    # agent velocity      2           X and Y velocity of robot torso (global, NWU)
-    torso_global_velocity = torso_global_vel[:, 3:] + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     
     # linear acceleration 3           Linear acceleration from IMU (local to torso)
     torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[:, 3:])
     torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.actual_timestep) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     self.previous_torso_local_velocity = torso_local_velocity
+    
+    # body velocity
+    torso_local_velocity = torso_local_velocity + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3)))
     
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + (self.randomization_factor * (IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 4)))
@@ -277,20 +291,39 @@ class GPUVecEnv(VecEnv):
 
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
+    self.joint_velocities_buffer.append(joint_velocities)
     self.local_ang_vel_buffer.append(local_ang_vel)
-    self.torso_global_velocity_buffer.append(torso_global_velocity[:, 0:2])
+    self.torso_local_velocity_buffer.append(torso_local_velocity)
     self.torso_local_accel_buffer.append(torso_local_accel)
     self.local_gravity_vector_buffer.append(local_gravity_vector)
     self.pressure_values_buffer.append(pressure_values)
     
+    SCALING_FACTOR = 10 # scaling factor to apply to unbounded sensor readings (velocity, ang vel, etc.)
+    
     joint_angles = self.joint_angles_buffer.pop(0)
-    local_ang_vel = self.local_ang_vel_buffer.pop(0)
-    torso_global_velocity = self.torso_global_velocity_buffer.pop(0)
-    torso_local_accel = self.torso_local_accel_buffer.pop(0)
+    joint_velocities = self.joint_velocities_buffer.pop(0)
+    local_ang_vel = self.local_ang_vel_buffer.pop(0) / SCALING_FACTOR
+    torso_local_velocity = self.torso_local_velocity_buffer.pop(0) / SCALING_FACTOR
+    torso_local_accel = self.torso_local_accel_buffer.pop(0) / SCALING_FACTOR
     local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
     pressure_values = self.pressure_values_buffer.pop(0)
     
-    delayed_observations = jp.hstack((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
+    clock_phase_sin = jp.sin(self.data_batch.time).reshape(-1, 1)
+    clock_phase_cos = jp.cos(self.data_batch.time).reshape(-1, 1)
+    clock_phase_complex = ((clock_phase_sin) / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))) + 0.5
+    
+    delayed_observations = jp.hstack((joint_angles,
+                                      joint_velocities,
+                                      local_ang_vel,
+                                      torso_local_velocity,
+                                      torso_local_accel,
+                                      local_gravity_vector,
+                                      pressure_values,
+                                      self.control_inputs_velocity / SCALING_FACTOR,
+                                      self.control_inputs_yaw / jp.pi,
+                                      clock_phase_sin,
+                                      clock_phase_cos,
+                                      clock_phase_complex))
         
     if self.verbose: print("Done")
     
@@ -342,7 +375,7 @@ class GPUVecEnv(VecEnv):
 if __name__ == "__main__":
   sim_batch = GPUVecEnv(num_envs=256,
                         xml_path=SIM_XML_PATH,
-                        reward_fn=standingRewardFn,
+                        reward_fn=controlInputRewardFn,
                         randomization_factor=1,
                         verbose=True)
 

@@ -42,7 +42,7 @@ class CPUEnv(gym.Env):
     self.rng_key = jax.random.PRNGKey(0)
 
     self.action_space = spaces.Box(-1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32)
-    observation_size = len(JOINT_NAMES) + 3 + 2 + 3 + 3 + 8
+    observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 3 + 8 + 3 + 3
     self.observation_space = spaces.Box(-10, 10, shape=(observation_size,), dtype=np.float32)
     
   def reset(self, seed=None, options=None):
@@ -76,6 +76,14 @@ class CPUEnv(gym.Env):
     self.model.vis.scale.forcewidth = 0.05
     self.model.vis.map.force = 0.3
     
+    # initialize random control inputs
+    if USE_CONTROL_INPUTS:
+      self.control_input_velocity = jp.array([random.uniform(-1*MAX_CONTROL_INPUT_VELOCITY*self.randomization_factor, MAX_CONTROL_INPUT_VELOCITY*self.randomization_factor), random.uniform(-1*MAX_CONTROL_INPUT_VELOCITY*self.randomization_factor, MAX_CONTROL_INPUT_VELOCITY*self.randomization_factor)])
+      self.control_input_yaw = jp.array([random.uniform(-1*jp.pi*self.randomization_factor, jp.pi*self.randomization_factor)])
+    else:
+      self.control_input_velocity = jp.array([0,0])
+      self.control_input_yaw = jp.array([0])
+    
     #initialize instance parameters
     self.next_force_start_time = 0
     self.next_force_direction = jp.zeros((2))
@@ -89,12 +97,12 @@ class CPUEnv(gym.Env):
     self.torso_idx = self.model.body(TORSO_BODY_NAME).id
     # save joint addresses
     self.joint_qpos_idx = []
-    self.joint_torque_idx = []
+    self.joint_dof_idx = []
     for joint in JOINT_NAMES:
-      self.joint_torque_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
+      self.joint_dof_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
       self.joint_qpos_idx.append(self.model.jnt_qposadr[self.model.joint(joint).id])
     self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
-    self.joint_torque_idx = jp.array(self.joint_torque_idx)
+    self.joint_dof_idx = jp.array(self.joint_dof_idx)
     # get pressure sensor geometries
     self.pressure_sensor_ids = [self.model.geom(pressure_sensor_geom).id for pressure_sensor_geom in PRESSURE_GEOM_NAMES]
     self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
@@ -132,12 +140,12 @@ class CPUEnv(gym.Env):
     actual_timestep = self.timestep * self.physics_steps_per_control_step
     self.action_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
-    self.joint_angles_observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.joint_angles_observation_delay = round(self.joint_angles_observation_delay / actual_timestep) * actual_timestep
+    self.joint_observation_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.joint_observation_delay = round(self.joint_observation_delay / actual_timestep) * actual_timestep
     self.local_ang_vel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.local_ang_vel_delay = round(self.local_ang_vel_delay / actual_timestep) * actual_timestep
-    self.torso_global_velocity_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
-    self.torso_global_velocity_delay = round(self.torso_global_velocity_delay / actual_timestep) * actual_timestep
+    self.torso_local_velocity_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
+    self.torso_local_velocity_delay = round(self.torso_local_velocity_delay / actual_timestep) * actual_timestep
     self.torso_local_accel_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
     self.torso_local_accel_delay = round(self.torso_local_accel_delay / actual_timestep) * actual_timestep
     self.local_gravity_vector_delay = random.uniform(MIN_DELAY*self.randomization_factor, MAX_DELAY*self.randomization_factor)
@@ -148,18 +156,21 @@ class CPUEnv(gym.Env):
     #make buffers for observations and actions   
     self.action_buffer = [self.data.ctrl] * (int)(self.action_delay/actual_timestep)
     self.joint_angles_buffer = []
+    self.joint_velocities_buffer = []
     self.local_ang_vel_buffer = []
-    self.torso_global_velocity_buffer = []
+    self.torso_local_velocity_buffer = []
     self.torso_local_accel_buffer = []
     self.local_gravity_vector_buffer = []
     self.pressure_values_buffer = []
     
-    for i in range((int)(self.joint_angles_observation_delay/actual_timestep)):
+    for i in range((int)(self.joint_observation_delay/actual_timestep)):
       self.joint_angles_buffer.append(jp.array([0]*len(JOINT_NAMES)))
+    for i in range((int)(self.joint_observation_delay/actual_timestep)):
+      self.joint_velocities_buffer.append(jp.array([0]*len(JOINT_NAMES)))
     for i in range((int)(self.local_ang_vel_delay/actual_timestep)):
       self.local_ang_vel_buffer.append(jp.array([0]*3))
-    for i in range((int)(self.torso_global_velocity_delay/actual_timestep)):
-      self.torso_global_velocity_buffer.append(jp.array([0]*2))
+    for i in range((int)(self.torso_local_velocity_delay/actual_timestep)):
+      self.torso_local_velocity_buffer.append(jp.array([0]*2))
     for i in range((int)(self.torso_local_accel_delay/actual_timestep)):
       self.torso_local_accel_buffer.append(jp.array([0]*3))
     for i in range((int)(self.local_gravity_vector_delay/actual_timestep)):
@@ -189,17 +200,20 @@ class CPUEnv(gym.Env):
     # normalize
     joint_angles = joint_angles / (jp.pi / 2)
 
+    # joint velocities
+    joint_velocities = self.data.qvel[self.joint_dof_idx] + (self.randomization_factor * (JOINT_VELOCITY_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
+
     # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
     torso_global_ang_vel = torso_global_vel[0:3]
     local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (self.randomization_factor * (GYRO_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(3,)))
-    
-    # agent velocity      2           X and Y velocity of robot torso (global, NWU)
-    torso_global_velocity = torso_global_vel[3:] + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
    
     # linear acceleration 3           Linear acceleration from IMU (local to torso)
     torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[3:])
     torso_local_accel = ((torso_local_velocity - self.previous_torso_local_velocity)/self.timestep) + (self.randomization_factor * ACCELEROMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     self.previous_torso_local_velocity = torso_local_velocity
+    
+    # body velocity
+    torso_local_velocity = torso_local_velocity + (self.randomization_factor * VELOCIMETER_NOISE_STDDEV * jax.random.normal(key=self.rng_key, shape=(3,)))
     
     # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
     noisy_torso_quat = torso_quat + (self.randomization_factor * (IMU_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(4,)))
@@ -218,20 +232,39 @@ class CPUEnv(gym.Env):
     
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
+    self.joint_velocities_buffer.append(joint_velocities)
     self.local_ang_vel_buffer.append(local_ang_vel)
-    self.torso_global_velocity_buffer.append(torso_global_velocity[0:2])
+    self.torso_local_velocity_buffer.append(torso_local_velocity)
     self.torso_local_accel_buffer.append(torso_local_accel)
     self.local_gravity_vector_buffer.append(local_gravity_vector)
     self.pressure_values_buffer.append(pressure_values)
     
+    SCALING_FACTOR = 10 # scaling factor to apply to unbounded sensor readings (velocity, ang vel, etc.)
+    
     joint_angles = self.joint_angles_buffer.pop(0)
-    local_ang_vel = self.local_ang_vel_buffer.pop(0)
-    torso_global_velocity = self.torso_global_velocity_buffer.pop(0)
-    torso_local_accel = self.torso_local_accel_buffer.pop(0)
+    joint_velocities = self.joint_velocities_buffer.pop(0)
+    local_ang_vel = self.local_ang_vel_buffer.pop(0) / SCALING_FACTOR
+    torso_local_velocity = self.torso_local_velocity_buffer.pop(0) / SCALING_FACTOR
+    torso_local_accel = self.torso_local_accel_buffer.pop(0) / SCALING_FACTOR
     local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
     pressure_values = self.pressure_values_buffer.pop(0)
     
-    delayed_observations = jp.concatenate((joint_angles, local_ang_vel, torso_global_velocity, torso_local_accel, local_gravity_vector, pressure_values))
+    clock_phase_sin = jp.array([jp.sin(self.data.time)])
+    clock_phase_cos = jp.array([jp.cos(self.data.time)])
+    clock_phase_complex = ((clock_phase_sin) / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))) + 0.5
+    
+    delayed_observations = jp.concatenate((joint_angles,
+                                           joint_velocities,
+                                           local_ang_vel,
+                                           torso_local_velocity,
+                                           torso_local_accel,
+                                           local_gravity_vector,
+                                           pressure_values,
+                                           self.control_input_velocity / SCALING_FACTOR,
+                                           self.control_input_yaw / jp.pi,
+                                           clock_phase_sin,
+                                           clock_phase_cos,
+                                           clock_phase_complex))
   
     if self.verbose: print("Done")
     
@@ -240,16 +273,16 @@ class CPUEnv(gym.Env):
   def _get_reward(self):
     if self.verbose: print("Computing reward...              ", end='')
     
-    torso_global_velocity = self.data.cvel[self.torso_idx][3:]
+    torso_local_velocity = self.data.cvel[self.torso_idx][3:]
     torso_z_pos = self.data.xpos[self.torso_idx, 2]
     torso_quat = self.data.xquat[self.torso_idx]
-    joint_torques = self.data.qfrc_constraint[self.joint_torque_idx] + self.data.qfrc_smooth[self.joint_torque_idx]
+    joint_torques = self.data.qfrc_constraint[self.joint_dof_idx] + self.data.qfrc_smooth[self.joint_dof_idx]
     self_collision = False
     for i in range(len(self.data.contact.geom1)):
       if self.data.contact.geom1[i] not in self.non_robot_geom_ids and self.data.contact.geom2[i] not in self.non_robot_geom_ids:
         self_collision = True
     
-    reward, isTerminal = self.reward_fn(torso_global_velocity, torso_z_pos, torso_quat, joint_torques, self.action_change, self_collision)
+    reward, isTerminal = self.reward_fn(torso_local_velocity, self.control_input_velocity, torso_quat, self.control_input_yaw, torso_z_pos, joint_torques, self.action_change, self_collision)
     
     if self.verbose: print("Done")
 
@@ -318,12 +351,12 @@ class CPUEnv(gym.Env):
       return frame
     
 if __name__ == "__main__":
-  sim = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=standingRewardFn, randomization_factor=1)
+  sim = CPUEnv(xml_path=SIM_XML_PATH, reward_fn=controlInputRewardFn, randomization_factor=1)
   obs = sim.reset()
   
   while True:
     # action = np.random.uniform(-1, 1, 16)
     action = None
     obs, reward, isTerminal, _, _ = sim.step(action)
-    print(reward)
+    # print(reward)
     sim.render("human")

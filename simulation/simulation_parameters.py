@@ -33,6 +33,7 @@ JOINT_STIFFNESS_MAX_CHANGE = 0.05 # unit ? TODO
 JOINT_MARGIN_MAX_CHANGE = 0.05 # radians
 JOINT_FORCE_LIMIT_MAX_CHANGE = 0.025 # N m
 JOINT_ANGLE_NOISE_STDDEV = 2 # degrees
+JOINT_VELOCITY_NOISE_STDDEV = 5 # deg/s
 IMU_NOISE_STDDEV = 2 # degrees
 GYRO_NOISE_STDDEV = 1 # degrees / s
 ACCELEROMETER_NOISE_STDDEV = 0.05 # m/s^2
@@ -42,7 +43,9 @@ VELOCIMETER_NOISE_STDDEV = 0.05 # m/s
 desired_control_frequency = 100
 timestep = 0.001
 physics_steps_per_control_step = int((1.0/desired_control_frequency) // timestep)
-max_simulation_time = 10
+max_simulation_time = 10 # seconds
+MAX_CONTROL_INPUT_VELOCITY = 2 # m/s ~ 7.2 mph (4.5 km/h)
+USE_CONTROL_INPUTS = True # if false, only the standing behaviour is trained
 
 ### URDF REFERENCE NAMES
 

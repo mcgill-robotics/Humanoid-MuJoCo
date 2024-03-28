@@ -7,7 +7,7 @@ checkpoint = "./data/training_results_r1/best_model"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
-    reward_fn=standingRewardFn,
+    reward_fn=controlInputRewardFn,
     randomization_factor=1
 )
 

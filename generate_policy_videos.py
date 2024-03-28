@@ -12,7 +12,7 @@ video_duration = 5 # seconds
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
-    reward_fn=standingRewardFn,
+    reward_fn=controlInputRewardFn,
     randomization_factor=1
 )
 

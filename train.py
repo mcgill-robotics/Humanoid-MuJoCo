@@ -42,7 +42,7 @@ NORMALIZE = False #whether or not to wrap env in a VecNormalize wrapper
 # env = VecMonitor(GPUVecEnv(
 #     num_envs=NUM_ENVS,
 #     xml_path=SIM_XML_PATH,
-#     reward_fn=standingRewardFn,
+#     reward_fn=controlInputRewardFn,
 #     randomization_factor=RANDOMIZATION_FACTOR
 # ))
 
@@ -53,14 +53,14 @@ NORMALIZE = False #whether or not to wrap env in a VecNormalize wrapper
 
 env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
-                                    reward_fn=standingRewardFn,
+                                    reward_fn=controlInputRewardFn,
                                     randomization_factor=RANDOMIZATION_FACTOR
                                 )] * NUM_ENVS))
 
 
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
-                                    reward_fn=standingRewardFn,
+                                    reward_fn=controlInputRewardFn,
                                     randomization_factor=RANDOMIZATION_FACTOR
                                 )]))
 
