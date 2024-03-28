@@ -46,6 +46,7 @@ physics_steps_per_control_step = int((1.0/desired_control_frequency) // timestep
 max_simulation_time = 10 # seconds
 MAX_CONTROL_INPUT_VELOCITY = 2 # m/s ~ 7.2 mph (4.5 km/h)
 USE_CONTROL_INPUTS = True # if false, only the standing behaviour is trained
+USE_POTENTIAL_REWARDS = True
 
 ### URDF REFERENCE NAMES
 

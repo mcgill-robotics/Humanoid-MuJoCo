@@ -181,6 +181,7 @@ class CPUEnv(gym.Env):
     # initialize environment properties
     self.lastAction = self.data.ctrl
     self.action_change = jp.zeros(self.data.ctrl.shape)
+    self.previous_reward, _ = self._get_reward()
     
     # clean up any unreferenced variables
     gc.collect()
@@ -330,6 +331,10 @@ class CPUEnv(gym.Env):
     if self.verbose: print("Done")
     
     reward, terminated = self._get_reward()
+    if USE_POTENTIAL_REWARDS:
+      _reward = reward - self.previous_reward
+      self.previous_reward = reward
+      reward = _reward
     
     truncated = False
     if self.data.time >= max_simulation_time:
@@ -355,8 +360,8 @@ if __name__ == "__main__":
   obs = sim.reset()
   
   while True:
-    # action = np.random.uniform(-1, 1, 16)
+    # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
     action = None
     obs, reward, isTerminal, _, _ = sim.step(action)
-    # print(reward)
+    print(reward)
     sim.render("human")

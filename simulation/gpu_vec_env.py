@@ -234,6 +234,7 @@ class GPUVecEnv(VecEnv):
     # initialize environment properties
     self.lastAction = self.data_batch.ctrl
     self.action_change = jp.zeros(self.data_batch.ctrl.shape)
+    self.previous_rewards, _ = self._get_rewards()
 
     if self.verbose: print("Done")
     
@@ -356,6 +357,10 @@ class GPUVecEnv(VecEnv):
     
     obs = self._get_obs()
     rewards, terminals = self._get_rewards()
+    if USE_POTENTIAL_REWARDS:
+      _rewards = rewards - self.previous_rewards
+      self.previous_rewards = rewards
+      rewards = _rewards
     truncated = np.any(self.data_batch.time >= max_simulation_time)
     done = truncated or np.all(terminals)
     dones = np.full(terminals.shape, done)
@@ -380,9 +385,11 @@ if __name__ == "__main__":
                         verbose=True)
 
   obs = sim_batch.reset()
+  rewards = []
+  terminals = []
 
   while True:
-    actions = np.random.uniform(-1, 1, (sim_batch.num_envs, 16))
+    actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
     actions = None
     obs, rewards, terminals, _ = sim_batch.step(actions)
     print(rewards[0])
