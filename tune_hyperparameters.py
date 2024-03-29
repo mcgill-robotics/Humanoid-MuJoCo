@@ -21,7 +21,7 @@ sys.argv = ["python", "-optimize",
             "--verbose", "0",
             "--eval-episodes", "10",
             "--env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
-            "--eval-env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1",
+            "--eval-env-kwargs", "reward_fn:\"{}\"".format(reward_fn), "randomization_factor:1", "use_potential_rewards:0",
             "--conf-file", "simulation.hyperparam_config"]
 
 train()

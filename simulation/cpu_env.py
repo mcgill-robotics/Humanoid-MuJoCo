@@ -29,11 +29,12 @@ inverseRotateVectors = lambda q, v : Rotation.from_quat([q[1], q[2], q[3], q[0]]
 
 class CPUEnv(gym.Env):
   metadata = {"render_modes": ["rgb_array"], "render_fps": 30}
-  def __init__(self, reward_fn, xml_path=SIM_XML_PATH, randomization_factor=0, verbose=False):
+  def __init__(self, reward_fn, xml_path=SIM_XML_PATH, randomization_factor=0, verbose=False, use_potential_rewards=USE_POTENTIAL_REWARDS):
     self.platform = "CPU"
     self.xml_path = xml_path
     self.randomization_factor = randomization_factor
     self.timestep = timestep
+    self.use_potential_rewards = bool(use_potential_rewards)
     if type(reward_fn) == str: reward_fn = getattr(reward_functions, reward_fn)
     self.reward_fn = reward_fn
     self.physics_steps_per_control_step = physics_steps_per_control_step
@@ -331,7 +332,7 @@ class CPUEnv(gym.Env):
     if self.verbose: print("Done")
     
     reward, terminated = self._get_reward()
-    if USE_POTENTIAL_REWARDS:
+    if self.use_potential_rewards:
       _reward = reward - self.previous_reward
       self.previous_reward = reward
       reward = _reward

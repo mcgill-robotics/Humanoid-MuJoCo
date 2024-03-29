@@ -25,7 +25,7 @@ from simulation import SIM_XML_PATH, reward_functions
     # previous action     5 · 20          Action filter state (stacked)
 
 class GPUVecEnv(VecEnv):
-  def __init__(self, num_envs, reward_fn, xml_path=SIM_XML_PATH, randomization_factor=0, verbose=False):
+  def __init__(self, num_envs, reward_fn, xml_path=SIM_XML_PATH, randomization_factor=0, verbose=False, use_potential_rewards=USE_POTENTIAL_REWARDS):
     if jax.default_backend() != 'gpu':
       print("ERROR: Failed to find GPU device.")
       exit()
@@ -36,6 +36,7 @@ class GPUVecEnv(VecEnv):
     self.randomization_factor = randomization_factor
     self.timestep = timestep
     self.num_envs = num_envs
+    self.use_potential_rewards = bool(use_potential_rewards)
     if type(reward_fn) == str: reward_fn = getattr(reward_functions, reward_fn)
     self.reward_fn = jax.jit(jax.vmap(lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, ctrl_change, isSelfColliding : reward_fn(velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, ctrl_change, isSelfColliding)))
     self.physics_steps_per_control_step = physics_steps_per_control_step
@@ -357,7 +358,7 @@ class GPUVecEnv(VecEnv):
     
     obs = self._get_obs()
     rewards, terminals = self._get_rewards()
-    if USE_POTENTIAL_REWARDS:
+    if self.use_potential_rewards:
       _rewards = rewards - self.previous_rewards
       self.previous_rewards = rewards
       rewards = _rewards

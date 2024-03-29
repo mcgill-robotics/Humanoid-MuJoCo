@@ -6,7 +6,7 @@ hyperparams = {
     "CPUHumanoid": dict(
         policy = 'MlpPolicy',
         normalize = False,
-        n_timesteps = 1e7, # IRRELEVANT, OVERWRITTEN IN TUNING ARGS
+        n_timesteps = 150000, # IRRELEVANT, OVERWRITTEN IN TUNING ARGS
         n_envs = 64,
         batch_size = 64,
         n_steps = 64,
@@ -22,7 +22,8 @@ hyperparams = {
                             log_std_init = -2,
                             ortho_init = False,
                             activation_fn = nn.Tanh,
-                            net_arch = dict(pi=[256, 256, 256], vf=[256, 256, 256])
+                            net_arch = dict(pi=[256, 256, 256], vf=[256, 256, 256]),
+                            use_expln = True
                         )
         )
 }
