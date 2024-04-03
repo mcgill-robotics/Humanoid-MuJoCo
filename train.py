@@ -26,37 +26,38 @@ log_dir = "data/training_results"
 # Trial 19 finished with value: 262.5614284 and parameters: {'batch_size': 256, 'n_steps': 1024, 'gamma': 0.98, 'learning_rate': 0.0006905843913061805, 'ent_coef': 0.022694858251377927, 'clip_range': 0.1, 'n_epochs': 1, 'gae_lambda': 0.8, 'max_grad_norm': 0.7, 'vf_coef': 0.7445807875710113, 'net_arch': 'large', 'log_std_init': -0.5482045338158068, 'sde_sample_freq': 128, 'ortho_init': True, 'activation_fn': 'tanh'}. Best is trial 19 with value: 262.5614284.
 
 
-NUM_ENVS = 256
+NUM_ENVS = 64
+SIMULATE_ON_GPU = False
 N_EVAL_EPISODES = 10
 POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 1024
+POLICY_UPDATE_TIMESTEPS = 2048
 TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
 CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
 CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 5
 RANDOMIZATION_INCREMENT = 0.1
 RANDOMIZATION_FACTOR = 0 # starts at this, increments whenever training is successful
-SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 950
+SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 750
 NORMALIZE = False #whether or not to wrap env in a VecNormalize wrapper
 
-env = VecMonitor(GPUVecEnv(
-    num_envs=NUM_ENVS,
-    xml_path=SIM_XML_PATH,
-    reward_fn=controlInputRewardFn,
-    randomization_factor=RANDOMIZATION_FACTOR
-))
+if SIMULATE_ON_GPU:
+    env = VecMonitor(GPUVecEnv(
+        num_envs=NUM_ENVS,
+        xml_path=SIM_XML_PATH,
+        reward_fn=controlInputRewardFn,
+        randomization_factor=RANDOMIZATION_FACTOR
+    ))
 
-print("\nInitializing environment...      ", end='')
-env.reset()
-env.step(None)
-print("Done")
-
-# env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
-#                                     xml_path=SIM_XML_PATH,
-#                                     reward_fn=controlInputRewardFn,
-#                                     randomization_factor=RANDOMIZATION_FACTOR
-#                                 )] * NUM_ENVS))
-
+    print("\nInitializing environment...      ", end='')
+    env.reset()
+    env.step(None)
+    print("Done")
+else:
+    env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
+                                        xml_path=SIM_XML_PATH,
+                                        reward_fn=controlInputRewardFn,
+                                        randomization_factor=RANDOMIZATION_FACTOR
+                                    )] * NUM_ENVS))
 
 eval_env = VecMonitor(DummyVecEnv([ lambda : CPUEnv(
                                     xml_path=SIM_XML_PATH,
@@ -73,38 +74,39 @@ print("\nBeginning training.\n")
 
 
 if CHECKPOINT is None:
-    policy_args = {
-        # "lr_schedule": lambda progress : progress * 0.0002,
-        "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
-        "activation_fn": nn.Tanh,
-        "ortho_init": True,
-        "log_std_init": -2.0,
-        "full_std": False,
-        "use_expln": True,
-        "squash_output": False,
-        "normalize_images": False,
-        "optimizer_class": torch.optim.Adam,
-        "optimizer_kwargs": None
-    }
+    # policy_args = {
+    #     # "lr_schedule": lambda progress : progress * 0.0002,
+    #     "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
+    #     "activation_fn": nn.Tanh,
+    #     "ortho_init": True,
+    #     "log_std_init": -2.0,
+    #     "full_std": False,
+    #     "use_expln": True,
+    #     "squash_output": False,
+    #     "normalize_images": False,
+    #     "optimizer_class": torch.optim.Adam,
+    #     "optimizer_kwargs": None
+    # }
 
-    model = PPO(
-        policy = "MlpPolicy",
-        env = env,
-        learning_rate = 0.0001,
-        n_steps = POLICY_UPDATE_TIMESTEPS,
-        batch_size = 256,
-        n_epochs = 5,
-        gamma = 0.99,
-        gae_lambda = 0.95,
-        clip_range = 0.2,
-        ent_coef = 0,
-        vf_coef = 0.5,
-        max_grad_norm = 0.5,
-        use_sde = True,
-        sde_sample_freq = 128,
-        policy_kwargs = policy_args,
-        verbose = 1
-    )
+    # model = PPO(
+    #     policy = "MlpPolicy",
+    #     env = env,
+    #     learning_rate = 0.0001,
+    #     n_steps = POLICY_UPDATE_TIMESTEPS,
+    #     batch_size = 256,
+    #     n_epochs = 5,
+    #     gamma = 0.99,
+    #     gae_lambda = 0.95,
+    #     clip_range = 0.2,
+    #     ent_coef = 0,
+    #     vf_coef = 0.5,
+    #     max_grad_norm = 0.5,
+    #     use_sde = True,
+    #     sde_sample_freq = 128,
+    #     policy_kwargs = policy_args,
+    #     verbose = 1
+    # )
+    model = PPO(policy="MlpPolicy", env=env, verbose=1)
 else:
     model = PPO.load(
         path=CHECKPOINT,

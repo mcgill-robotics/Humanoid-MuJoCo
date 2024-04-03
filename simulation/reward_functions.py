@@ -57,15 +57,15 @@ def controlInputRewardFn(velocity, target_velocity, torso_quat, target_yaw, z_po
     ORIENTATION_MAX_REWARD = 0.2 # CUSTOM -> paper has it at 0.02
     ORIENTATION_MAX_PENALTY = -0.1 # CUSTOM -> paper does not penalize high tilts
     # CUSTOM: add a constant offset to the reward
-    CONSTANT_REWARD_OFFSET = 0.5
+    CONSTANT_REWARD_OFFSET = 1.0
     # CUSTOM: penalize self-collisions
     TERMINATE_ON_SELF_COLLISION = False
     SELF_COLLISION_PENALTY = -0.1
     # CUSTOM hyperparameters
-    ALLOW_NEGATIVE_REWARDS = True
-    ALLOW_EARLY_TERMINATION = False
-    OVERRIDE_TERMINAL_REWARD = False
-    TERMINAL_REWARD = -1 if ALLOW_NEGATIVE_REWARDS else 0
+    ALLOW_NEGATIVE_REWARDS = False
+    ALLOW_EARLY_TERMINATION = True
+    OVERRIDE_TERMINAL_REWARD = True
+    TERMINAL_REWARD = -10 if ALLOW_NEGATIVE_REWARDS else 0
     
     ### COMPUTE REWARD
     reward = 0
