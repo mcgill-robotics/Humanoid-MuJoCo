@@ -11,11 +11,13 @@ from sklearn.linear_model import LinearRegression
 file_path = "tuned_hyperparams.txt"
 
 # Define the hyperparameters you want to plot on x and z axes
-x_param = 'log_std_init'
-z_param = 'ent_coef'
+x_param = "log_std_init"
+z_param = "ent_coef"
 
 # Regular expression patterns to extract values
-trial_pattern = re.compile(r'\[I \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+\] Trial (\d+) finished with value: ([\d.]+) and parameters: ({.*?})')
+trial_pattern = re.compile(
+    r"\[I \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+\] Trial (\d+) finished with value: ([\d.]+) and parameters: ({.*?})"
+)
 
 # Initialize lists to store hyperparameters and scores
 x_values = []
@@ -23,7 +25,7 @@ z_values = []
 y_values = []
 
 # Read the text file and extract relevant information
-with open(file_path, 'r') as file:
+with open(file_path, "r") as file:
     for line in file:
         match = trial_pattern.match(line)
         if match:
@@ -52,16 +54,16 @@ yy = model.predict(np.array(list(zip(xx.ravel(), zz.ravel())))).reshape(xx.shape
 
 # Create a 3D scatter plot
 fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+ax = fig.add_subplot(111, projection="3d")
 
 # Plot the curved surface with colored surface based on score
-surf = ax.plot_surface(xx, zz, yy, cmap='viridis', alpha=0.8)
+surf = ax.plot_surface(xx, zz, yy, cmap="viridis", alpha=0.8)
 
 # Add color bar
 fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
 
 # Plot the original data points
-ax.scatter(x_values, z_values, y, c='r', marker='o', label='Original Data')
+ax.scatter(x_values, z_values, y, c="r", marker="o", label="Original Data")
 
 # Find the coordinates of the maximum score on the surface
 max_score_idx = np.unravel_index(np.argmax(yy, axis=None), yy.shape)
@@ -70,13 +72,13 @@ max_z = z_range[max_score_idx[0]]
 max_y = yy[max_score_idx]
 
 # Plot indicator for the maximum score
-ax.scatter(max_x, max_z, max_y, c='m', marker='*', s=100, label='Max Score')
+ax.scatter(max_x, max_z, max_y, c="m", marker="*", s=100, label="Max Score")
 
 # Set labels and title
 ax.set_xlabel(x_param)
 ax.set_ylabel(z_param)
-ax.set_zlabel('Score')
-ax.set_title('Hyperparameter Optimization with Fitted Curved Surface')
+ax.set_zlabel("Score")
+ax.set_title("Hyperparameter Optimization with Fitted Curved Surface")
 
 plt.legend()
 plt.show()

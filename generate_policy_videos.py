@@ -8,12 +8,12 @@ import cv2
 
 dir = "./data/training_results_r0/"
 num_videos = 9
-video_duration = 5 # seconds
+video_duration = 5  # seconds
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
-    randomization_factor=1
+    randomization_factor=1,
 )
 
 ppo_agent = PPO.load(
@@ -24,11 +24,16 @@ ppo_agent = PPO.load(
 if not os.path.exists(dir + "policy_videos/"):
     os.makedirs(dir + "policy_videos/")
 video_file_name = os.path.splitext(os.path.basename(dir + "best_model"))[0]
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
-print("0%", end='\r')
+print("0%", end="\r")
 for v in range(num_videos):
-    video_writer = cv2.VideoWriter(dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4", fourcc, 30, (1080, 720))
+    video_writer = cv2.VideoWriter(
+        dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4",
+        fourcc,
+        30,
+        (1080, 720),
+    )
     done = False
     obs, _ = env.reset()
     while env.data.time < video_duration:
@@ -37,4 +42,4 @@ for v in range(num_videos):
         frame = env.render("rgb_array")
         video_writer.write(frame)
     video_writer.release()
-    print("{}%                    ".format(100*(v+1)/num_videos), end='\r')
+    print("{}%                    ".format(100 * (v + 1) / num_videos), end="\r")

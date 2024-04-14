@@ -6,9 +6,7 @@ from stable_baselines3 import PPO
 checkpoint = "./data/training_results_r1/best_model"
 
 env = CPUEnv(
-    xml_path=SIM_XML_PATH,
-    reward_fn=controlInputRewardFn,
-    randomization_factor=1
+    xml_path=SIM_XML_PATH, reward_fn=controlInputRewardFn, randomization_factor=1
 )
 
 ppo_agent = PPO.load(
@@ -29,4 +27,6 @@ while True:
             total_reward += reward
         print(reward)
         env.render("human")
-    print(" >>> Episode Length {}, Total Reward {}".format(episode_length, total_reward))
+    print(
+        " >>> Episode Length {}, Total Reward {}".format(episode_length, total_reward)
+    )
