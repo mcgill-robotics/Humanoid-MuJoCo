@@ -94,7 +94,6 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "lr_schedule": lambda progress: 3e-4,
         "net_arch": dict(pi=[256, 256, 256], vf=[256, 256, 256]),
         "activation_fn": nn.Tanh,
         "ortho_init": True,

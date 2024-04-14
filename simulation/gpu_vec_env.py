@@ -503,10 +503,10 @@ class GPUVecEnv(VecEnv):
         self.pressure_values_buffer.append(pressure_values)
 
         joint_angles = self.joint_angles_buffer.pop(0)
-        joint_velocities = jp.log(self.joint_velocities_buffer.pop(0) + 1)
-        local_ang_vel = jp.log(self.local_ang_vel_buffer.pop(0) + 1)
-        torso_local_velocity = jp.log(self.torso_local_velocity_buffer.pop(0) + 1)
-        torso_local_accel = jp.log(self.torso_local_accel_buffer.pop(0) + 1)
+        joint_velocities = self.joint_velocities_buffer.pop(0)
+        local_ang_vel = self.local_ang_vel_buffer.pop(0)
+        torso_local_velocity = self.torso_local_velocity_buffer.pop(0)
+        torso_local_accel = self.torso_local_accel_buffer.pop(0)
         local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
         pressure_values = self.pressure_values_buffer.pop(0)
 
