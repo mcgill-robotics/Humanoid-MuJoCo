@@ -264,8 +264,6 @@ class GPUVecEnv(VecEnv):
     
     # joint positions     20          Joint positions in radians
     joint_angles = self.data_batch.qpos[:, self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, len(self.joint_qpos_idx))))
-    #normalize
-    joint_angles = joint_angles / (jp.pi / 2)
     
     # joint velocities     20          Joint positions in radians
     joint_velocities = self.data_batch.qvel[:, self.joint_dof_idx] + (self.randomization_factor * (JOINT_VELOCITY_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=(self.num_envs, len(self.joint_qpos_idx))))
@@ -289,7 +287,7 @@ class GPUVecEnv(VecEnv):
     # foot pressure       8           Pressure values from foot sensors (N)
     pressure_values = self.getFootForces(self.pressure_sensor_ids, self.data_batch)
     # convert to binary (above 0.5N is considered a contact point)
-    pressure_values = jp.where(pressure_values > 0.5, 1.0, 0.0)
+    pressure_values = jp.where(pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0)
 
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
@@ -300,13 +298,11 @@ class GPUVecEnv(VecEnv):
     self.local_gravity_vector_buffer.append(local_gravity_vector)
     self.pressure_values_buffer.append(pressure_values)
     
-    SCALING_FACTOR = 10 # scaling factor to apply to unbounded sensor readings (velocity, ang vel, etc.)
-    
     joint_angles = self.joint_angles_buffer.pop(0)
-    joint_velocities = self.joint_velocities_buffer.pop(0)
-    local_ang_vel = self.local_ang_vel_buffer.pop(0) / SCALING_FACTOR
-    torso_local_velocity = self.torso_local_velocity_buffer.pop(0) / SCALING_FACTOR
-    torso_local_accel = self.torso_local_accel_buffer.pop(0) / SCALING_FACTOR
+    joint_velocities = jp.log(self.joint_velocities_buffer.pop(0) + 1)
+    local_ang_vel = jp.log(self.local_ang_vel_buffer.pop(0) + 1)
+    torso_local_velocity = jp.log(self.torso_local_velocity_buffer.pop(0) + 1)
+    torso_local_accel = jp.log(self.torso_local_accel_buffer.pop(0) + 1)
     local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
     pressure_values = self.pressure_values_buffer.pop(0)
     
@@ -321,8 +317,8 @@ class GPUVecEnv(VecEnv):
                                       torso_local_accel,
                                       local_gravity_vector,
                                       pressure_values,
-                                      self.control_inputs_velocity / SCALING_FACTOR,
-                                      self.control_inputs_yaw / jp.pi,
+                                      self.control_inputs_velocity,
+                                      self.control_inputs_yaw,
                                       clock_phase_sin,
                                       clock_phase_cos,
                                       clock_phase_complex))

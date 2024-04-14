@@ -74,39 +74,39 @@ print("\nBeginning training.\n")
 
 
 if CHECKPOINT is None:
-    # policy_args = {
-    #     # "lr_schedule": lambda progress : progress * 0.0002,
-    #     "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
-    #     "activation_fn": nn.Tanh,
-    #     "ortho_init": True,
-    #     "log_std_init": -2.0,
-    #     "full_std": False,
-    #     "use_expln": True,
-    #     "squash_output": False,
-    #     "normalize_images": False,
-    #     "optimizer_class": torch.optim.Adam,
-    #     "optimizer_kwargs": None
-    # }
+    policy_args = {
+        "lr_schedule": lambda progress : 3e-4,
+        "net_arch": dict(pi=[256,256,256], vf=[256,256,256]),
+        "activation_fn": nn.Tanh,
+        "ortho_init": True,
+        "log_std_init": 0.0,
+        "full_std": True,
+        "use_expln": False,
+        "squash_output": False,
+        "optimizer_class": torch.optim.Adam,
+        "optimizer_kwargs": None
+    }
 
-    # model = PPO(
-    #     policy = "MlpPolicy",
-    #     env = env,
-    #     learning_rate = 0.0001,
-    #     n_steps = POLICY_UPDATE_TIMESTEPS,
-    #     batch_size = 256,
-    #     n_epochs = 5,
-    #     gamma = 0.99,
-    #     gae_lambda = 0.95,
-    #     clip_range = 0.2,
-    #     ent_coef = 0,
-    #     vf_coef = 0.5,
-    #     max_grad_norm = 0.5,
-    #     use_sde = True,
-    #     sde_sample_freq = 128,
-    #     policy_kwargs = policy_args,
-    #     verbose = 1
-    # )
-    model = PPO(policy="MlpPolicy", env=env, verbose=1)
+    model = PPO(
+        policy = "MlpPolicy",
+        env = env,
+        learning_rate = 3e-4,
+        n_steps = POLICY_UPDATE_TIMESTEPS,
+        batch_size = 64,
+        n_epochs = 10,
+        gamma = 0.99,
+        gae_lambda = 0.95,
+        clip_range = 0.2,
+        clip_range_vf=None,
+        ent_coef = 0.0,
+        normalize_advantage=True,
+        vf_coef = 0.5,
+        max_grad_norm = 0.5,
+        use_sde = False,
+        sde_sample_freq = -1,
+        policy_kwargs = policy_args,
+        verbose = 1
+    )
 else:
     model = PPO.load(
         path=CHECKPOINT,

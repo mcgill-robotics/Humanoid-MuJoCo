@@ -199,8 +199,6 @@ class CPUEnv(gym.Env):
     
     # joint positions     20          Joint positions in radians
     joint_angles = self.data.qpos[self.joint_qpos_idx] + (self.randomization_factor * (JOINT_ANGLE_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
-    # normalize
-    joint_angles = joint_angles / (jp.pi / 2)
 
     # joint velocities
     joint_velocities = self.data.qvel[self.joint_dof_idx] + (self.randomization_factor * (JOINT_VELOCITY_NOISE_STDDEV/180.0*jp.pi) * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)]))
@@ -230,7 +228,7 @@ class CPUEnv(gym.Env):
         if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
           pressure_values[i] += abs(self.data.efc_force[self.data.contact.efc_address[ci]])
     #convert pressure to binary values
-    pressure_values = np.where(pressure_values > 0.5, 1.0, 0.0) # above 0.5N is considered a contact
+    pressure_values = np.where(pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0) # above 0.5N is considered a contact
     
     # cycle observations through observation buffers
     self.joint_angles_buffer.append(joint_angles)
@@ -241,13 +239,11 @@ class CPUEnv(gym.Env):
     self.local_gravity_vector_buffer.append(local_gravity_vector)
     self.pressure_values_buffer.append(pressure_values)
     
-    SCALING_FACTOR = 10 # scaling factor to apply to unbounded sensor readings (velocity, ang vel, etc.)
-    
     joint_angles = self.joint_angles_buffer.pop(0)
-    joint_velocities = self.joint_velocities_buffer.pop(0)
-    local_ang_vel = self.local_ang_vel_buffer.pop(0) / SCALING_FACTOR
-    torso_local_velocity = self.torso_local_velocity_buffer.pop(0) / SCALING_FACTOR
-    torso_local_accel = self.torso_local_accel_buffer.pop(0) / SCALING_FACTOR
+    joint_velocities = jp.log(self.joint_velocities_buffer.pop(0) + 1.0)
+    local_ang_vel = jp.log(self.local_ang_vel_buffer.pop(0) + 1.0)
+    torso_local_velocity = jp.log(self.torso_local_velocity_buffer.pop(0) + 1.0)
+    torso_local_accel = jp.log(self.torso_local_accel_buffer.pop(0) + 1.0)
     local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
     pressure_values = self.pressure_values_buffer.pop(0)
     
@@ -262,8 +258,8 @@ class CPUEnv(gym.Env):
                                            torso_local_accel,
                                            local_gravity_vector,
                                            pressure_values,
-                                           self.control_input_velocity / SCALING_FACTOR,
-                                           self.control_input_yaw / jp.pi,
+                                           self.control_input_velocity,
+                                           self.control_input_yaw,
                                            clock_phase_sin,
                                            clock_phase_cos,
                                            clock_phase_complex))
