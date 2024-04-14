@@ -130,6 +130,11 @@ def controlInputRewardFn(
 
     # Upright
     tilt_vector = torso_quat_obj.inv().apply(jp.array([0, 0, 1]))
+    tilt_vector = jp.clip(
+        tilt_vector,
+        a_min=-1 * jp.ones(tilt_vector.shape),
+        a_max=jp.ones(tilt_vector.shape),
+    )
     tilt_amt = jp.arcsin(jp.max(jp.abs(tilt_vector[0:2])))
     tilt_amt = jp.where(tilt_vector[2] <= 0, ORIENTATION_REWARD_MAX_ERROR_RAD, tilt_amt)
     tilt_reward = jp.interp(
@@ -144,7 +149,6 @@ def controlInputRewardFn(
         jp.array([ORIENTATION_MAX_REWARD / 2, 0, ORIENTATION_MAX_PENALTY / 2]),
     )
     reward += tilt_reward
-    # print("tilt_reward", tilt_reward)
 
     # Target orientation
     rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
@@ -182,6 +186,18 @@ def controlInputRewardFn(
 
     if OVERRIDE_TERMINAL_REWARD:
         reward = jp.where(terminal, TERMINAL_REWARD, reward)
+
+    if jp.isnan(reward):
+        print("TERMINAL_REWARD", TERMINAL_REWARD)
+        print("self_collision_reward", self_collision_reward)
+        print("rot_reward", rot_reward)
+        print("tilt_reward", tilt_reward)
+        print("CONSTANT_REWARD_OFFSET", CONSTANT_REWARD_OFFSET)
+        print("control_std_reward", control_std_reward)
+        print("joint_torque_reward", joint_torque_reward)
+        print("z_pos_penalty", z_pos_penalty)
+        print("vvelocity_reward", vvelocity_reward)
+        print("hvelocity_reward", hvelocity_reward)
 
     return reward, terminal
 
