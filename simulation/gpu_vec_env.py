@@ -574,7 +574,8 @@ class GPUVecEnv(VecEnv):
             self.previous_rewards = rewards
             rewards = _rewards
         truncated = np.any(self.data_batch.time >= max_simulation_time)
-        done = truncated or np.all(terminals)
+        fraction_of_terminated = np.sum(terminals) / np.sum(np.ones(terminals.shape))
+        done = truncated or fraction_of_terminated > TERMINAL_FRACTION_RESET_THRESHOLD
         dones = np.full(terminals.shape, done)
         infos = [{}] * self.num_envs
 

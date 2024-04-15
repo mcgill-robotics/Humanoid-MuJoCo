@@ -5,7 +5,7 @@ from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 import torch
 from torch import nn
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     CheckpointCallback,
@@ -40,9 +40,10 @@ CHECKPOINT = None
 EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
 CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 5
 RANDOMIZATION_INCREMENT = 0.1
-RANDOMIZATION_FACTOR = 0  # starts at this, increments whenever training is successful
-SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 750
+RANDOMIZATION_FACTOR = 1  # starts at this, increments whenever training is successful
+SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 1000
 NORMALIZE = False  # whether or not to wrap env in a VecNormalize wrapper
+MODEL_TYPE = SAC  # TD3 # PPO
 
 if SIMULATE_ON_GPU:
     env = VecMonitor(
@@ -94,7 +95,7 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": dict(pi=[256, 256, 256], vf=[256, 256, 256]),
+        "net_arch": dict(pi=[256, 256], vf=[256, 256]),
         "activation_fn": nn.Tanh,
         "ortho_init": True,
         "log_std_init": 0.0,
@@ -104,29 +105,11 @@ if CHECKPOINT is None:
         "optimizer_class": torch.optim.Adam,
         "optimizer_kwargs": None,
     }
-
-    model = PPO(
-        policy="MlpPolicy",
-        env=env,
-        learning_rate=3e-4,
-        n_steps=POLICY_UPDATE_TIMESTEPS,
-        batch_size=64,
-        n_epochs=10,
-        gamma=0.99,
-        gae_lambda=0.95,
-        clip_range=0.2,
-        clip_range_vf=None,
-        ent_coef=0.0,
-        normalize_advantage=True,
-        vf_coef=0.5,
-        max_grad_norm=0.5,
-        use_sde=False,
-        sde_sample_freq=-1,
-        policy_kwargs=policy_args,
-        verbose=1,
+    model = MODEL_TYPE(
+        policy="MlpPolicy", env=env, verbose=2, policy_kwargs=policy_args
     )
 else:
-    model = PPO.load(
+    model = MODEL_TYPE.load(
         path=CHECKPOINT,
         env=env,
     )

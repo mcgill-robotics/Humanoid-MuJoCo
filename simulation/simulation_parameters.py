@@ -43,10 +43,11 @@ MIN_FORCE_FOR_CONTACT = 0.5  # N
 desired_control_frequency = 100
 timestep = 0.001
 physics_steps_per_control_step = int((1.0 / desired_control_frequency) // timestep)
-max_simulation_time = 10  # seconds
+max_simulation_time = 999999999  # 10  # seconds
 MAX_CONTROL_INPUT_VELOCITY = 2  # m/s ~ 7.2 mph (4.5 km/h)
 USE_CONTROL_INPUTS = True  # if false, only the standing behaviour is trained
 USE_POTENTIAL_REWARDS = False
+TERMINAL_FRACTION_RESET_THRESHOLD = 0.5  # applies only to GPUVecEnv
 
 ### URDF REFERENCE NAMES
 
