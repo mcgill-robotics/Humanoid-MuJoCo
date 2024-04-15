@@ -30,8 +30,8 @@ log_dir = "data/training_results"
 # Trial 19 finished with value: 262.5614284 and parameters: {'batch_size': 256, 'n_steps': 1024, 'gamma': 0.98, 'learning_rate': 0.0006905843913061805, 'ent_coef': 0.022694858251377927, 'clip_range': 0.1, 'n_epochs': 1, 'gae_lambda': 0.8, 'max_grad_norm': 0.7, 'vf_coef': 0.7445807875710113, 'net_arch': 'large', 'log_std_init': -0.5482045338158068, 'sde_sample_freq': 128, 'ortho_init': True, 'activation_fn': 'tanh'}. Best is trial 19 with value: 262.5614284.
 
 
-NUM_ENVS = 64
-SIMULATE_ON_GPU = False
+NUM_ENVS = 256
+SIMULATE_ON_GPU = True
 N_EVAL_EPISODES = 10
 POLICY_ITERATIONS = 1000
 POLICY_UPDATE_TIMESTEPS = 2048
@@ -43,7 +43,7 @@ RANDOMIZATION_INCREMENT = 0.1
 RANDOMIZATION_FACTOR = 1  # starts at this, increments whenever training is successful
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 1000
 NORMALIZE = False  # whether or not to wrap env in a VecNormalize wrapper
-MODEL_TYPE = SAC  # TD3 # PPO
+MODEL_TYPE = SAC # SAC # TD3 # PPO
 
 if SIMULATE_ON_GPU:
     env = VecMonitor(
@@ -95,15 +95,8 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": dict(pi=[256, 256], vf=[256, 256]),
+        "net_arch": dict(pi=[256, 256], vf=[256, 256], qf=[256, 256]),
         "activation_fn": nn.Tanh,
-        "ortho_init": True,
-        "log_std_init": 0.0,
-        "full_std": True,
-        "use_expln": False,
-        "squash_output": False,
-        "optimizer_class": torch.optim.Adam,
-        "optimizer_kwargs": None,
     }
     model = MODEL_TYPE(
         policy="MlpPolicy", env=env, verbose=2, policy_kwargs=policy_args

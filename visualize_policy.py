@@ -1,7 +1,7 @@
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import *
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC, TD3
 
 checkpoint = "./data/training_results_r1/best_model"
 
@@ -9,7 +9,8 @@ env = CPUEnv(
     xml_path=SIM_XML_PATH, reward_fn=controlInputRewardFn, randomization_factor=1
 )
 
-ppo_agent = PPO.load(
+MODEL_TYPE = SAC  # TD3 # PPO
+agent = MODEL_TYPE.load(
     path=checkpoint,
     env=env,
 )
@@ -20,7 +21,7 @@ while True:
     total_reward = 0
     episode_length = 0
     while not done:
-        action, _ = ppo_agent.predict(obs, deterministic=True)
+        action, _ = agent.predict(obs, deterministic=True)
         obs, reward, done, _, _ = env.step(action)
         if not done:
             episode_length += 1

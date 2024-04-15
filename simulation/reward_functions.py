@@ -76,7 +76,7 @@ def controlInputRewardFn(
     # CUSTOM hyperparameters
     ALLOW_NEGATIVE_REWARDS = True
     ALLOW_EARLY_TERMINATION = True
-    OVERRIDE_TERMINAL_REWARD = False
+    OVERRIDE_TERMINAL_REWARD = True
     TERMINAL_REWARD = -10 if ALLOW_NEGATIVE_REWARDS else 0
 
     ### COMPUTE REWARD
@@ -186,19 +186,7 @@ def controlInputRewardFn(
 
     if OVERRIDE_TERMINAL_REWARD:
         reward = jp.where(terminal, TERMINAL_REWARD, reward)
-
-    if jp.isnan(reward):
-        print("TERMINAL_REWARD", TERMINAL_REWARD)
-        print("self_collision_reward", self_collision_reward)
-        print("rot_reward", rot_reward)
-        print("tilt_reward", tilt_reward)
-        print("CONSTANT_REWARD_OFFSET", CONSTANT_REWARD_OFFSET)
-        print("control_std_reward", control_std_reward)
-        print("joint_torque_reward", joint_torque_reward)
-        print("z_pos_penalty", z_pos_penalty)
-        print("vvelocity_reward", vvelocity_reward)
-        print("hvelocity_reward", hvelocity_reward)
-
+        
     return reward, terminal
 
 

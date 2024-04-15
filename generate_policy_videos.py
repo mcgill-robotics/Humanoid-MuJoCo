@@ -1,7 +1,7 @@
 from simulation.cpu_env import CPUEnv
 from simulation import GREEN_SCREEN_SIM_XML_PATH
 from simulation.reward_functions import *
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC, TD3
 import os
 import cv2
 
@@ -16,7 +16,8 @@ env = CPUEnv(
     randomization_factor=1,
 )
 
-ppo_agent = PPO.load(
+MODEL_TYPE = SAC  # TD3 # PPO
+agent = MODEL_TYPE.load(
     path=dir + "best_model",
     env=env,
 )
@@ -37,7 +38,7 @@ for v in range(num_videos):
     done = False
     obs, _ = env.reset()
     while env.data.time < video_duration:
-        action, _ = ppo_agent.predict(obs, deterministic=True)
+        action, _ = agent.predict(obs, deterministic=True)
         obs, reward, done, _, _ = env.step(action)
         frame = env.render("rgb_array")
         video_writer.write(frame)

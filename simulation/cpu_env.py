@@ -117,8 +117,8 @@ class CPUEnv(gym.Env):
             self.control_input_yaw = jp.array(
                 [
                     random.uniform(
-                        -1 * jp.pi * self.randomization_factor,
-                        jp.pi * self.randomization_factor,
+                        -1 * RANGE_CONTROL_INPUT_YAW * self.randomization_factor,
+                        RANGE_CONTROL_INPUT_YAW * self.randomization_factor,
                     )
                 ]
             )
