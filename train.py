@@ -200,7 +200,7 @@ else:
 ##########################
 
 while True:
-    print(" >> TRAINING WITH RANDOMIZATION FACTOR {}".format(RANDOMIZATION_FACTOR))
+    print(" >> TRAINING WITH RANDOMIZATION FACTOR {:.1f}".format(RANDOMIZATION_FACTOR))
     env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
     env.reset()
     eval_env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
@@ -208,7 +208,7 @@ while True:
 
     checkpoint_callback = CheckpointCallback(
         save_freq=CHECKPOINT_FREQ,
-        save_path=log_dir + "_r{}".format(RANDOMIZATION_FACTOR),
+        save_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
         name_prefix="checkpoint",
         verbose=0,
     )
@@ -219,8 +219,8 @@ while True:
 
     eval_callback = EvalCallback(
         eval_env,
-        best_model_save_path=log_dir + "_r{}".format(RANDOMIZATION_FACTOR),
-        log_path=log_dir + "_r{}".format(RANDOMIZATION_FACTOR),
+        best_model_save_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
+        log_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
         eval_freq=EVAL_FREQ,
         n_eval_episodes=N_EVAL_EPISODES,
         deterministic=True,
@@ -233,7 +233,7 @@ while True:
         total_timesteps=TOTAL_TIMESTEPS,
         callback=[checkpoint_callback, eval_callback],
         log_interval=1,
-        tb_log_name="Standing_r{}".format(RANDOMIZATION_FACTOR),
+        tb_log_name="Standing_r{:.1f}".format(RANDOMIZATION_FACTOR),
         reset_num_timesteps=False,
         progress_bar=True,
     )

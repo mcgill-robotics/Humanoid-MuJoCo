@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 LOG_NAME = "TD3"  # "SAC" # "PPO"
-RANDOMIZATION_FACTOR = 0
+RANDOMIZATION_FACTOR = 0.5
 evaluations = np.load(
     "data/{}/training_results_r{}/evaluations.npz".format(
         LOG_NAME, RANDOMIZATION_FACTOR
@@ -37,7 +37,7 @@ for i in range(len(rewards)):
 
 # Plot the curve
 plt.plot(timesteps, rewards, label="Reward", color="blue")
-plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+# plt.plot(timesteps, running_avgs, label="Running Average", color="red")
 
 # Add labels and title
 plt.xlabel("Steps")
@@ -57,7 +57,7 @@ plt.show()
 
 #### PLOT EPISODE LENGTHS
 
-window_size = 100
+window_size = 10
 running_avgs = []
 for i in range(len(ep_lengths)):
     running_avg = 0
@@ -70,7 +70,7 @@ for i in range(len(ep_lengths)):
 
 # Plot the curve
 plt.plot(timesteps, ep_lengths, label="Episode Length", color="blue")
-plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+# plt.plot(timesteps, running_avgs, label="Running Average", color="red")
 
 # Add labels and title
 plt.xlabel("Steps")

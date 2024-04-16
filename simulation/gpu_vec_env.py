@@ -248,7 +248,7 @@ class GPUVecEnv(VecEnv):
         # vary the mass of all limbs randomly
         for i in range(self.model.nbody - 1):
             self.model.body(i + 1).mass[0] = max(
-                0.01,
+                0.00001,
                 self.model.body(i + 1).mass[0]
                 + random.uniform(
                     -MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
