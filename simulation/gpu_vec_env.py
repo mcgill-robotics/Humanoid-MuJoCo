@@ -34,6 +34,7 @@ class GPUVecEnv(VecEnv):
         randomization_factor=0,
         verbose=False,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
+        max_simulation_time_override=None,
     ):
         if jax.default_backend() != "gpu":
             print("ERROR: Failed to find GPU device.")
@@ -67,6 +68,13 @@ class GPUVecEnv(VecEnv):
         self.rng = jax.random.split(self.rng_key, self.num_envs)
         self.verbose = verbose
         self.render_mode = [[None]] * self.num_envs
+        self.max_simulation_time = (
+            max_simulation_time_override
+            if max_simulation_time_override is not None
+            else max_simulation_time
+        )
+        if self.max_simulation_time < 0:
+            self.max_simulation_time = np.inf
 
         # define jax step function
         def rollout(m, d):
@@ -173,15 +181,22 @@ class GPUVecEnv(VecEnv):
             self.control_inputs_velocity = jax.random.uniform(
                 self.rng_key,
                 (self.num_envs, 2),
-                minval=-1 * MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
-                maxval=MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
+                minval=-1 * CONTROL_INPUT_MAX_VELOCITY,
+                maxval=CONTROL_INPUT_MAX_VELOCITY,
             )
             self.control_inputs_yaw = jax.random.uniform(
                 self.rng_key,
                 (self.num_envs, 1),
-                minval=-1 * jp.pi * self.randomization_factor,
-                maxval=jp.pi * self.randomization_factor,
+                minval=-1 * CONTROL_INPUT_MAX_YAW,
+                maxval=CONTROL_INPUT_MAX_YAW,
             )
+            if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
+                self.control_inputs_yaw = (
+                    self.control_inputs_yaw * self.randomization_factor
+                )
+                self.control_inputs_velocity = (
+                    self.control_inputs_velocity * self.randomization_factor
+                )
         else:
             self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
             self.control_inputs_yaw = jp.zeros((self.num_envs, 1))
@@ -286,17 +301,21 @@ class GPUVecEnv(VecEnv):
         self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
 
         # randomize joint initial states (GPU)
-        joint_ctrl_range = JOINT_INITIAL_CTRL_OFFSET_MIN + self.randomization_factor * (
-            JOINT_INITIAL_CTRL_OFFSET_MAX - JOINT_INITIAL_CTRL_OFFSET_MIN
+        joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
         )
+        joint_mask = jp.zeros(self.base_mjx_data.qpos.shape)
+        joint_mask.at[self.joint_qpos_idx].set(1.0)
+
         self.data_batch = jax.vmap(
             lambda rng: self.base_mjx_data.replace(
-                ctrl=jax.random.uniform(
+                qpos=jax.random.uniform(
                     rng,
-                    self.base_mjx_data.ctrl.shape,
-                    minval=-joint_ctrl_range,
-                    maxval=joint_ctrl_range,
+                    self.base_mjx_data.qpos.shape,
+                    minval=-joint_pos_range,
+                    maxval=joint_pos_range,
                 )
+                * joint_mask
             )
         )(self.rng)
 
@@ -573,7 +592,7 @@ class GPUVecEnv(VecEnv):
             _rewards = rewards - self.previous_rewards
             self.previous_rewards = rewards
             rewards = _rewards
-        truncated = np.any(self.data_batch.time >= max_simulation_time)
+        truncated = np.any(self.data_batch.time >= self.max_simulation_time)
         fraction_of_terminated = np.sum(terminals) / np.sum(np.ones(terminals.shape))
         done = truncated or fraction_of_terminated > TERMINAL_FRACTION_RESET_THRESHOLD
         dones = np.full(terminals.shape, done)

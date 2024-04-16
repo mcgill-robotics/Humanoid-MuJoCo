@@ -1,7 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-evaluations = np.load("data/training_results_r0.30000000000000004/evaluations.npz")
+LOG_NAME = "TD3"  # "SAC" # "PPO"
+RANDOMIZATION_FACTOR = 0
+evaluations = np.load(
+    "data/{}/training_results_r{}/evaluations.npz".format(
+        LOG_NAME, RANDOMIZATION_FACTOR
+    )
+)
 
 timesteps = evaluations["timesteps"]
 rewards = np.mean(evaluations["results"], axis=1)

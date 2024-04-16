@@ -1,35 +1,40 @@
 from simulation.cpu_env import CPUEnv
 from simulation import GREEN_SCREEN_SIM_XML_PATH
 from simulation.reward_functions import *
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC, TD3
 import os
 import cv2
 
 
-dir = "./data/training_results_r0/"
+MODEL_TYPE = SAC  # TD3 # PPO
+LOG_NAME = "SAC"
+RANDOMIZATION_FACTOR = 0
+CKPT_NAME = "best_model"
+
+eval_dir = "./data/{}/training_results_r{}/".format(LOG_NAME, RANDOMIZATION_FACTOR)
 num_videos = 9
 video_duration = 5  # seconds
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
-    randomization_factor=1,
+    randomization_factor=RANDOMIZATION_FACTOR,
 )
 
-ppo_agent = PPO.load(
-    path=dir + "best_model",
+agent = MODEL_TYPE.load(
+    path=eval_dir + CKPT_NAME,
     env=env,
 )
 
-if not os.path.exists(dir + "policy_videos/"):
-    os.makedirs(dir + "policy_videos/")
-video_file_name = os.path.splitext(os.path.basename(dir + "best_model"))[0]
+if not os.path.exists(eval_dir + "policy_videos/"):
+    os.makedirs(eval_dir + "policy_videos/")
+video_file_name = os.path.splitext(os.path.basename(eval_dir + CKPT_NAME))[0]
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
 print("0%", end="\r")
 for v in range(num_videos):
     video_writer = cv2.VideoWriter(
-        dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4",
+        eval_dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4",
         fourcc,
         30,
         (1080, 720),
@@ -37,7 +42,7 @@ for v in range(num_videos):
     done = False
     obs, _ = env.reset()
     while env.data.time < video_duration:
-        action, _ = ppo_agent.predict(obs, deterministic=True)
+        action, _ = agent.predict(obs, deterministic=True)
         obs, reward, done, _, _ = env.step(action)
         frame = env.render("rgb_array")
         video_writer.write(frame)
