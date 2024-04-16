@@ -24,7 +24,7 @@ argparser.add_argument(
     "--n-envs", type=int, default=128, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
-    "--cpu", type=bool, action="store_true", help="Pass this flag to run on CPU"
+    "--cpu", action="store_true", help="Pass this flag to run on CPU"
 )
 argparser.add_argument(
     "--n-eval-episodes",
@@ -79,6 +79,7 @@ argparser.add_argument(
 )
 
 args = argparser.parse_args()
+print(args)
 
 ##########################
 ##  SETUP TRAIN PARAMS  ##
