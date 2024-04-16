@@ -41,9 +41,9 @@ VELOCIMETER_NOISE_STDDEV = 0.05  # m/s
 
 desired_control_frequency = 100
 timestep = 0.001
-max_simulation_time = 30  # 10  # seconds
-MAX_CONTROL_INPUT_VELOCITY = 2  # m/s ~ 7.2 mph (4.5 km/h)
-RANGE_CONTROL_INPUT_YAW = 3.14159  # radians
+max_simulation_time = -1  # let the simulation run indefinitely
+CONTROL_INPUT_MAX_VELOCITY = 2  # m/s ~ 7.2 mph (4.5 km/h), can go from -2 to 2 m/s
+CONTROL_INPUT_MAX_YAW = 3.14159  # radians, can go from -180 to 180 degrees
 USE_CONTROL_INPUTS = True  # if false, only the standing behaviour is trained
 USE_POTENTIAL_REWARDS = False
 TERMINAL_FRACTION_RESET_THRESHOLD = 0.5  # applies only to GPUVecEnv
@@ -75,8 +75,8 @@ IMU_NOISE_STDDEV = 0  # degrees
 GYRO_NOISE_STDDEV = 0  # degrees / s
 ACCELEROMETER_NOISE_STDDEV = 0.0  # m/s^2
 VELOCIMETER_NOISE_STDDEV = 0.0  # m/s
-MAX_CONTROL_INPUT_VELOCITY = 0  # m/s
-RANGE_CONTROL_INPUT_YAW = 0  # radians
+# CONTROL_INPUT_MAX_VELOCITY = 0  # m/s
+# CONTROL_INPUT_MAX_YAW = 0  # radians
 
 ### URDF REFERENCE NAMES
 

@@ -40,6 +40,7 @@ class CPUEnv(gym.Env):
         randomization_factor=0,
         verbose=False,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
+        max_simulation_time_override=None,
     ):
         self.platform = "CPU"
         self.xml_path = xml_path
@@ -63,6 +64,13 @@ class CPUEnv(gym.Env):
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float32
         )
+        self.max_simulation_time = (
+            max_simulation_time_override
+            if max_simulation_time_override is not None
+            else max_simulation_time
+        )
+        if self.max_simulation_time < 0:
+            self.max_simulation_time = np.inf
 
     def reset(self, seed=None, options=None):
         try:
@@ -105,20 +113,20 @@ class CPUEnv(gym.Env):
             self.control_input_velocity = jp.array(
                 [
                     random.uniform(
-                        -1 * MAX_CONTROL_INPUT_VELOCITY,
-                        MAX_CONTROL_INPUT_VELOCITY,
+                        -1 * CONTROL_INPUT_MAX_VELOCITY,
+                        CONTROL_INPUT_MAX_VELOCITY,
                     ),
                     random.uniform(
-                        -1 * MAX_CONTROL_INPUT_VELOCITY,
-                        MAX_CONTROL_INPUT_VELOCITY,
+                        -1 * CONTROL_INPUT_MAX_VELOCITY,
+                        CONTROL_INPUT_MAX_VELOCITY,
                     ),
                 ]
             )
             self.control_input_yaw = jp.array(
                 [
                     random.uniform(
-                        -1 * RANGE_CONTROL_INPUT_YAW,
-                        RANGE_CONTROL_INPUT_YAW,
+                        -1 * CONTROL_INPUT_MAX_YAW,
+                        CONTROL_INPUT_MAX_YAW,
                     )
                 ]
             )
@@ -546,7 +554,7 @@ class CPUEnv(gym.Env):
             reward = _reward
 
         truncated = False
-        if self.data.time >= max_simulation_time:
+        if self.data.time >= self.max_simulation_time:
             truncated = True
 
         if terminated or truncated:

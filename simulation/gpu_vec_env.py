@@ -34,6 +34,7 @@ class GPUVecEnv(VecEnv):
         randomization_factor=0,
         verbose=False,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
+        max_simulation_time_override=None,
     ):
         if jax.default_backend() != "gpu":
             print("ERROR: Failed to find GPU device.")
@@ -67,6 +68,13 @@ class GPUVecEnv(VecEnv):
         self.rng = jax.random.split(self.rng_key, self.num_envs)
         self.verbose = verbose
         self.render_mode = [[None]] * self.num_envs
+        self.max_simulation_time = (
+            max_simulation_time_override
+            if max_simulation_time_override is not None
+            else max_simulation_time
+        )
+        if self.max_simulation_time < 0:
+            self.max_simulation_time = np.inf
 
         # define jax step function
         def rollout(m, d):
@@ -173,14 +181,14 @@ class GPUVecEnv(VecEnv):
             self.control_inputs_velocity = jax.random.uniform(
                 self.rng_key,
                 (self.num_envs, 2),
-                minval=-1 * MAX_CONTROL_INPUT_VELOCITY,
-                maxval=MAX_CONTROL_INPUT_VELOCITY,
+                minval=-1 * CONTROL_INPUT_MAX_VELOCITY,
+                maxval=CONTROL_INPUT_MAX_VELOCITY,
             )
             self.control_inputs_yaw = jax.random.uniform(
                 self.rng_key,
                 (self.num_envs, 1),
-                minval=-1 * RANGE_CONTROL_INPUT_YAW,
-                maxval=RANGE_CONTROL_INPUT_YAW,
+                minval=-1 * CONTROL_INPUT_MAX_YAW,
+                maxval=CONTROL_INPUT_MAX_YAW,
             )
             if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
                 self.control_inputs_yaw = (
@@ -584,7 +592,7 @@ class GPUVecEnv(VecEnv):
             _rewards = rewards - self.previous_rewards
             self.previous_rewards = rewards
             rewards = _rewards
-        truncated = np.any(self.data_batch.time >= max_simulation_time)
+        truncated = np.any(self.data_batch.time >= self.max_simulation_time)
         fraction_of_terminated = np.sum(terminals) / np.sum(np.ones(terminals.shape))
         done = truncated or fraction_of_terminated > TERMINAL_FRACTION_RESET_THRESHOLD
         dones = np.full(terminals.shape, done)

@@ -12,33 +12,110 @@ from stable_baselines3.common.callbacks import (
     StopTrainingOnRewardThreshold,
 )
 from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecNormalize
+import argparse
 
 ###########################
-##  TRAINING PARAMETERS  ##
+##   ARGUMENT  PARSING   ##
 ###########################
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument("--algo", type=str, default="td3", help="Algorithm to use")
+argparser.add_argument(
+    "--n-envs", type=int, default=128, help="Number of environments to run in parallel"
+)
+argparser.add_argument(
+    "--cpu", type=bool, action="store_true", help="Pass this flag to run on CPU"
+)
+argparser.add_argument(
+    "--n-eval-episodes",
+    type=int,
+    default=10,
+    help="Number of episodes to evaluate the model on",
+)
+argparser.add_argument(
+    "--n-evals",
+    type=int,
+    default=100,
+    help="Number of evaluations to run, per randomization factor (can do less if reward threshold is reached early)",
+)
+argparser.add_argument(
+    "--n-checkpoints",
+    type=int,
+    default=10,
+    help="Number of checkpoints to save, per randomization factor (can do less if reward threshold is reached early)",
+)
+argparser.add_argument(
+    "--timesteps",
+    type=int,
+    default=1000000,
+    help="Total timesteps to train for, per randomization factor (can do less if reward threshold is reached early)",
+)
+argparser.add_argument(
+    "--rand-init", type=float, default=0, help="Initial randomization factor value"
+)
+argparser.add_argument(
+    "--rand-increment",
+    type=float,
+    default=0.1,
+    help="How much to increment the randomization factor once reward threshold is reached",
+)
+argparser.add_argument(
+    "--reward-goal",
+    type=int,
+    default=800,
+    help="Reward goal to reach. Ends training or increments randomization factor once reached in evaluation.",
+)
+argparser.add_argument(
+    "--ckpt",
+    type=str,
+    default=None,
+    help="Path to checkpoint to continue training from (must point to .zip file, without the .zip extension in the path)",
+)
+argparser.add_argument(
+    "--log-name",
+    type=str,
+    default=None,
+    help="Subfolder path to save training results in",
+)
+
+args = argparser.parse_args()
+
+##########################
+##  SETUP TRAIN PARAMS  ##
+##########################
+
+# BENCHMARKS ON TD3
+#       GPU
+#    64: 46 it/s
+#   128: 53 it/s  <--- FASTEST
+#   256: 51 it/s
+#   512: 33 it/s
+
+MODEL_TYPE = {"td3": TD3, "sac": SAC, "ppo": PPO}[args.algo.lower()]
+NUM_ENVS = args.n_envs
+SIMULATE_ON_GPU = not args.cpu
+N_EVAL_EPISODES = args.n_eval_episodes
+NUM_EVALS = args.n_evals
+NUM_CHECKPOINTS = args.n_checkpoints
+TOTAL_TIMESTEPS = args.timesteps
+RANDOMIZATION_FACTOR = args.rand_init
+RANDOMIZATION_INCREMENT = args.rand_increment
+SUCCESSFUL_TRAINING_REWARD_THRESHOLD = args.reward_goal
+CHECKPOINT = args.ckpt
+
+if args.log_name is not None:
+    log_dir = "data/{}/training_results".format(args.log_name)
+else:
+    log_dir = "data/{}/training_results".format(args.algo.upper())
+EVAL_FREQ = TOTAL_TIMESTEPS // (NUM_EVALS * NUM_ENVS)
+CHECKPOINT_FREQ = TOTAL_TIMESTEPS // (NUM_CHECKPOINTS * NUM_ENVS)
+
+##########################
+##  ENVIRONMENT  SETUP  ##
+##########################
 
 # Set environment variable to disable rendering
 os.environ["RENDER_SIM"] = "False"
-
-MODEL_TYPE = TD3  # SAC # TD3 # PPO
-log_dir = "data/{}/training_results".format(str(MODEL_TYPE))
-
-##########################
-##    HYPERPARAMETERS   ##
-##########################
-
-NUM_ENVS = 64
-SIMULATE_ON_GPU = True
-N_EVAL_EPISODES = 10
-NUM_EVALS = 100  # in total
-NUM_CHECKPOINTS = 10  # in total
-TOTAL_TIMESTEPS = 10000000  # ten million
-RANDOMIZATION_INCREMENT = 0.1
-RANDOMIZATION_FACTOR = 0  # starts at this, increments whenever training is successful
-SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 2500
-NORMALIZE = False  # whether or not to wrap env in a VecNormalize wrapper
-
-CHECKPOINT = None
 
 if SIMULATE_ON_GPU:
     env = VecMonitor(
@@ -76,14 +153,15 @@ eval_env = VecMonitor(
                 reward_fn=controlInputRewardFn,
                 randomization_factor=RANDOMIZATION_FACTOR,
                 use_potential_rewards=False,
+                max_simulation_time_override=10.0,
             )
         ]
     )
 )
 
-if NORMALIZE:
-    env = VecNormalize(env)
-    eval_env = VecNormalize(eval_env)
+##########################
+## MODEL INITIALIZATION ##
+##########################
 
 print("\nBeginning training.\n")
 
@@ -113,9 +191,6 @@ else:
 ##########################
 ##    TRAINING  LOOP    ##
 ##########################
-
-EVAL_FREQ = TOTAL_TIMESTEPS // (NUM_EVALS * NUM_ENVS)
-CHECKPOINT_FREQ = TOTAL_TIMESTEPS // (NUM_CHECKPOINTS * NUM_ENVS)
 
 while True:
     print(" >> TRAINING WITH RANDOMIZATION FACTOR {}".format(RANDOMIZATION_FACTOR))

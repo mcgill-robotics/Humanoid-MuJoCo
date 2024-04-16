@@ -6,31 +6,35 @@ import os
 import cv2
 
 
-dir = "./data/training_results_r0/"
+MODEL_TYPE = SAC  # TD3 # PPO
+LOG_NAME = "SAC"
+RANDOMIZATION_FACTOR = 0
+CKPT_NAME = "best_model"
+
+eval_dir = "./data/{}/training_results_r{}/".format(LOG_NAME, RANDOMIZATION_FACTOR)
 num_videos = 9
 video_duration = 5  # seconds
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
-    randomization_factor=1,
+    randomization_factor=RANDOMIZATION_FACTOR,
 )
 
-MODEL_TYPE = SAC  # TD3 # PPO
 agent = MODEL_TYPE.load(
-    path=dir + "best_model",
+    path=eval_dir + CKPT_NAME,
     env=env,
 )
 
-if not os.path.exists(dir + "policy_videos/"):
-    os.makedirs(dir + "policy_videos/")
-video_file_name = os.path.splitext(os.path.basename(dir + "best_model"))[0]
+if not os.path.exists(eval_dir + "policy_videos/"):
+    os.makedirs(eval_dir + "policy_videos/")
+video_file_name = os.path.splitext(os.path.basename(eval_dir + CKPT_NAME))[0]
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
 print("0%", end="\r")
 for v in range(num_videos):
     video_writer = cv2.VideoWriter(
-        dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4",
+        eval_dir + "policy_videos/" + video_file_name + "_" + str(v) + ".mp4",
         fourcc,
         30,
         (1080, 720),
