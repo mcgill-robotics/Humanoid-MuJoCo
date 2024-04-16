@@ -173,15 +173,22 @@ class GPUVecEnv(VecEnv):
             self.control_inputs_velocity = jax.random.uniform(
                 self.rng_key,
                 (self.num_envs, 2),
-                minval=-1 * MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
-                maxval=MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
+                minval=-1 * MAX_CONTROL_INPUT_VELOCITY,
+                maxval=MAX_CONTROL_INPUT_VELOCITY,
             )
             self.control_inputs_yaw = jax.random.uniform(
                 self.rng_key,
                 (self.num_envs, 1),
-                minval=-1 * RANGE_CONTROL_INPUT_YAW * self.randomization_factor,
-                maxval=RANGE_CONTROL_INPUT_YAW * self.randomization_factor,
+                minval=-1 * RANGE_CONTROL_INPUT_YAW,
+                maxval=RANGE_CONTROL_INPUT_YAW,
             )
+            if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
+                self.control_inputs_yaw = (
+                    self.control_inputs_yaw * self.randomization_factor
+                )
+                self.control_inputs_velocity = (
+                    self.control_inputs_velocity * self.randomization_factor
+                )
         else:
             self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
             self.control_inputs_yaw = jp.zeros((self.num_envs, 1))

@@ -31,19 +31,17 @@ log_dir = "data/training_results"
 
 
 NUM_ENVS = 256
+MODEL_TYPE = SAC  # SAC # TD3 # PPO
 SIMULATE_ON_GPU = True
 N_EVAL_EPISODES = 10
-POLICY_ITERATIONS = 1000
-POLICY_UPDATE_TIMESTEPS = 2048
-TOTAL_TIMESTEPS = POLICY_ITERATIONS * NUM_ENVS * POLICY_UPDATE_TIMESTEPS
+NUM_EVALS = 100
+NUM_CHECKPOINTS = 10
+TOTAL_TIMESTEPS = 10000000  # ten million
 CHECKPOINT = None
-EVAL_FREQ = POLICY_UPDATE_TIMESTEPS
-CHECKPOINT_FREQ = POLICY_UPDATE_TIMESTEPS * 5
 RANDOMIZATION_INCREMENT = 0.1
-RANDOMIZATION_FACTOR = 1  # starts at this, increments whenever training is successful
+RANDOMIZATION_FACTOR = 0  # starts at this, increments whenever training is successful
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 1000
 NORMALIZE = False  # whether or not to wrap env in a VecNormalize wrapper
-MODEL_TYPE = SAC # SAC # TD3 # PPO
 
 if SIMULATE_ON_GPU:
     env = VecMonitor(
@@ -99,7 +97,7 @@ if CHECKPOINT is None:
         "activation_fn": nn.Tanh,
     }
     model = MODEL_TYPE(
-        policy="MlpPolicy", env=env, verbose=2, policy_kwargs=policy_args
+        policy="MlpPolicy", env=env, verbose=0, policy_kwargs=policy_args
     )
 else:
     model = MODEL_TYPE.load(
@@ -110,6 +108,9 @@ else:
 ##########################
 ##    TRAINING  LOOP    ##
 ##########################
+
+EVAL_FREQ = TOTAL_TIMESTEPS // (NUM_EVALS * NUM_ENVS)
+CHECKPOINT_FREQ = TOTAL_TIMESTEPS // (NUM_CHECKPOINTS * NUM_ENVS)
 
 while True:
     print(" >> TRAINING WITH RANDOMIZATION FACTOR {}".format(RANDOMIZATION_FACTOR))

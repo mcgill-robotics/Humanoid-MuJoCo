@@ -48,7 +48,7 @@ USE_CONTROL_INPUTS = True  # if false, only the standing behaviour is trained
 USE_POTENTIAL_REWARDS = False
 TERMINAL_FRACTION_RESET_THRESHOLD = 0.5  # applies only to GPUVecEnv
 MIN_FORCE_FOR_CONTACT = 0.1  # N
-
+RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT = False
 
 physics_steps_per_control_step = int((1.0 / desired_control_frequency) // timestep)
 
