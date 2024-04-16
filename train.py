@@ -11,7 +11,7 @@ from stable_baselines3.common.callbacks import (
     CheckpointCallback,
     StopTrainingOnRewardThreshold,
 )
-from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecNormalize
+from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecCheckNan
 import argparse
 
 ###########################
@@ -105,9 +105,9 @@ SUCCESSFUL_TRAINING_REWARD_THRESHOLD = args.reward_goal
 CHECKPOINT = args.ckpt
 
 if args.log_name is not None:
-    log_dir = "data/{}/training_results".format(args.log_name)
+    log_dir = "data/{}/training_results".format(args.log_name.strip())
 else:
-    log_dir = "data/{}/training_results".format(args.algo.upper())
+    log_dir = "data/{}/training_results".format(args.algo.upper().strip())
 EVAL_FREQ = TOTAL_TIMESTEPS // (NUM_EVALS * NUM_ENVS)
 CHECKPOINT_FREQ = TOTAL_TIMESTEPS // (NUM_CHECKPOINTS * NUM_ENVS)
 
@@ -159,6 +159,10 @@ eval_env = VecMonitor(
         ]
     )
 )
+
+
+env = VecCheckNan(env, raise_exception=True)
+eval_env = VecCheckNan(eval_env, raise_exception=True)
 
 ##########################
 ## MODEL INITIALIZATION ##
