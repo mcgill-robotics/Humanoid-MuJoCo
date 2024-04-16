@@ -62,7 +62,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--reward-goal",
     type=int,
-    default=800,
+    default=950,  # best possible reward is 1150 (by definition of reward function)
     help="Reward goal to reach. Ends training or increments randomization factor once reached in evaluation.",
 )
 argparser.add_argument(

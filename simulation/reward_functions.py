@@ -40,7 +40,7 @@ def controlInputRewardFn(
     # Velocity The magnitude of the player’s velocity minus the target velocity. - 0.1
     VELOCITY_ERROR_REWARD_WEIGHT = -0.1
     # Velocity The magnitude of the player's vertical velocity
-    VERTICAL_VELOCITY_REWARD_WEIGHT = -0.1
+    VERTICAL_VELOCITY_REWARD_WEIGHT = -0.02
     # Termination A penalty, equal to −1 if the player is on the ground - 0.5
     # MODIFICATION: +0.5 reward for torso being above or at Z=0, linearly interpolated to -0.5 if the torso is under -0.4
     GROUNDED_PENALTY_WEIGHT = -0.1
@@ -54,7 +54,7 @@ def controlInputRewardFn(
     # during ground impacts, which can damage a physical robot. - 0.01
     MAX_JOINT_TORQUE = 1.5
     JOINT_TORQUE_PENALTY_WEIGHT = (
-        -0.1 / 16
+        -0.05 / 16
     )  # divide by N since there are N joints and we consider the sum of joint torques
     # penalty term to minimize the time integral of torque peaks
     # (thresholded above 5 N m)
@@ -66,18 +66,18 @@ def controlInputRewardFn(
     )
     ORIENTATION_REWARD_MAX_ERROR_RAD_FOR_REWARD = 0.3  # at this error rad reward is 0
     ORIENTATION_REWARD_MIN_ERROR_RAD = 0.1  # at this error rad reward is at MAX_REWARD
-    ORIENTATION_MAX_REWARD = 0.2  # CUSTOM -> paper has it at 0.02
+    ORIENTATION_MAX_REWARD = 0.05  # CUSTOM -> paper has it at 0.02
     ORIENTATION_MAX_PENALTY = -0.1  # CUSTOM -> paper does not penalize high tilts
     # CUSTOM: add a constant offset to the reward
     CONSTANT_REWARD_OFFSET = 1.0
     # CUSTOM: penalize self-collisions
     TERMINATE_ON_SELF_COLLISION = False
-    SELF_COLLISION_PENALTY = -0.1
+    SELF_COLLISION_PENALTY = -0.05
     # CUSTOM hyperparameters
     ALLOW_NEGATIVE_REWARDS = True
     ALLOW_EARLY_TERMINATION = True
-    OVERRIDE_TERMINAL_REWARD = True
-    TERMINAL_REWARD = -10 if ALLOW_NEGATIVE_REWARDS else 0
+    OVERRIDE_TERMINAL_REWARD = False
+    TERMINAL_REWARD = -1.0 if ALLOW_NEGATIVE_REWARDS else 0
 
     ### COMPUTE REWARD
     reward = 0
@@ -186,7 +186,7 @@ def controlInputRewardFn(
 
     if OVERRIDE_TERMINAL_REWARD:
         reward = jp.where(terminal, TERMINAL_REWARD, reward)
-        
+
     return reward, terminal
 
 
