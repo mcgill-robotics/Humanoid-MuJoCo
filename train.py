@@ -21,7 +21,7 @@ import argparse
 argparser = argparse.ArgumentParser()
 argparser.add_argument("--algo", type=str, default="td3", help="Algorithm to use")
 argparser.add_argument(
-    "--n-envs", type=int, default=128, help="Number of environments to run in parallel"
+    "--n-envs", type=int, default=256, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
     "--cpu", action="store_true", help="Pass this flag to run on CPU"
@@ -45,10 +45,10 @@ argparser.add_argument(
     help="Number of checkpoints to save, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
-    "--timesteps",
+    "--iterations",
     type=int,
-    default=1000000,
-    help="Total timesteps to train for, per randomization factor (can do less if reward threshold is reached early)",
+    default=1000,
+    help="Total iterations to train policy for, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
     "--rand-init", type=float, default=0, help="Initial randomization factor value"
@@ -85,20 +85,17 @@ print(args)
 ##  SETUP TRAIN PARAMS  ##
 ##########################
 
-# BENCHMARKS ON TD3
-#       GPU
-#    64: 46 it/s
-#   128: 53 it/s  <--- FASTEST
-#   256: 51 it/s
-#   512: 33 it/s
-
 MODEL_TYPE = {"td3": TD3, "sac": SAC, "ppo": PPO}[args.algo.lower()]
 NUM_ENVS = args.n_envs
 SIMULATE_ON_GPU = not args.cpu
 N_EVAL_EPISODES = args.n_eval_episodes
 NUM_EVALS = args.n_evals
 NUM_CHECKPOINTS = args.n_checkpoints
-TOTAL_TIMESTEPS = args.timesteps
+TOTAL_TIMESTEPS = (
+    args.iterations * 2048 * NUM_ENVS
+    if MODEL_TYPE == PPO
+    else args.iterations * NUM_ENVS
+)  # because PPO uses 2048 timesteps per iteration and SAC/TD3 use 1 timestep per iteration
 RANDOMIZATION_FACTOR = args.rand_init
 RANDOMIZATION_INCREMENT = args.rand_increment
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = args.reward_goal
@@ -178,8 +175,13 @@ if CHECKPOINT is None:
     }
 
     additional_kwargs = {}
-    if MODEL_TYPE != PPO:
-        additional_kwargs["train_freq"] = 1
+    if MODEL_TYPE == SAC:
+        additional_kwargs["log_std_init"] = -1
+    elif MODEL_TYPE == TD3:
+        pass
+    elif MODEL_TYPE == PPO:
+        pass
+
     model = MODEL_TYPE(
         policy="MlpPolicy",
         env=env,
