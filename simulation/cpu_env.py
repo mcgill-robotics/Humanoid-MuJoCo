@@ -105,23 +105,30 @@ class CPUEnv(gym.Env):
             self.control_input_velocity = jp.array(
                 [
                     random.uniform(
-                        -1 * MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
-                        MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
+                        -1 * MAX_CONTROL_INPUT_VELOCITY,
+                        MAX_CONTROL_INPUT_VELOCITY,
                     ),
                     random.uniform(
-                        -1 * MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
-                        MAX_CONTROL_INPUT_VELOCITY * self.randomization_factor,
+                        -1 * MAX_CONTROL_INPUT_VELOCITY,
+                        MAX_CONTROL_INPUT_VELOCITY,
                     ),
                 ]
             )
             self.control_input_yaw = jp.array(
                 [
                     random.uniform(
-                        -1 * RANGE_CONTROL_INPUT_YAW * self.randomization_factor,
-                        RANGE_CONTROL_INPUT_YAW * self.randomization_factor,
+                        -1 * RANGE_CONTROL_INPUT_YAW,
+                        RANGE_CONTROL_INPUT_YAW,
                     )
                 ]
             )
+            if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
+                self.control_inputs_yaw = (
+                    self.control_inputs_yaw * self.randomization_factor
+                )
+                self.control_inputs_velocity = (
+                    self.control_inputs_velocity * self.randomization_factor
+                )
         else:
             self.control_input_velocity = jp.array([0, 0])
             self.control_input_yaw = jp.array([0])
@@ -220,12 +227,12 @@ class CPUEnv(gym.Env):
         self.data = mujoco.MjData(self.model)
         mujoco.mj_kinematics(self.model, self.data)
         # randomize joint initial states (CPU)
-        joint_ctrl_range = JOINT_INITIAL_CTRL_OFFSET_MIN + self.randomization_factor * (
-            JOINT_INITIAL_CTRL_OFFSET_MAX - JOINT_INITIAL_CTRL_OFFSET_MIN
+        joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
         )
-        for i in range(len(self.data.ctrl)):
-            random_val = random.uniform(-joint_ctrl_range, joint_ctrl_range)
-            self.data.ctrl[i] = random_val
+        for i in self.joint_qpos_idx:
+            random_val = random.uniform(-joint_pos_range, joint_pos_range)
+            self.data.qpos[i] = self.data.qpos[i] + random_val
 
         # delays in actions and observations (10ms to 50ms)
         # round delays to be multiples of the timestep

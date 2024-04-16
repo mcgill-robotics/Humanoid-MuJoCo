@@ -293,17 +293,21 @@ class GPUVecEnv(VecEnv):
         self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
 
         # randomize joint initial states (GPU)
-        joint_ctrl_range = JOINT_INITIAL_CTRL_OFFSET_MIN + self.randomization_factor * (
-            JOINT_INITIAL_CTRL_OFFSET_MAX - JOINT_INITIAL_CTRL_OFFSET_MIN
+        joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
         )
+        joint_mask = jp.zeros(self.base_mjx_data.qpos.shape)
+        joint_mask.at[self.joint_qpos_idx].set(1.0)
+
         self.data_batch = jax.vmap(
             lambda rng: self.base_mjx_data.replace(
-                ctrl=jax.random.uniform(
+                qpos=jax.random.uniform(
                     rng,
-                    self.base_mjx_data.ctrl.shape,
-                    minval=-joint_ctrl_range,
-                    maxval=joint_ctrl_range,
+                    self.base_mjx_data.qpos.shape,
+                    minval=-joint_pos_range,
+                    maxval=joint_pos_range,
                 )
+                * joint_mask
             )
         )(self.rng)
 

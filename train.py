@@ -20,28 +20,25 @@ from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecNormali
 # Set environment variable to disable rendering
 os.environ["RENDER_SIM"] = "False"
 
-log_dir = "data/training_results"
+MODEL_TYPE = TD3  # SAC # TD3 # PPO
+log_dir = "data/{}/training_results".format(str(MODEL_TYPE))
 
 ##########################
 ##    HYPERPARAMETERS   ##
 ##########################
 
-# FROM RL ZOO 3 HYPERPARAMETER TUNING
-# Trial 19 finished with value: 262.5614284 and parameters: {'batch_size': 256, 'n_steps': 1024, 'gamma': 0.98, 'learning_rate': 0.0006905843913061805, 'ent_coef': 0.022694858251377927, 'clip_range': 0.1, 'n_epochs': 1, 'gae_lambda': 0.8, 'max_grad_norm': 0.7, 'vf_coef': 0.7445807875710113, 'net_arch': 'large', 'log_std_init': -0.5482045338158068, 'sde_sample_freq': 128, 'ortho_init': True, 'activation_fn': 'tanh'}. Best is trial 19 with value: 262.5614284.
-
-
-NUM_ENVS = 256
-MODEL_TYPE = SAC  # SAC # TD3 # PPO
+NUM_ENVS = 64
 SIMULATE_ON_GPU = True
 N_EVAL_EPISODES = 10
-NUM_EVALS = 100
-NUM_CHECKPOINTS = 10
+NUM_EVALS = 100  # in total
+NUM_CHECKPOINTS = 10  # in total
 TOTAL_TIMESTEPS = 10000000  # ten million
-CHECKPOINT = None
 RANDOMIZATION_INCREMENT = 0.1
 RANDOMIZATION_FACTOR = 0  # starts at this, increments whenever training is successful
-SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 1000
+SUCCESSFUL_TRAINING_REWARD_THRESHOLD = 2500
 NORMALIZE = False  # whether or not to wrap env in a VecNormalize wrapper
+
+CHECKPOINT = None
 
 if SIMULATE_ON_GPU:
     env = VecMonitor(
@@ -93,11 +90,19 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": dict(pi=[256, 256], vf=[256, 256], qf=[256, 256]),
+        "net_arch": dict(pi=[64, 64, 64], vf=[64, 64, 64], qf=[64, 64, 64]),
         "activation_fn": nn.Tanh,
     }
+
+    additional_kwargs = {}
+    if MODEL_TYPE != PPO:
+        additional_kwargs["train_freq"] = 1
     model = MODEL_TYPE(
-        policy="MlpPolicy", env=env, verbose=0, policy_kwargs=policy_args
+        policy="MlpPolicy",
+        env=env,
+        verbose=0,
+        policy_kwargs=policy_args,
+        **additional_kwargs
     )
 else:
     model = MODEL_TYPE.load(
@@ -123,11 +128,11 @@ while True:
         save_freq=CHECKPOINT_FREQ,
         save_path=log_dir + "_r{}".format(RANDOMIZATION_FACTOR),
         name_prefix="checkpoint",
-        verbose=1,
+        verbose=0,
     )
 
     stop_training_callback = StopTrainingOnRewardThreshold(
-        reward_threshold=SUCCESSFUL_TRAINING_REWARD_THRESHOLD, verbose=1
+        reward_threshold=SUCCESSFUL_TRAINING_REWARD_THRESHOLD, verbose=0
     )
 
     eval_callback = EvalCallback(
