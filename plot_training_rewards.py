@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAME = "TD3"  # "SAC" # "PPO"
-RANDOMIZATION_FACTOR = 0.5
+LOG_NAME = "SAC"  # "SAC" # "PPO"
+RANDOMIZATION_FACTOR = 1.0
 evaluations = np.load(
     "data/{}/training_results_r{}/evaluations.npz".format(
         LOG_NAME, RANDOMIZATION_FACTOR

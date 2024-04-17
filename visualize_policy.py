@@ -4,14 +4,13 @@ from simulation.reward_functions import *
 from stable_baselines3 import PPO, SAC, TD3
 
 
-MODEL_TYPE = SAC  # TD3 # PPO
-RANDOMIZATION_FACTOR = 0
+MODEL_TYPE = SAC  # TD3 # SAC # PPO
+RANDOMIZATION_FACTOR = 1.0
 LOG_NAME = "SAC"
 CKPT_NAME = "best_model"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
-    {TD3: "TD3", SAC: "SAC", PPO: "PPO"}[MODEL_TYPE],
     LOG_NAME,
     RANDOMIZATION_FACTOR,
     CKPT_NAME,
@@ -37,7 +36,7 @@ while True:
         if not done:
             episode_length += 1
             total_reward += reward
-        print(reward)
+            print(reward)
         env.render("human")
     print(
         " >>> Episode Length {}, Total Reward {}".format(episode_length, total_reward)

@@ -45,10 +45,10 @@ argparser.add_argument(
     help="Number of checkpoints to save, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
-    "--iterations",
+    "--n-steps",
     type=int,
-    default=1000,
-    help="Total iterations to train policy for, per randomization factor (can do less if reward threshold is reached early)",
+    default=1_000_000,
+    help="Total timesteps to train policy for, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
     "--rand-init", type=float, default=0, help="Initial randomization factor value"
@@ -91,11 +91,7 @@ SIMULATE_ON_GPU = not args.cpu
 N_EVAL_EPISODES = args.n_eval_episodes
 NUM_EVALS = args.n_evals
 NUM_CHECKPOINTS = args.n_checkpoints
-TOTAL_TIMESTEPS = (
-    args.iterations * 2048 * NUM_ENVS
-    if MODEL_TYPE == PPO
-    else args.iterations * NUM_ENVS
-)  # because PPO uses 2048 timesteps per iteration and SAC/TD3 use 1 timestep per iteration
+TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
 RANDOMIZATION_INCREMENT = args.rand_increment
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = args.reward_goal
@@ -154,6 +150,7 @@ eval_env = VecMonitor(
                 max_simulation_time_override=10.0,
             )
         ]
+        * N_EVAL_EPISODES
     )
 )
 
@@ -176,7 +173,7 @@ if CHECKPOINT is None:
 
     additional_kwargs = {}
     if MODEL_TYPE == SAC:
-        additional_kwargs["log_std_init"] = -1
+        policy_args["log_std_init"] = -1
     elif MODEL_TYPE == TD3:
         pass
     elif MODEL_TYPE == PPO:
@@ -187,7 +184,7 @@ if CHECKPOINT is None:
         env=env,
         verbose=0,
         policy_kwargs=policy_args,
-        **additional_kwargs
+        **additional_kwargs,
     )
 else:
     model = MODEL_TYPE.load(
@@ -222,7 +219,7 @@ while True:
         best_model_save_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
         log_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
         eval_freq=EVAL_FREQ,
-        n_eval_episodes=N_EVAL_EPISODES,
+        n_eval_episodes=1,
         deterministic=True,
         render=False,
         callback_on_new_best=stop_training_callback,
