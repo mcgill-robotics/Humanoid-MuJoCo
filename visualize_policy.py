@@ -4,9 +4,9 @@ from simulation.reward_functions import *
 from stable_baselines3 import PPO, SAC, TD3
 
 
-MODEL_TYPE = SAC  # TD3 # SAC # PPO
+MODEL_TYPE = PPO  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
-LOG_NAME = "SAC"
+LOG_NAME = "PPO"
 CKPT_NAME = "best_model"
 
 

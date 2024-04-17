@@ -219,7 +219,7 @@ while True:
         best_model_save_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
         log_path=log_dir + "_r{:.1f}".format(RANDOMIZATION_FACTOR),
         eval_freq=EVAL_FREQ,
-        n_eval_episodes=1,
+        n_eval_episodes=N_EVAL_EPISODES,
         deterministic=True,
         render=False,
         callback_on_new_best=stop_training_callback,

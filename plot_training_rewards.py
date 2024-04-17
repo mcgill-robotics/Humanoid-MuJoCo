@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 LOG_NAME = "SAC"  # "SAC" # "PPO"
-RANDOMIZATION_FACTOR = 1.0
+RANDOMIZATION_FACTOR = 0.0
 evaluations = np.load(
     "data/{}/training_results_r{}/evaluations.npz".format(
         LOG_NAME, RANDOMIZATION_FACTOR
@@ -43,7 +43,7 @@ plt.plot(timesteps, rewards, label="Reward", color="blue")
 plt.xlabel("Steps")
 plt.ylabel("Reward")
 plt.title(
-    "Evaluation Reward for Standing Behavior (avg. over {} episodes per evaluation)".format(
+    "Evaluation Reward for Standing Behavior (avg. over {} episodes)".format(
         num_episodes_averaged
     )
 )
