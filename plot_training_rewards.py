@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAME = "SAC"  # "SAC" # "PPO"
-RANDOMIZATION_FACTOR = 0.0
+LOG_NAME = "PPO"  # "SAC" # "PPO"
+RANDOMIZATION_FACTOR = 1.0
 evaluations = np.load(
     "data/{}/training_results_r{}/evaluations.npz".format(
         LOG_NAME, RANDOMIZATION_FACTOR
@@ -13,13 +13,6 @@ timesteps = evaluations["timesteps"]
 rewards = np.mean(evaluations["results"], axis=1)
 ep_lengths = np.mean(evaluations["ep_lengths"], axis=1)
 num_episodes_averaged = evaluations["results"].shape[1]
-
-
-def smoothMAconv(depth, data, scale=1):  # Moving average by numpy convolution
-    dz = np.diff(depth)
-    N = int(scale / dz[0])
-    smoothed = 0
-    return smoothed
 
 
 #### PLOT REWARDS

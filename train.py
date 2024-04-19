@@ -199,8 +199,8 @@ else:
 while True:
     print(" >> TRAINING WITH RANDOMIZATION FACTOR {:.1f}".format(RANDOMIZATION_FACTOR))
     env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
-    env.reset()
     eval_env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
+    env.reset()
     eval_env.reset()
 
     checkpoint_callback = CheckpointCallback(
