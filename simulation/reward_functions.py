@@ -94,7 +94,7 @@ def controlInputRewardFn(
         jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0, jp.inf)
     )
     reward += joint_torque_reward
-    print("joint_torque_reward", joint_torque_reward)
+    # print("joint_torque_reward", joint_torque_reward)
 
     # ACTION CHANGE REWARD
     CONTROL_CHANGE_REWARD_WEIGHT = 0  # -1e-3

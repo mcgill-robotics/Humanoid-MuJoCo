@@ -467,7 +467,6 @@ class CPUEnv(gym.Env):
             self.data.qfrc_constraint[self.joint_dof_idx]
             + self.data.qfrc_smooth[self.joint_dof_idx]
         )
-        print(jp.max(joint_torques))
         is_self_colliding = self._check_self_collision()
 
         reward, isTerminal = self.reward_fn(
