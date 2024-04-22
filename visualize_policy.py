@@ -5,9 +5,9 @@ from stable_baselines3 import PPO, SAC, TD3
 
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
-RANDOMIZATION_FACTOR = 0.0
+RANDOMIZATION_FACTOR = 1.0
 LOG_NAME = "SAC"
-CKPT_NAME = "checkpoint_998400_steps"
+CKPT_NAME = "checkpoint_3499776_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
@@ -18,7 +18,7 @@ checkpoint = "./data/{}/training_results_r{}/{}".format(
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
-    randomization_factor=0.0,  # ,RANDOMIZATION_FACTOR,
+    randomization_factor=RANDOMIZATION_FACTOR,
 )
 agent = MODEL_TYPE.load(
     path=checkpoint,
