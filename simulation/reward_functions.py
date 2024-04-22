@@ -17,11 +17,6 @@ from simulation.simulation_parameters import *
 # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions - 0.1
 
 
-inverseRotateVectors = (
-    lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
-)
-
-
 def controlInputRewardFn(
     velocity,
     target_velocity,
@@ -60,10 +55,17 @@ def controlInputRewardFn(
     torso_quat_obj = Rotation.from_quat(
         [torso_quat[1], torso_quat[2], torso_quat[3], torso_quat[0]]
     )
-    rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
-    target_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
+    fwd_rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
+    target_fwd_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
+    down_rot_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
+    target_down_rot_vector = jp.array([0, 0, -1])
     rot_reward = ORIENTATION_REWARD_WEIGHT * jp.exp(
-        -1 * jp.linalg.norm(rot_vector - target_rot_vector) / EXP_SCALING_PARAM
+        -1
+        * (
+            jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector)
+            + jp.linalg.norm(down_rot_vector - target_down_rot_vector)
+        )
+        / EXP_SCALING_PARAM
     )
     reward += rot_reward
     # print("rot_reward", rot_reward)
@@ -124,7 +126,7 @@ def controlInputRewardFn(
     ALLOW_EARLY_TERMINATION = True
     MIN_Z_BEFORE_GROUNDED = -0.3
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
-    local_gravity_vector = inverseRotateVectors(torso_quat, jp.array([0, 0, -1]))
+    local_gravity_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     isNotUpright = jp.where(
         jp.max(jp.abs(local_gravity_vector[0:2])) < 0.7, isTouchingGround, True
     )

@@ -170,7 +170,7 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": dict(pi=[64, 64, 64], vf=[64, 64, 64], qf=[64, 64, 64]),
+        "net_arch": dict(pi=[256, 256, 256], vf=[256, 256, 256], qf=[256, 256, 256]),
         "activation_fn": nn.Tanh,
     }
 
