@@ -42,7 +42,6 @@ class CPUEnv(gym.Env):
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
     ):
-        self.platform = "CPU"
         self.xml_path = xml_path
         self.randomization_factor = randomization_factor
         self.timestep = timestep
@@ -58,9 +57,7 @@ class CPUEnv(gym.Env):
         self.action_space = spaces.Box(
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32
         )
-        observation_size = (
-            len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 3 + 8 + 3 + 3
-        )
+        observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float32
         )
@@ -72,21 +69,7 @@ class CPUEnv(gym.Env):
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
 
-    def reset(self, seed=None, options=None):
-        try:
-            del self.renderer
-        except:
-            pass
-
-        super().reset(seed=seed)
-        if seed is not None:
-            self.rng_key = jax.random.PRNGKey(seed)
-        else:
-            self.rng_key = jax.random.PRNGKey(random.randint(0, 100))
-
-        if self.verbose:
-            print("Creating new simulation...       ", end="")
-
+    def _init_model(self):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
         if os.environ.get("RENDER_SIM", "True") == "True":
@@ -108,48 +91,7 @@ class CPUEnv(gym.Env):
         self.model.vis.scale.forcewidth = 0.05
         self.model.vis.map.force = 0.3
 
-        # initialize random control inputs
-        if USE_CONTROL_INPUTS:
-            self.control_input_velocity = jp.array(
-                [
-                    random.uniform(
-                        -1 * CONTROL_INPUT_MAX_VELOCITY,
-                        CONTROL_INPUT_MAX_VELOCITY,
-                    ),
-                    random.uniform(
-                        -1 * CONTROL_INPUT_MAX_VELOCITY,
-                        CONTROL_INPUT_MAX_VELOCITY,
-                    ),
-                ]
-            )
-            self.control_input_yaw = jp.array(
-                [
-                    random.uniform(
-                        -1 * CONTROL_INPUT_MAX_YAW,
-                        CONTROL_INPUT_MAX_YAW,
-                    )
-                ]
-            )
-            if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
-                self.control_inputs_yaw = (
-                    self.control_inputs_yaw * self.randomization_factor
-                )
-                self.control_inputs_velocity = (
-                    self.control_inputs_velocity * self.randomization_factor
-                )
-        else:
-            self.control_input_velocity = jp.array([0, 0])
-            self.control_input_yaw = jp.array([0])
-
-        # initialize instance parameters
-        self.next_force_start_time = 0
-        self.next_force_direction = jp.zeros((2))
-        self.next_force_magnitude = 0
-        self.next_force_duration = 0
-        self.next_force_body = 0
-        self.previous_torso_local_velocity = jp.zeros((3))
-        # save gravity vector
-        self.gravity_vector = jp.array([0, 0, -1])
+        ### SAVE MODEL IDs
         # save torso body index
         self.torso_idx = self.model.body(TORSO_BODY_NAME).id
         # save joint addresses
@@ -169,33 +111,63 @@ class CPUEnv(gym.Env):
         ]
         self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
 
-        # RANDOMIZATION
-        # floor friction (0.5 to 1.0)
-        self.model.geom("floor").friction = [
-            coef
-            * (
-                1.0 * (1.0 - self.randomization_factor)
-                + random.uniform(
-                    FLOOR_FRICTION_MIN_MULTIPLIER, FLOOR_FRICTION_MAX_MULTIPLIER
-                )
-                * self.randomization_factor
-            )
-            for coef in self.model.geom("floor").friction
-        ]
-        # vary the mass of all limbs randomly
-        for i in range(self.model.nbody - 1):
-            self.model.body(i + 1).mass[0] = max(
-                0.00001,
-                self.model.body(i + 1).mass[0]
-                + random.uniform(
-                    -MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
-                    MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
-                ),
-            )
-        # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
-        self.model.body(random.randint(1, self.model.nbody - 1)).mass[
-            0
-        ] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED * self.randomization_factor)
+    def _randomize_delays(self):
+        # delays in actions and observations (10ms to 50ms)
+        # round delays to be integer delays in timesteps
+        actual_timestep = self.timestep * self.physics_steps_per_control_step
+        self.action_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.action_delay = round(self.action_delay / actual_timestep)
+        self.joint_observation_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.joint_observation_delay = round(
+            self.joint_observation_delay / actual_timestep
+        )
+        self.local_ang_vel_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.local_ang_vel_delay = round(self.local_ang_vel_delay / actual_timestep)
+        self.torso_local_velocity_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.torso_local_velocity_delay = round(
+            self.torso_local_velocity_delay / actual_timestep
+        )
+        self.local_gravity_vector_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.local_gravity_vector_delay = round(
+            self.local_gravity_vector_delay / actual_timestep
+        )
+        self.pressure_values_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.pressure_values_delay = round(self.pressure_values_delay / actual_timestep)
+
+        # make buffers for observations and actions
+        self.action_buffer = [self.data.ctrl] * (int)(self.action_delay)
+        self.joint_angles_buffer = [jp.array([0] * len(JOINT_NAMES))] * (int)(
+            self.joint_observation_delay
+        )
+        self.joint_velocities_buffer = [jp.array([0] * len(JOINT_NAMES))] * (int)(
+            self.joint_observation_delay
+        )
+        self.local_ang_vel_buffer = [jp.array([0] * 3)] * (int)(
+            self.local_ang_vel_delay
+        )
+        self.torso_local_velocity_buffer = [jp.array([0] * 3)] * (int)(
+            self.torso_local_velocity_delay
+        )
+        self.local_gravity_vector_buffer = [jp.array([0] * 3)] * (int)(
+            self.local_gravity_vector_delay
+        )
+        self.pressure_values_buffer = [jp.array([0] * len(PRESSURE_GEOM_NAMES))] * (
+            int
+        )(self.pressure_values_delay)
+
+    def _randomize_joint_properties(self):
         # randomize joint properties
         for joint in JOINT_NAMES:
             self.model.joint(joint).armature[0] += (
@@ -230,10 +202,35 @@ class CPUEnv(gym.Env):
                 * self.randomization_factor
             )
 
-        # create data from model
-        self.cpu_model = None
-        self.data = mujoco.MjData(self.model)
-        mujoco.mj_kinematics(self.model, self.data)
+    def _randomize_robot_dynamics(self):
+        # floor friction (0.5 to 1.0)
+        self.model.geom("floor").friction = [
+            coef
+            * (
+                1.0 * (1.0 - self.randomization_factor)
+                + random.uniform(
+                    FLOOR_FRICTION_MIN_MULTIPLIER, FLOOR_FRICTION_MAX_MULTIPLIER
+                )
+                * self.randomization_factor
+            )
+            for coef in self.model.geom("floor").friction
+        ]
+        # vary the mass of all limbs randomly
+        for i in range(self.model.nbody - 1):
+            self.model.body(i + 1).mass[0] = max(
+                0.00001,
+                self.model.body(i + 1).mass[0]
+                + random.uniform(
+                    -MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
+                    MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
+                ),
+            )
+        # attach a random external mass (up to 0.1 kg) to a randomly chosen limb
+        self.model.body(random.randint(1, self.model.nbody - 1)).mass[
+            0
+        ] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED * self.randomization_factor)
+
+    def _randomize_sim_data(self):
         # randomize joint initial states (CPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
             JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
@@ -242,81 +239,83 @@ class CPUEnv(gym.Env):
             random_val = random.uniform(-joint_pos_range, joint_pos_range)
             self.data.qpos[i] = self.data.qpos[i] + random_val
 
-        # delays in actions and observations (10ms to 50ms)
-        # round delays to be multiples of the timestep
-        actual_timestep = self.timestep * self.physics_steps_per_control_step
-        self.action_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.action_delay = round(self.action_delay / actual_timestep) * actual_timestep
-        self.joint_observation_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.joint_observation_delay = (
-            round(self.joint_observation_delay / actual_timestep) * actual_timestep
-        )
-        self.local_ang_vel_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.local_ang_vel_delay = (
-            round(self.local_ang_vel_delay / actual_timestep) * actual_timestep
-        )
-        self.torso_local_velocity_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.torso_local_velocity_delay = (
-            round(self.torso_local_velocity_delay / actual_timestep) * actual_timestep
-        )
-        self.torso_local_accel_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.torso_local_accel_delay = (
-            round(self.torso_local_accel_delay / actual_timestep) * actual_timestep
-        )
-        self.local_gravity_vector_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.local_gravity_vector_delay = (
-            round(self.local_gravity_vector_delay / actual_timestep) * actual_timestep
-        )
-        self.pressure_values_delay = random.uniform(
-            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
-        )
-        self.pressure_values_delay = (
-            round(self.pressure_values_delay / actual_timestep) * actual_timestep
-        )
+    def _randomize_control_inputs(self):
+        # initialize random control inputs
+        if USE_CONTROL_INPUTS:
+            self.control_input_velocity = jp.array(
+                [
+                    random.uniform(
+                        -1 * CONTROL_INPUT_MAX_VELOCITY,
+                        CONTROL_INPUT_MAX_VELOCITY,
+                    ),
+                    random.uniform(
+                        -1 * CONTROL_INPUT_MAX_VELOCITY,
+                        CONTROL_INPUT_MAX_VELOCITY,
+                    ),
+                ]
+            )
+            self.control_input_yaw = jp.array(
+                [
+                    random.uniform(
+                        -1 * CONTROL_INPUT_MAX_YAW,
+                        CONTROL_INPUT_MAX_YAW,
+                    )
+                ]
+            )
+            if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
+                self.control_inputs_yaw = (
+                    self.control_inputs_yaw * self.randomization_factor
+                )
+                self.control_inputs_velocity = (
+                    self.control_inputs_velocity * self.randomization_factor
+                )
+        else:
+            self.control_input_velocity = jp.array([0, 0])
+            self.control_input_yaw = jp.array([0])
 
-        # make buffers for observations and actions
-        self.action_buffer = [self.data.ctrl] * (int)(
-            self.action_delay / actual_timestep
-        )
-        self.joint_angles_buffer = []
-        self.joint_velocities_buffer = []
-        self.local_ang_vel_buffer = []
-        self.torso_local_velocity_buffer = []
-        self.torso_local_accel_buffer = []
-        self.local_gravity_vector_buffer = []
-        self.pressure_values_buffer = []
-
-        for i in range((int)(self.joint_observation_delay / actual_timestep)):
-            self.joint_angles_buffer.append(jp.array([0] * len(JOINT_NAMES)))
-        for i in range((int)(self.joint_observation_delay / actual_timestep)):
-            self.joint_velocities_buffer.append(jp.array([0] * len(JOINT_NAMES)))
-        for i in range((int)(self.local_ang_vel_delay / actual_timestep)):
-            self.local_ang_vel_buffer.append(jp.array([0] * 3))
-        for i in range((int)(self.torso_local_velocity_delay / actual_timestep)):
-            self.torso_local_velocity_buffer.append(jp.array([0] * 3))
-        for i in range((int)(self.torso_local_accel_delay / actual_timestep)):
-            self.torso_local_accel_buffer.append(jp.array([0] * 3))
-        for i in range((int)(self.local_gravity_vector_delay / actual_timestep)):
-            self.local_gravity_vector_buffer.append(self.gravity_vector)
-        for i in range((int)(self.pressure_values_delay / actual_timestep)):
-            self.pressure_values_buffer.append(jp.array([0] * len(PRESSURE_GEOM_NAMES)))
-
-        # initialize environment properties
+    def _init_sim_trackers(self):
         self.lastAction = self.data.ctrl
         self.action_change = jp.zeros(self.data.ctrl.shape)
         self.previous_reward, _ = self._get_reward()
+        self.next_force_start_time = 0
+        self.next_force_direction = jp.zeros((2))
+        self.next_force_magnitude = 0
+        self.next_force_duration = 0
+        self.next_force_body = 0
+
+    def reset(self, seed=None, options=None):
+        try:
+            del self.renderer
+        except:
+            pass
+
+        super().reset(seed=seed)
+        if seed is not None:
+            self.rng_key = jax.random.PRNGKey(seed)
+        else:
+            self.rng_key = jax.random.PRNGKey(random.randint(0, 100))
+
+        if self.verbose:
+            print("Creating new simulation...       ", end="")
+
+        self._randomize_control_inputs()
+
+        self._init_model()
+
+        # randomize model-dependent properties
+        self._randomize_robot_dynamics()
+        self._randomize_joint_properties()
+
+        # create data from model
+        self.data = mujoco.MjData(self.model)
+        mujoco.mj_kinematics(self.model, self.data)
+
+        # call self.data-dependent randomizations
+        self._randomize_delays()
+        self._randomize_sim_data()
+
+        # initialize environment trackers
+        self._init_sim_trackers()
 
         # clean up any unreferenced variables
         gc.collect()
@@ -330,93 +329,93 @@ class CPUEnv(gym.Env):
         if self.verbose:
             print("Collecting observations...       ", end="")
 
-        torso_quat = self.data.xquat[self.torso_idx]
-        torso_global_vel = self.data.cvel[self.torso_idx]
-
-        # joint positions     20          Joint positions in radians
-        joint_angles = self.data.qpos[self.joint_qpos_idx] + (
+        # joint positions
+        joint_pos_noise = (
             self.randomization_factor
             * (JOINT_ANGLE_NOISE_STDDEV / 180.0 * jp.pi)
             * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)])
         )
+        joint_angles = self.data.qpos[self.joint_qpos_idx] + joint_pos_noise
 
         # joint velocities
-        joint_velocities = self.data.qvel[self.joint_dof_idx] + (
+        joint_vel_noise = (
             self.randomization_factor
             * (JOINT_VELOCITY_NOISE_STDDEV / 180.0 * jp.pi)
             * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)])
         )
+        joint_velocities = self.data.qvel[self.joint_dof_idx] + joint_vel_noise
 
-        # angular velocity    3           Angular velocity (roll, pitch, yaw) from IMU (in torso reference frame)
-        torso_global_ang_vel = torso_global_vel[0:3]
-        local_ang_vel = inverseRotateVectors(torso_quat, torso_global_ang_vel) + (
+        # local angular velocity
+        ang_vel_noise = (
             self.randomization_factor
             * (GYRO_NOISE_STDDEV / 180.0 * jp.pi)
             * jax.random.normal(key=self.rng_key, shape=(3,))
         )
-
-        # linear acceleration 3           Linear acceleration from IMU (local to torso)
-        torso_local_velocity = inverseRotateVectors(torso_quat, torso_global_vel[3:])
-        torso_local_accel = (
-            (torso_local_velocity - self.previous_torso_local_velocity) / self.timestep
-        ) + (
-            self.randomization_factor
-            * ACCELEROMETER_NOISE_STDDEV
-            * jax.random.normal(key=self.rng_key, shape=(3,))
+        torso_global_vel = self.data.cvel[self.torso_idx]
+        torso_quat = self.data.xquat[self.torso_idx]
+        torso_global_ang_vel = torso_global_vel[0:3]
+        local_ang_vel = (
+            inverseRotateVectors(torso_quat, torso_global_ang_vel) + ang_vel_noise
         )
-        self.previous_torso_local_velocity = torso_local_velocity
 
-        # body velocity
-        torso_local_velocity = torso_local_velocity + (
+        # local velocity
+        local_vel_noise = (
             self.randomization_factor
             * VELOCIMETER_NOISE_STDDEV
             * jax.random.normal(key=self.rng_key, shape=(3,))
         )
+        torso_local_velocity = (
+            inverseRotateVectors(torso_quat, torso_global_vel[3:]) + local_vel_noise
+        )
 
-        # gravity             3           Gravity direction, derived from angular velocity using Madgwick filter
-        noisy_torso_quat = torso_quat + (
+        # gravity direction (local)
+        quaternion_noise = (
             self.randomization_factor
             * (IMU_NOISE_STDDEV / 180.0 * jp.pi)
             * jax.random.normal(key=self.rng_key, shape=(4,))
         )
+        noisy_torso_quat = torso_quat + quaternion_noise
         local_gravity_vector = inverseRotateVectors(
-            noisy_torso_quat, self.gravity_vector
+            noisy_torso_quat, jp.array([0, 0, -1])
         )
 
-        # foot pressure       8           Pressure values from foot sensors (N)
+        # foot contact forces
         pressure_values = np.zeros((8))
         for i in range(len(self.pressure_sensor_ids)):
             for ci in range(len(self.data.contact.geom1)):
                 if self.data.contact.geom1[ci] == self.pressure_sensor_ids[i]:
-                    pressure_values[i] += abs(
-                        self.data.efc_force[self.data.contact.efc_address[ci]]
+                    pressure_values[i] += (
+                        abs(self.data.efc_force[self.data.contact.efc_address[ci]])
+                        + 0.0001  # add a small amount to the force since sometimes contacts have a force of 0 (for binary contact checking, we want all contacts to have a force)
                     )
                 if self.data.contact.geom2[ci] == self.pressure_sensor_ids[i]:
-                    pressure_values[i] += abs(
-                        self.data.efc_force[self.data.contact.efc_address[ci]]
+                    pressure_values[i] += (
+                        abs(self.data.efc_force[self.data.contact.efc_address[ci]])
+                        + 0.0001  # add a small amount to the force since sometimes contacts have a force of 0 (for binary contact checking, we want all contacts to have a force)
                     )
         # convert pressure to binary values
-        pressure_values = np.where(
-            pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0
-        )  # above 0.5N is considered a contact
+        pressure_values = np.where(pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0)
 
         # cycle observations through observation buffers
         self.joint_angles_buffer.append(joint_angles)
         self.joint_velocities_buffer.append(joint_velocities)
         self.local_ang_vel_buffer.append(local_ang_vel)
         self.torso_local_velocity_buffer.append(torso_local_velocity)
-        self.torso_local_accel_buffer.append(torso_local_accel)
         self.local_gravity_vector_buffer.append(local_gravity_vector)
         self.pressure_values_buffer.append(pressure_values)
-
+        # get oldest (delayed) observations
         joint_angles = self.joint_angles_buffer.pop(0)
         joint_velocities = self.joint_velocities_buffer.pop(0)
         local_ang_vel = self.local_ang_vel_buffer.pop(0)
         torso_local_velocity = self.torso_local_velocity_buffer.pop(0)
-        torso_local_accel = self.torso_local_accel_buffer.pop(0)
         local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
         pressure_values = self.pressure_values_buffer.pop(0)
 
+        # convert 8 binary values into one per foot
+        binary_foot_contact_state_left = np.clip(np.sum(pressure_values[:4]), 0, 1)
+        binary_foot_contact_state_right = np.clip(np.sum(pressure_values[:4]), 0, 1)
+
+        # calculate clock phase observations (no delay on these)
         clock_phase_sin = jp.array([jp.sin(self.data.time)])
         clock_phase_cos = jp.array([jp.cos(self.data.time)])
         clock_phase_complex = (
@@ -424,20 +423,21 @@ class CPUEnv(gym.Env):
             / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))
         ) + 0.5
 
+        # concatenate all observations into a single array
         delayed_observations = jp.concatenate(
             (
-                joint_angles,
-                joint_velocities,
-                local_ang_vel,
-                torso_local_velocity,
-                torso_local_accel,
-                local_gravity_vector,
-                pressure_values,
-                self.control_input_velocity,
-                self.control_input_yaw,
-                clock_phase_sin,
-                clock_phase_cos,
-                clock_phase_complex,
+                joint_angles,  # rad
+                joint_velocities,  # rad / s
+                local_ang_vel,  # rad/s
+                torso_local_velocity,  # m/s
+                local_gravity_vector,  # unit vector
+                np.array([binary_foot_contact_state_left]),
+                np.array([binary_foot_contact_state_right]),
+                self.control_input_velocity,  # as defined in reset
+                self.control_input_yaw,  # as defined in reset
+                clock_phase_sin,  # as defined in paper on potential rewards
+                clock_phase_cos,  # as defined in paper on potential rewards
+                clock_phase_complex,  # as defined in paper on potential rewards
             )
         )
 
@@ -446,17 +446,7 @@ class CPUEnv(gym.Env):
 
         return np.array(delayed_observations, dtype=np.float32)
 
-    def _get_reward(self):
-        if self.verbose:
-            print("Computing reward...              ", end="")
-
-        torso_local_velocity = self.data.cvel[self.torso_idx][3:]
-        torso_z_pos = self.data.xpos[self.torso_idx, 2]
-        torso_quat = self.data.xquat[self.torso_idx]
-        joint_torques = (
-            self.data.qfrc_constraint[self.joint_dof_idx]
-            + self.data.qfrc_smooth[self.joint_dof_idx]
-        )
+    def _check_self_collision(self):
         self_collision = False
         for i in range(len(self.data.contact.geom1)):
             if (
@@ -464,37 +454,44 @@ class CPUEnv(gym.Env):
                 and self.data.contact.geom2[i] not in self.non_robot_geom_ids
             ):
                 self_collision = True
+        return self_collision
+
+    def _get_reward(self):
+        if self.verbose:
+            print("Computing reward...              ", end="")
+
+        torso_global_velocity = self.data.cvel[self.torso_idx][3:]
+        torso_z_pos = self.data.xpos[self.torso_idx, 2]
+        torso_quat = self.data.xquat[self.torso_idx]
+        joint_torques = (
+            self.data.qfrc_constraint[self.joint_dof_idx]
+            + self.data.qfrc_smooth[self.joint_dof_idx]
+        )
+        print(jp.max(joint_torques))
+        is_self_colliding = self._check_self_collision()
 
         reward, isTerminal = self.reward_fn(
-            torso_local_velocity,
+            torso_global_velocity,
             self.control_input_velocity,
             torso_quat,
             self.control_input_yaw,
             torso_z_pos,
             joint_torques,
             self.action_change,
-            self_collision,
+            is_self_colliding,
         )
+
+        if self.use_potential_rewards:
+            _reward = reward - self.previous_reward
+            self.previous_reward = reward
+            reward = _reward
 
         if self.verbose:
             print("Done")
 
         return float(reward), bool(isTerminal)
 
-    def step(self, action=None):
-        if self.verbose:
-            print("Stepping simulation...           ", end="")
-        # cycle action through action buffer
-        if action is None:
-            action = self.data.ctrl
-        # TODO: actions should be -1 to 1, we need to map each entry to the corresponding joint limits in radians
-        self.action_buffer.append(action)
-        action_to_take = self.action_buffer.pop(0)
-        action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
-        self.data.ctrl = action_to_take
-        self.action_change = action_to_take - self.lastAction[0]
-        self.lastAction = jp.expand_dims(action_to_take, axis=0)
-
+    def _apply_external_forces(self):
         # apply forces to the robot to destabilise it
         if self.data.time >= self.next_force_start_time + self.next_force_duration:
             self.next_force_start_time = self.data.time + random.uniform(
@@ -532,26 +529,35 @@ class CPUEnv(gym.Env):
                 self.next_force_direction[1] * self.next_force_magnitude
             )
 
+    def _apply_action(self, action):
+        # cycle action through action buffer
+        if action is None:
+            action = self.data.ctrl
+        self.action_buffer.append(action)
+        action_to_take = self.action_buffer.pop(0)
+        # actions should be inputted to the environment in the -1 to 1 range, and they are mapped here to -pi/2 and pi/2 accordingly
+        action_to_take = jp.clip(jp.array(action_to_take), -1, 1)
+        action_to_take = action_to_take * (jp.pi / 2)
+        self.data.ctrl = action_to_take
+        self.action_change = action_to_take - self.lastAction[0]
+        self.lastAction = jp.expand_dims(action_to_take, axis=0)
+
+    def step(self, action=None):
+        if self.verbose:
+            print("Stepping simulation...           ", end="")
+
+        self._apply_action(action)
+
+        self._apply_external_forces()
+
         # step simulation
-        for _ in range(self.physics_steps_per_control_step - 1):
+        for _ in range(self.physics_steps_per_control_step):
             mujoco.mj_step(self.model, self.data)
-
-        torso_quat = self.data.xquat[self.torso_idx]
-        torso_global_vel = self.data.cvel[self.torso_idx]
-        self.previous_torso_local_velocity = inverseRotateVectors(
-            torso_quat, torso_global_vel[3:]
-        )
-
-        mujoco.mj_step(self.model, self.data)
 
         if self.verbose:
             print("Done")
 
         reward, terminated = self._get_reward()
-        if self.use_potential_rewards:
-            _reward = reward - self.previous_reward
-            self.previous_reward = reward
-            reward = _reward
 
         truncated = False
         if self.data.time >= self.max_simulation_time:
@@ -586,9 +592,10 @@ if __name__ == "__main__":
 
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        action = None
+        action = np.zeros(len(JOINT_NAMES))
+
         obs, reward, isTerminal, _, _ = sim.step(action)
-        print(reward)
+        # print(reward)
         sim.render("human")
         if isTerminal:
             sim.reset()

@@ -47,7 +47,7 @@ CONTROL_INPUT_MAX_YAW = 3.14159  # radians, can go from -180 to 180 degrees
 USE_CONTROL_INPUTS = True  # if false, only the standing behaviour is trained
 USE_POTENTIAL_REWARDS = False
 TERMINAL_FRACTION_RESET_THRESHOLD = 0.5  # applies only to GPUVecEnv
-MIN_FORCE_FOR_CONTACT = 0.1  # N
+MIN_FORCE_FOR_CONTACT = 0.0  # N
 RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT = False
 
 physics_steps_per_control_step = int((1.0 / desired_control_frequency) // timestep)
@@ -61,7 +61,7 @@ MAX_EXTERNAL_MASS_ADDED = 0.0  # kg
 MIN_EXTERNAL_FORCE_MAGNITUDE = 0  # N
 MAX_EXTERNAL_FORCE_MAGNITUDE = 0  # N
 # JOINT_INITIAL_OFFSET_MIN = 0.0  #
-JOINT_INITIAL_OFFSET_MAX = 0.05  #
+JOINT_INITIAL_OFFSET_MAX = 0.1  #
 JOINT_ARMATURE_MAX_CHANGE = 0.0  # kg m2
 JOINT_RANGE_MAX_CHANGE = 0.0  # radians
 JOINT_STIFFNESS_MAX_CHANGE = 0.0  # unit ?

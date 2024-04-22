@@ -1,5 +1,6 @@
 from jax import numpy as jp
 from jax.scipy.spatial.transform import Rotation
+from simulation.simulation_parameters import *
 
 # REWARD INFO FROM https://arxiv.org/pdf/2304.13653.pdf
 
@@ -14,6 +15,11 @@ from jax.scipy.spatial.transform import Rotation
 # gaits which cause high forces on the knees, for example
 # during ground impacts, which can damage a physical robot. - 0.01
 # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions - 0.1
+
+
+inverseRotateVectors = (
+    lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
+)
 
 
 def controlInputRewardFn(
@@ -36,154 +42,99 @@ def controlInputRewardFn(
     # ctrl_change is (latest_action - previous_action)
     # isSelfColliding is a boolean (is robot colliding with itself?)
 
-    ### REWARD PARAMETERS
-    # Velocity The magnitude of the player’s velocity minus the target velocity. - 0.1
-    VELOCITY_ERROR_REWARD_WEIGHT = -0.1
-    # Velocity The magnitude of the player's vertical velocity
-    VERTICAL_VELOCITY_REWARD_WEIGHT = -0.02
-    # Termination A penalty, equal to −1 if the player is on the ground - 0.5
-    # MODIFICATION: +0.5 reward for torso being above or at Z=0, linearly interpolated to -0.5 if the torso is under -0.4
-    GROUNDED_PENALTY_WEIGHT = -0.1
-    NOT_GROUNDED_REWARD_WEIGHT = 0.1  # added this so that staying not grounded is rewarded (rather than terminating quickly to avoid future penalties)
-    MIN_Z_BEFORE_GROUNDED = -0.3
-    MIN_Z_FOR_REWARD = -0.2
-    MAX_Z = -0.1
-    # Joint torque A penalty, equal to the magnitude of the torque measured at
-    # the player’s knees. This discourages the player from learning
-    # gaits which cause high forces on the knees, for example
-    # during ground impacts, which can damage a physical robot. - 0.01
-    MAX_JOINT_TORQUE = 1.5
-    JOINT_TORQUE_PENALTY_WEIGHT = (
-        -0.05 / 16
-    )  # divide by N since there are N joints and we consider the sum of joint torques
-    # penalty term to minimize the time integral of torque peaks
-    # (thresholded above 5 N m)
-    # CUSTOM: a penalty for how much the joint control differs from previous joint control, to reward "smoother" motions (std is 0 to 2)
-    CONTROL_STD_PENALTY = 0  # -0.01
-    # Upright: a reward which scales linearly with how close the torso is to perfectly upright
-    ORIENTATION_REWARD_MAX_ERROR_RAD = (
-        0.6  # CUSTOM -> paper does not penalize high tilts
-    )
-    ORIENTATION_REWARD_MAX_ERROR_RAD_FOR_REWARD = 0.3  # at this error rad reward is 0
-    ORIENTATION_REWARD_MIN_ERROR_RAD = 0.1  # at this error rad reward is at MAX_REWARD
-    ORIENTATION_MAX_REWARD = 0.05  # CUSTOM -> paper has it at 0.02
-    ORIENTATION_MAX_PENALTY = -0.1  # CUSTOM -> paper does not penalize high tilts
-    # CUSTOM: add a constant offset to the reward
-    CONSTANT_REWARD_OFFSET = 1.0
-    # CUSTOM: penalize self-collisions
-    TERMINATE_ON_SELF_COLLISION = False
-    SELF_COLLISION_PENALTY = -0.05
-    # CUSTOM hyperparameters
-    ALLOW_NEGATIVE_REWARDS = True
-    ALLOW_EARLY_TERMINATION = True
-    OVERRIDE_TERMINAL_REWARD = True
-    TERMINAL_REWARD = -1.0 if ALLOW_NEGATIVE_REWARDS else 0
+    EXP_SCALING_PARAM = 0.5
 
     ### COMPUTE REWARD
     reward = 0
 
-    # Velocity error
-    abs_velocity_error = jp.abs(velocity[0:2] - target_velocity)
-    hvelocity_reward = VELOCITY_ERROR_REWARD_WEIGHT * (
-        jp.linalg.norm(abs_velocity_error) ** 2
+    ### HORIZONTAL VELOCITY REWARD
+    VELOCITY_ERROR_REWARD_WEIGHT = 10
+    hvelocity_reward = VELOCITY_ERROR_REWARD_WEIGHT * jp.exp(
+        -1 * jp.linalg.norm(velocity[0:2] - target_velocity) / EXP_SCALING_PARAM
     )
     reward += hvelocity_reward
     # print("hvelocity_reward", hvelocity_reward)
 
-    # Vertical velocity
-    abs_vertical_velocity = jp.abs(velocity)[2]
-    vvelocity_reward = VERTICAL_VELOCITY_REWARD_WEIGHT * (abs_vertical_velocity**2)
-    reward += vvelocity_reward
-    # print("vvelocity_reward", vvelocity_reward)
-
-    # Torso height reward
-    z_pos_penalty = jp.interp(
-        z_pos,
-        jp.array([MIN_Z_FOR_REWARD, MAX_Z]),
-        jp.array([GROUNDED_PENALTY_WEIGHT, NOT_GROUNDED_REWARD_WEIGHT]),
-    )
-    reward += z_pos_penalty
-    # print("z_pos_penalty", z_pos_penalty)
-
-    # Joint torque
-    thresholded_joint_torques = (
-        jp.clip(jp.abs(joint_torques), 0.0, MAX_JOINT_TORQUE) / MAX_JOINT_TORQUE
-    )
-    total_joint_torque = jp.sum(thresholded_joint_torques)
-    joint_torque_reward = total_joint_torque * JOINT_TORQUE_PENALTY_WEIGHT
-    reward += joint_torque_reward
-    # print("joint_torque_reward", joint_torque_reward)
-
-    # Control change
-    control_std = jp.std(ctrl_change)
-    control_std_reward = CONTROL_STD_PENALTY * control_std
-    reward += control_std_reward
-    # print("control_std_reward", control_std_reward)
-
-    # constant reward offset
-    reward += CONSTANT_REWARD_OFFSET
-
-    # Rewards using torso_quat
+    # TARGET ORIENTATION REWARD
+    ORIENTATION_REWARD_WEIGHT = 5  # CUSTOM -> paper does not penalize high tilts
     torso_quat_obj = Rotation.from_quat(
         [torso_quat[1], torso_quat[2], torso_quat[3], torso_quat[0]]
     )
-
-    # Upright
-    tilt_vector = torso_quat_obj.inv().apply(jp.array([0, 0, 1]))
-    tilt_vector = jp.clip(
-        tilt_vector,
-        a_min=-1 * jp.ones(tilt_vector.shape),
-        a_max=jp.ones(tilt_vector.shape),
-    )
-    tilt_amt = jp.arcsin(jp.max(jp.abs(tilt_vector[0:2])))
-    tilt_amt = jp.where(tilt_vector[2] <= 0, ORIENTATION_REWARD_MAX_ERROR_RAD, tilt_amt)
-    tilt_reward = jp.interp(
-        tilt_amt,
-        jp.array(
-            [
-                ORIENTATION_REWARD_MIN_ERROR_RAD,
-                ORIENTATION_REWARD_MAX_ERROR_RAD_FOR_REWARD,
-                ORIENTATION_REWARD_MAX_ERROR_RAD,
-            ]
-        ),
-        jp.array([ORIENTATION_MAX_REWARD / 2, 0, ORIENTATION_MAX_PENALTY / 2]),
-    )
-    reward += tilt_reward
-
-    # Target orientation
     rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
     target_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
-    rot_error = jp.abs(target_rot_vector - rot_vector)
-    rot_error_amt = jp.arcsin(jp.max(rot_error) / 2)
-    rot_reward = jp.interp(
-        rot_error_amt,
-        jp.array(
-            [
-                ORIENTATION_REWARD_MIN_ERROR_RAD,
-                ORIENTATION_REWARD_MAX_ERROR_RAD_FOR_REWARD,
-                ORIENTATION_REWARD_MAX_ERROR_RAD,
-            ]
-        ),
-        jp.array([ORIENTATION_MAX_REWARD / 2, 0, ORIENTATION_MAX_PENALTY / 2]),
+    rot_reward = ORIENTATION_REWARD_WEIGHT * jp.exp(
+        -1 * jp.linalg.norm(rot_vector - target_rot_vector) / EXP_SCALING_PARAM
     )
     reward += rot_reward
     # print("rot_reward", rot_reward)
 
-    # Self collision penalty
+    ### VERTICAL VELOCITY REWARD
+    VERTICAL_VELOCITY_REWARD_WEIGHT = 1
+    vvelocity_reward = VERTICAL_VELOCITY_REWARD_WEIGHT * jp.exp(
+        -1 * jp.abs(velocity)[2] / EXP_SCALING_PARAM
+    )
+    reward += vvelocity_reward
+    # print("vvelocity_reward", vvelocity_reward)
+
+    ### TORSO HEIGHT REWARD
+    TORSO_HEIGHT_REWARD_WEIGHT = 1
+    TARGET_Z_POS = (
+        -0.1
+    )  # above this position, the reward is the same (only penalize the torso for being too low)
+    z_pos_reward = TORSO_HEIGHT_REWARD_WEIGHT * jp.exp(
+        jp.clip(z_pos - TARGET_Z_POS, -jp.inf, 0) / EXP_SCALING_PARAM
+    )
+    reward += z_pos_reward
+    # print("z_pos_reward", z_pos_reward)
+
+    # JOINT TORQUE REWARD
+    MAX_JOINT_TORQUE = 1.5
+    JOINT_TORQUE_REWARD_WEIGHT = -0.01
+    joint_torque_reward = JOINT_TORQUE_REWARD_WEIGHT * jp.linalg.norm(
+        jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0, jp.inf)
+    )
+    reward += joint_torque_reward
+    print("joint_torque_reward", joint_torque_reward)
+
+    # ACTION CHANGE REWARD
+    CONTROL_CHANGE_REWARD_WEIGHT = 0  # -1e-3
+    control_change_reward = CONTROL_CHANGE_REWARD_WEIGHT * jp.linalg.norm(
+        desired_control_frequency * ctrl_change
+    )
+    reward += control_change_reward
+    # print("control_std_reward", control_std_reward)
+
+    # SELF COLLISION REWARD
+    SELF_COLLISION_PENALTY = 0
     self_collision_reward = jp.where(isSelfColliding, SELF_COLLISION_PENALTY, 0)
-    reward = reward + self_collision_reward
+    reward += self_collision_reward
     # print("self_collision_reward", self_collision_reward)
 
-    # make reward positive if necessary
+    # CONSTANT REWARD OFFSET
+    CONSTANT_REWARD_OFFSET = 0.0
+    reward += CONSTANT_REWARD_OFFSET
+
+    # FORCE REWARD TO BE POSITIVE IF DESIRED
+    ALLOW_NEGATIVE_REWARDS = True
     if not ALLOW_NEGATIVE_REWARDS:
         reward = jp.where(reward < 0, 0, reward)
 
-    # Termination
+    # CHECK TERMINATION CONDITION AND REWARD
+    TERMINATE_ON_SELF_COLLISION = True
+    ALLOW_EARLY_TERMINATION = True
+    MIN_Z_BEFORE_GROUNDED = -0.3
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
-    terminal = jp.where(isTouchingGround, ALLOW_EARLY_TERMINATION, False)
+    local_gravity_vector = inverseRotateVectors(torso_quat, jp.array([0, 0, -1]))
+    isNotUpright = jp.where(
+        jp.max(jp.abs(local_gravity_vector[0:2])) < 0.7, isTouchingGround, True
+    )
+    terminal = jp.where(isNotUpright, ALLOW_EARLY_TERMINATION, False)
     if TERMINATE_ON_SELF_COLLISION:
         terminal = jp.where(isSelfColliding, ALLOW_EARLY_TERMINATION, terminal)
 
+    # OVERRIDE TERMINAL REWARD IF DESIRED
+    OVERRIDE_TERMINAL_REWARD = True
+    TERMINAL_REWARD = -100.0
     if OVERRIDE_TERMINAL_REWARD:
         reward = jp.where(terminal, TERMINAL_REWARD, reward)
 
