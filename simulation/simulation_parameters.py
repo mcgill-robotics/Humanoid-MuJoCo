@@ -81,22 +81,22 @@ VELOCIMETER_NOISE_STDDEV = 0.0  # m/s
 ### URDF REFERENCE NAMES
 
 JOINT_NAMES = [
-    "right_shoulder_pitch",
-    "right_elbow",
-    "left_shoulder_pitch",
-    "left_elbow",
-    "left_hip_yaw",
-    "left_hip_roll",
-    "left_hip_pitch",
-    "left_knee",
-    "left_ankle_pitch",
-    "right_hip_yaw",
-    "right_hip_roll",
-    "right_hip_pitch",
-    "right_knee",
-    "right_ankle_pitch",
-    "torso_yaw",
-    "torso_roll",
+    "right_shoulder_pitch", #0
+    "right_elbow", #1
+    "left_shoulder_pitch", #2
+    "left_elbow", #3
+    "left_hip_yaw", #4
+    "left_hip_roll", #5
+    "left_hip_pitch", #6
+    "left_knee", #7
+    "left_ankle_pitch", #8
+    "right_hip_yaw", #9
+    "right_hip_roll", #10
+    "right_hip_pitch",  #11
+    "right_knee", #12
+    "right_ankle_pitch", #13
+    "torso_yaw", #14
+    "torso_roll",   #15
 ]
 JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = [
