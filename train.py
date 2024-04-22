@@ -4,6 +4,7 @@ from simulation.gpu_vec_env import GPUVecEnv
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 import torch
+import numpy as np
 from torch import nn
 from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.callbacks import (
@@ -94,7 +95,9 @@ NUM_CHECKPOINTS = args.n_checkpoints
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
 RANDOMIZATION_INCREMENT = args.rand_increment
-SUCCESSFUL_TRAINING_REWARD_THRESHOLD = args.reward_goal
+SUCCESSFUL_TRAINING_REWARD_THRESHOLD = (
+    np.inf if args.reward_goal < 0 else args.reward_goal
+)
 CHECKPOINT = args.ckpt
 
 if args.log_name is not None:

@@ -131,22 +131,22 @@
   
   <!-- CUSTOM -->
   <actuator>
-    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_hip_yaw" joint="left_hip_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_knee" joint="left_knee" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="left_ankle_pitch" joint="left_ankle_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="right_hip_yaw" joint="right_hip_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="right_hip_roll" joint="right_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="right_hip_pitch" joint="right_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="right_knee" joint="right_knee" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="right_ankle_pitch" joint="right_ankle_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="torso_yaw" joint="torso_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
-    <position name="torso_roll" joint="torso_roll" forcelimited="true" forcerange="-1.5 1.5" kp="32" kv="0.1"/>
+    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_hip_yaw" joint="left_hip_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_knee" joint="left_knee" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="left_ankle_pitch" joint="left_ankle_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="right_hip_yaw" joint="right_hip_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="right_hip_roll" joint="right_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="right_hip_pitch" joint="right_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="right_knee" joint="right_knee" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="right_ankle_pitch" joint="right_ankle_pitch" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="torso_yaw" joint="torso_yaw" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
+    <position name="torso_roll" joint="torso_roll" forcelimited="true" forcerange="-1.5 1.5" kp="100" kv="10"/>
   </actuator>
 
   <!-- CUSTOM -->
