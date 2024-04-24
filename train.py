@@ -169,18 +169,85 @@ print("\nBeginning training.\n")
 
 
 if CHECKPOINT is None:
+    additional_kwargs = {}
     policy_args = {
         "net_arch": dict(pi=[256, 256, 256], vf=[256, 256, 256], qf=[256, 256, 256]),
         "activation_fn": nn.Tanh,
     }
-
-    additional_kwargs = {}
     if MODEL_TYPE == SAC:
         policy_args["log_std_init"] = -1
+        if False:  # CHANGE TO TRUE TO USE RL-ZOO3 PARAMS
+            # from rl-zoo3 tuned params for Humanoid-v4:
+            # n_timesteps: !!float 2e6
+            # policy: 'MlpPolicy'
+            # learning_starts: 10000
+
+            # additional_kwargs["n_timesteps"] = 2e6
+            additional_kwargs["learning_starts"] = 10000
     elif MODEL_TYPE == TD3:
-        pass
+        if False:  # CHANGE TO TRUE TO USE RL-ZOO3 PARAMS
+            # from rl-zoo3 tuned params for Humanoid-v4:
+            # n_timesteps: !!float 2e6
+            # policy: 'MlpPolicy'
+            # learning_starts: 10000
+            # noise_type: 'normal'
+            # noise_std: 0.1
+            # train_freq: 1
+            # gradient_steps: 1
+            # learning_rate: !!float 1e-3
+            # batch_size: 256
+            # policy_kwargs: "dict(net_arch=[400, 300])"
+
+            # additional_kwargs["n_timesteps"] = 2e6
+            additional_kwargs["learning_starts"] = 10000
+            additional_kwargs["noise_type"] = "normal"
+            additional_kwargs["noise_std"] = 0.1
+            additional_kwargs["train_freq"] = 1
+            additional_kwargs["gradient_steps"] = 1
+            additional_kwargs["learning_rate"] = 1e-3
+            additional_kwargs["batch_size"] = 256
+            policy_args["net_arch"] = [400, 300]
     elif MODEL_TYPE == PPO:
-        pass
+        if False:  # CHANGE TO TRUE TO USE RL-ZOO3 PARAMS
+            # from rl-zoo3 tuned params for Humanoid-v4:
+            # normalize: true
+            # n_envs: 1
+            # policy: 'MlpPolicy'
+            # n_timesteps: !!float 1e7
+            # batch_size: 256
+            # n_steps: 512
+            # gamma: 0.95
+            # learning_rate: 3.56987e-05
+            # ent_coef: 0.00238306
+            # clip_range: 0.3
+            # n_epochs: 5
+            # gae_lambda: 0.9
+            # max_grad_norm: 2
+            # vf_coef: 0.431892
+            # policy_kwargs: "dict(
+            #             log_std_init=-2,
+            #             ortho_init=False,
+            #             activation_fn=nn.ReLU,
+            #             net_arch=dict(pi=[256, 256], vf=[256, 256])
+            #           )"
+
+            # additional_kwargs["normalize"] = True
+            # additional_kwargs["n_envs"] = 1
+            # additional_kwargs["n_timesteps"] = 1e7
+            additional_kwargs["batch_size"] = 256
+            additional_kwargs["n_steps"] = 512
+            additional_kwargs["gamma"] = 0.95
+            additional_kwargs["learning_rate"] = 3.56987e-05
+            additional_kwargs["ent_coef"] = 0.00238306
+            additional_kwargs["clip_range"] = 0.3
+            additional_kwargs["n_epochs"] = 5
+            additional_kwargs["gae_lambda"] = 0.9
+            additional_kwargs["max_grad_norm"] = 2
+            additional_kwargs["vf_coef"] = 0.431892
+            policy_args["log_std_init"] = -2
+            policy_args["ortho_init"] = False
+            # policy_args["activation_fn"] = nn.ReLU
+            policy_args["net_arch"] = dict(pi=[256, 256], vf=[256, 256])
 
     model = MODEL_TYPE(
         policy="MlpPolicy",
