@@ -230,7 +230,7 @@ class CPUEnv(gym.Env):
             0
         ] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED * self.randomization_factor)
 
-    def _randomize_sim_data(self):
+    def _randomize_joint_positions(self):
         # randomize joint initial states (CPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
             JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
@@ -312,7 +312,7 @@ class CPUEnv(gym.Env):
 
         # call self.data-dependent randomizations
         self._randomize_delays()
-        self._randomize_sim_data()
+        self._randomize_joint_positions()
 
         # initialize environment trackers
         self._init_sim_trackers()
