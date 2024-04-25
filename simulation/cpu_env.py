@@ -14,17 +14,6 @@ import gc
 import os
 from simulation import SIM_XML_PATH, reward_functions
 
-# STATE INFO FROM https://arxiv.org/pdf/2304.13653.pdf
-
-# STATE
-# joint positions     5 · 20          Joint positions in radians (stacked last 5 timesteps)
-# angular velocity    5 · 3           Angular velocity (roll, pitch, yaw) from IMU (stacked)
-# agent velocity      5 · 2           X and Y velocity of robot torso (stacked)
-# linear acceleration 5 · 3           Linear acceleration from IMU (stacked)
-# gravity             5 · 3           Gravity direction, derived from angular velocity using Madgwick filter (stacked)
-# foot pressure       5 · 8           Pressure values from foot sensors (stacked)
-# previous action     5 · 20          Action filter state (stacked)
-
 inverseRotateVectors = (
     lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
 )
@@ -141,10 +130,10 @@ class CPUEnv(gym.Env):
         self.local_gravity_vector_delay = round(
             self.local_gravity_vector_delay / actual_timestep
         )
-        self.pressure_values_delay = random.uniform(
+        self.contact_sensor_delay = random.uniform(
             MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
         )
-        self.pressure_values_delay = round(self.pressure_values_delay / actual_timestep)
+        self.contact_sensor_delay = round(self.contact_sensor_delay / actual_timestep)
 
         # make buffers for observations and actions
         self.action_buffer = [self.data.ctrl] * (int)(self.action_delay)
@@ -160,12 +149,10 @@ class CPUEnv(gym.Env):
         self.torso_local_velocity_buffer = [jp.array([0] * 3)] * (int)(
             self.torso_local_velocity_delay
         )
-        self.local_gravity_vector_buffer = [jp.array([0] * 3)] * (int)(
+        self.local_gravity_vector_buffer = [jp.array([0, 0, -1])] * (int)(
             self.local_gravity_vector_delay
         )
-        self.pressure_values_buffer = [jp.array([0] * len(PRESSURE_GEOM_NAMES))] * (
-            int
-        )(self.pressure_values_delay)
+        self.contact_sensor_buffer = [(0, 0)] * (int)(self.contact_sensor_delay)
 
     def _randomize_joint_properties(self):
         # randomize joint properties
@@ -202,7 +189,7 @@ class CPUEnv(gym.Env):
                 * self.randomization_factor
             )
 
-    def _randomize_robot_dynamics(self):
+    def _randomize_dynamics(self):
         # floor friction (0.5 to 1.0)
         self.model.geom("floor").friction = [
             coef
@@ -303,7 +290,7 @@ class CPUEnv(gym.Env):
         self._init_model()
 
         # randomize model-dependent properties
-        self._randomize_robot_dynamics()
+        self._randomize_dynamics()
         self._randomize_joint_properties()
 
         # create data from model
@@ -325,61 +312,31 @@ class CPUEnv(gym.Env):
 
         return self._get_obs(), {}
 
-    def _get_obs(self):
-        if self.verbose:
-            print("Collecting observations...       ", end="")
+    def _get_torso_velocity(self):  # NOTE: in global reference frame (NWU)
+        return self.data.cvel[self.torso_idx][3:]
 
-        # joint positions
-        joint_pos_noise = (
-            self.randomization_factor
-            * (JOINT_ANGLE_NOISE_STDDEV / 180.0 * jp.pi)
-            * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)])
-        )
-        joint_angles = self.data.qpos[self.joint_qpos_idx] + joint_pos_noise
+    def _get_torso_angular_velocity(self):  # NOTE: in global reference frame (NWU)
+        return self.data.cvel[self.torso_idx][:3]
 
-        # joint velocities
-        joint_vel_noise = (
-            self.randomization_factor
-            * (JOINT_VELOCITY_NOISE_STDDEV / 180.0 * jp.pi)
-            * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)])
-        )
-        joint_velocities = self.data.qvel[self.joint_dof_idx] + joint_vel_noise
-
-        # local angular velocity
-        ang_vel_noise = (
-            self.randomization_factor
-            * (GYRO_NOISE_STDDEV / 180.0 * jp.pi)
-            * jax.random.normal(key=self.rng_key, shape=(3,))
-        )
-        torso_global_vel = self.data.cvel[self.torso_idx]
-        torso_quat = self.data.xquat[self.torso_idx]
-        torso_global_ang_vel = torso_global_vel[0:3]
-        local_ang_vel = (
-            inverseRotateVectors(torso_quat, torso_global_ang_vel) + ang_vel_noise
+    def _get_joint_torques(self):
+        return (
+            self.data.qfrc_constraint[self.joint_dof_idx]
+            + self.data.qfrc_smooth[self.joint_dof_idx]
         )
 
-        # local velocity
-        local_vel_noise = (
-            self.randomization_factor
-            * VELOCIMETER_NOISE_STDDEV
-            * jax.random.normal(key=self.rng_key, shape=(3,))
-        )
-        torso_local_velocity = (
-            inverseRotateVectors(torso_quat, torso_global_vel[3:]) + local_vel_noise
-        )
+    def _get_joint_positions(self):
+        return self.data.qpos[self.joint_qpos_idx]
 
-        # gravity direction (local)
-        quaternion_noise = (
-            self.randomization_factor
-            * (IMU_NOISE_STDDEV / 180.0 * jp.pi)
-            * jax.random.normal(key=self.rng_key, shape=(4,))
-        )
-        noisy_torso_quat = torso_quat + quaternion_noise
-        local_gravity_vector = inverseRotateVectors(
-            noisy_torso_quat, jp.array([0, 0, -1])
-        )
+    def _get_joint_velocities(self):
+        return self.data.qvel[self.joint_dof_idx]
 
-        # foot contact forces
+    def _get_torso_quaternion(self):  # in NWU
+        return self.data.xquat[self.torso_idx]
+
+    def _get_torso_z_pos(self):
+        return self.data.xpos[self.torso_idx, 2]
+
+    def _get_contact_sensor_data(self):
         pressure_values = np.zeros((8))
         for i in range(len(self.pressure_sensor_ids)):
             for ci in range(len(self.data.contact.geom1)):
@@ -393,8 +350,70 @@ class CPUEnv(gym.Env):
                         abs(self.data.efc_force[self.data.contact.efc_address[ci]])
                         + 0.0001  # add a small amount to the force since sometimes contacts have a force of 0 (for binary contact checking, we want all contacts to have a force)
                     )
-        # convert pressure to binary values
         pressure_values = np.where(pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0)
+        binary_foot_contact_state_left = np.clip(np.sum(pressure_values[:4]), 0, 1)
+        binary_foot_contact_state_right = np.clip(np.sum(pressure_values[4:]), 0, 1)
+        return binary_foot_contact_state_left, binary_foot_contact_state_right
+
+    def _get_obs(self):
+        if self.verbose:
+            print("Collecting observations...       ", end="")
+
+        # joint positions
+        joint_pos_noise = (
+            self.randomization_factor
+            * (JOINT_ANGLE_NOISE_STDDEV / 180.0 * jp.pi)
+            * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)])
+        )
+        joint_angles = self._get_joint_positions() + joint_pos_noise
+
+        # joint velocities
+        joint_vel_noise = (
+            self.randomization_factor
+            * (JOINT_VELOCITY_NOISE_STDDEV / 180.0 * jp.pi)
+            * jax.random.normal(key=self.rng_key, shape=[len(self.joint_qpos_idx)])
+        )
+        joint_velocities = self._get_joint_velocities() + joint_vel_noise
+
+        # local angular velocity
+        ang_vel_noise = (
+            self.randomization_factor
+            * (GYRO_NOISE_STDDEV / 180.0 * jp.pi)
+            * jax.random.normal(key=self.rng_key, shape=(3,))
+        )
+
+        torso_quat = self._get_torso_quaternion()
+        local_ang_vel = (
+            inverseRotateVectors(torso_quat, self._get_torso_angular_velocity())
+            + ang_vel_noise
+        )
+
+        # local velocity
+        local_vel_noise = (
+            self.randomization_factor
+            * VELOCIMETER_NOISE_STDDEV
+            * jax.random.normal(key=self.rng_key, shape=(3,))
+        )
+        torso_local_velocity = (
+            inverseRotateVectors(torso_quat, self._get_torso_velocity())
+            + local_vel_noise
+        )
+
+        # gravity direction (local)
+        quaternion_noise = (
+            self.randomization_factor
+            * (IMU_NOISE_STDDEV / 180.0 * jp.pi)
+            * jax.random.normal(key=self.rng_key, shape=(4,))
+        )
+        noisy_torso_quat = torso_quat + quaternion_noise
+        local_gravity_vector = inverseRotateVectors(
+            noisy_torso_quat, jp.array([0, 0, -1])
+        )
+
+        # foot contact states
+        binary_foot_contact_state_left, binary_foot_contact_state_right = (
+            self._get_contact_sensor_data()
+        )
 
         # cycle observations through observation buffers
         self.joint_angles_buffer.append(joint_angles)
@@ -402,18 +421,18 @@ class CPUEnv(gym.Env):
         self.local_ang_vel_buffer.append(local_ang_vel)
         self.torso_local_velocity_buffer.append(torso_local_velocity)
         self.local_gravity_vector_buffer.append(local_gravity_vector)
-        self.pressure_values_buffer.append(pressure_values)
+        self.contact_sensor_buffer.append(
+            (binary_foot_contact_state_left, binary_foot_contact_state_right)
+        )
         # get oldest (delayed) observations
         joint_angles = self.joint_angles_buffer.pop(0)
         joint_velocities = self.joint_velocities_buffer.pop(0)
         local_ang_vel = self.local_ang_vel_buffer.pop(0)
         torso_local_velocity = self.torso_local_velocity_buffer.pop(0)
         local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
-        pressure_values = self.pressure_values_buffer.pop(0)
-
-        # convert 8 binary values into one per foot
-        binary_foot_contact_state_left = np.clip(np.sum(pressure_values[:4]), 0, 1)
-        binary_foot_contact_state_right = np.clip(np.sum(pressure_values[:4]), 0, 1)
+        binary_foot_contact_state_left, binary_foot_contact_state_right = (
+            self.contact_sensor_buffer.pop(0)
+        )
 
         # calculate clock phase observations (no delay on these)
         clock_phase_sin = jp.array([jp.sin(self.data.time)])
@@ -460,13 +479,10 @@ class CPUEnv(gym.Env):
         if self.verbose:
             print("Computing reward...              ", end="")
 
-        torso_global_velocity = self.data.cvel[self.torso_idx][3:]
-        torso_z_pos = self.data.xpos[self.torso_idx, 2]
-        torso_quat = self.data.xquat[self.torso_idx]
-        joint_torques = (
-            self.data.qfrc_constraint[self.joint_dof_idx]
-            + self.data.qfrc_smooth[self.joint_dof_idx]
-        )
+        torso_global_velocity = self._get_torso_velocity()
+        torso_z_pos = self._get_torso_z_pos()
+        torso_quat = self._get_torso_quaternion()
+        joint_torques = self._get_joint_torques()
         is_self_colliding = self._check_self_collision()
 
         reward, isTerminal = self.reward_fn(
