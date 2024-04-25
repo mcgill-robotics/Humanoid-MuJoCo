@@ -7,7 +7,7 @@ from stable_baselines3 import PPO, SAC, TD3
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
 LOG_NAME = "SAC"
-CKPT_NAME = "checkpoint_8999424_steps"
+CKPT_NAME = "checkpoint_9999360_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
