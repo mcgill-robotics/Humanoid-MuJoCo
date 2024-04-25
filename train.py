@@ -19,9 +19,9 @@ import argparse
 ###########################
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument("--algo", type=str, default="td3", help="Algorithm to use")
+argparser.add_argument("--algo", type=str, default="ppo", help="Algorithm to use")
 argparser.add_argument(
-    "--n-envs", type=int, default=128, help="Number of environments to run in parallel"
+    "--n-envs", type=int, default=1024, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
     "--cpu", action="store_true", help="Pass this flag to run on CPU"
@@ -35,19 +35,19 @@ argparser.add_argument(
 argparser.add_argument(
     "--n-evals",
     type=int,
-    default=100,
+    default=500,
     help="Number of evaluations to run, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
     "--n-checkpoints",
     type=int,
-    default=10,
+    default=500,
     help="Number of checkpoints to save, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
     "--timesteps",
     type=int,
-    default=1000000,
+    default=5000000,
     help="Total timesteps to train for, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
@@ -62,7 +62,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--reward-goal",
     type=int,
-    default=800,
+    default=1000000,
     help="Reward goal to reach. Ends training or increments randomization factor once reached in evaluation.",
 )
 argparser.add_argument(
@@ -123,7 +123,7 @@ if SIMULATE_ON_GPU:
         GPUVecEnv(
             num_envs=NUM_ENVS,
             xml_path=SIM_XML_PATH,
-            reward_fn=controlInputRewardFn,
+            reward_fn=rewardControlInputFn,
             randomization_factor=RANDOMIZATION_FACTOR,
         )
     )
@@ -138,7 +138,7 @@ else:
             [
                 lambda: CPUEnv(
                     xml_path=SIM_XML_PATH,
-                    reward_fn=controlInputRewardFn,
+                    reward_fn=rewardControlInputFn,
                     randomization_factor=RANDOMIZATION_FACTOR,
                 )
             ]
@@ -151,12 +151,12 @@ eval_env = VecMonitor(
         [
             lambda: CPUEnv(
                 xml_path=SIM_XML_PATH,
-                reward_fn=controlInputRewardFn,
+                reward_fn=rewardControlInputFn,
                 randomization_factor=RANDOMIZATION_FACTOR,
                 use_potential_rewards=False,
                 max_simulation_time_override=10.0,
             )
-        ]
+        ] * N_EVAL_EPISODES
     )
 )
 
@@ -169,8 +169,8 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     policy_args = {
-        "net_arch": dict(pi=[64, 64, 64], vf=[64, 64, 64], qf=[64, 64, 64]),
-        "activation_fn": nn.Tanh,
+        "net_arch": dict(pi=[256, 256, 256], vf=[256, 256, 256], qf=[256, 256, 256]),
+        "activation_fn": nn.ELU,
     }
 
     additional_kwargs = {}
@@ -180,6 +180,17 @@ if CHECKPOINT is None:
         policy="MlpPolicy",
         env=env,
         verbose=0,
+        learning_rate = 1e-5,
+        n_epochs = 5,
+        gamma = 0.99,
+        ent_coef = 0.01,
+        clip_range =0.2,
+        vf_coef = 1.0,
+        gae_lambda =0.95,
+        batch_size = 24576, # 12288, #24576
+        n_steps = 96,
+        target_kl =0.01,
+        max_grad_norm =1.0,
         policy_kwargs=policy_args,
         **additional_kwargs
     )
@@ -218,7 +229,7 @@ while True:
         eval_freq=EVAL_FREQ,
         n_eval_episodes=N_EVAL_EPISODES,
         deterministic=True,
-        render=False,
+        render=True,
         callback_on_new_best=stop_training_callback,
         verbose=0,
     )
@@ -238,8 +249,8 @@ while True:
         )
     )
 
-    if RANDOMIZATION_FACTOR == 1:
-        break
+    # if RANDOMIZATION_FACTOR == 1:
+    #     break
 
-    RANDOMIZATION_FACTOR += RANDOMIZATION_INCREMENT
-    RANDOMIZATION_FACTOR = 1 if RANDOMIZATION_FACTOR > 1 else RANDOMIZATION_FACTOR
+    # # RANDOMIZATION_FACTOR += RANDOMIZATION_INCREMENT
+    # RANDOMIZATION_FACTOR = 1 if RANDOMIZATION_FACTOR > 1 else RANDOMIZATION_FACTOR

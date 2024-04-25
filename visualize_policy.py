@@ -4,21 +4,20 @@ from simulation.reward_functions import *
 from stable_baselines3 import PPO, SAC, TD3
 
 
-MODEL_TYPE = SAC  # TD3 # PPO
-RANDOMIZATION_FACTOR = 0
-LOG_NAME = "SAC"
-CKPT_NAME = "best_model"
+MODEL_TYPE = PPO  # TD3 # SAC # PPO
+RANDOMIZATION_FACTOR = 0.1
+LOG_NAME = "PPO"
+CKPT_NAME = "checkpoint_1668096_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
-    {TD3: "TD3", SAC: "SAC", PPO: "PPO"}[MODEL_TYPE],
     LOG_NAME,
     RANDOMIZATION_FACTOR,
     CKPT_NAME,
 )
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
-    reward_fn=controlInputRewardFn,
+    reward_fn=rewardControlInputFn,
     randomization_factor=RANDOMIZATION_FACTOR,
 )
 agent = MODEL_TYPE.load(
@@ -33,11 +32,13 @@ while True:
     episode_length = 0
     while not done:
         action, _ = agent.predict(obs, deterministic=True)
+        print(max(abs(action)))
+        # print(action)
         obs, reward, done, _, _ = env.step(action)
         if not done:
             episode_length += 1
             total_reward += reward
-        print(reward)
+            # print(reward)
         env.render("human")
     print(
         " >>> Episode Length {}, Total Reward {}".format(episode_length, total_reward)

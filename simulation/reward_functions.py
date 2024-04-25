@@ -3,8 +3,6 @@ from jax.scipy.spatial.transform import Rotation
 
 # REWARD INFO FROM https://arxiv.org/pdf/2307.10142.pdf
 
-# can i assume constant time between actions? TODO 0.01 s
-
 def rewardControlInputFn(torso_local_velocity,
                         local_ang_vel,
                         control_input_velocity,
@@ -39,19 +37,21 @@ def rewardControlInputFn(torso_local_velocity,
     joint_reg_reward = joint_regularization_r(joint_qpos_idx)
     # Ankle Regularization
     ankle_reg_reward = ankle_regularization_r(joint_qpos_idx)
-    
+
     final_reward =  10.0 * lin_vel_reward +\
                     5.0 * ang_vel_reward +\
                     -1e-4 * torque_reward +\
-                    -0.01 * torque_limit_reward +\
-                    -10.0 * joint_limit_reward +\
+                    -0.001 * torque_limit_reward +\
+                    0.0 * joint_limit_reward +\
                     -100.0 * termination_reward +\
                     2.0 * height_reward +\
                     5.0 * orientation_reward +\
-                    -1e-3 * first_order_reward +\
-                    -1e-4 * second_order_reward +\
+                    0 * first_order_reward +\
+                    0 * second_order_reward +\
                     1.0 * joint_reg_reward +\
                     1.0 * ankle_reg_reward
+    
+    # print(first_order_reward)
     
     return final_reward[0], isTerminated
     
@@ -109,13 +109,13 @@ def ankle_regularization_r(joint_qpos_idx):
 def first_order_action_r(action_to_take, lastAction):
     FIXED_TIME = 0.01
     # Penalize changes in actions
-    diff = jp.array(action_to_take - lastAction) / FIXED_TIME
+    diff = (jp.array(action_to_take - lastAction) / (FIXED_TIME*10)**2) / (jp.pi/2)
     return jp.sum(jp.square(diff))
 
 def second_order_action_r(action_to_take, lastAction, lastLastAction):
     FIXED_TIME = 0.01
     # Penalize changes in actions
-    diff = jp.array(action_to_take - 2*lastAction + lastLastAction) / FIXED_TIME
+    diff = (jp.array(action_to_take - 2*lastAction + lastLastAction) / (FIXED_TIME*10)**2) / (jp.pi/2)
     return jp.sum(jp.square(diff))
 
 def orientation_r(local_gravity_vector):
@@ -134,7 +134,18 @@ def height_r(torso_z_pos):
 def termination_r(torso_local_velocity, torso_z_pos, local_ang_vel, self_collision, local_gravity_vector):
     MIN_Z_BEFORE_GROUNDED = -0.3
     MAX_LOCAL_VELOCITY_NORM = 10
-    MAX_ANGULAR_VELOCITY_NORM = 5
+    MAX_ANGULAR_VELOCITY_NORM = 15
+    
+    # if jp.linalg.norm(torso_local_velocity) >= MAX_LOCAL_VELOCITY_NORM:
+    #     print("Termination due to 1")
+    # if jp.linalg.norm(local_ang_vel) >= MAX_ANGULAR_VELOCITY_NORM:
+    #     print("Termination due to 2")
+    # if local_gravity_vector[0]>=0.7 or local_gravity_vector[1] >=0.7:
+    #     print("Termination due to 3")
+    # if torso_z_pos < MIN_Z_BEFORE_GROUNDED:
+    #     print("Termination due to 4")
+    # if self_collision:
+    #     print("Termination due to 5")
     
     if jp.linalg.norm(torso_local_velocity) >= MAX_LOCAL_VELOCITY_NORM or\
         jp.linalg.norm(local_ang_vel) >= MAX_ANGULAR_VELOCITY_NORM or \
@@ -142,6 +153,7 @@ def termination_r(torso_local_velocity, torso_z_pos, local_ang_vel, self_collisi
         self_collision or \
         torso_z_pos < MIN_Z_BEFORE_GROUNDED:
             return True
+        
     return False
     
 def joint_limits_r(joint_torques):
@@ -161,15 +173,21 @@ def track_lin_vel_r(control_input_velocity, torso_local_velocity):
     SIGMA = 0.5
     # Reward tracking specified linear velocity command
     error = jp.array(control_input_velocity - torso_local_velocity[:2])
+    # print("command velocity")
+    # print(control_input_velocity)
+    # print("torso velocity")
+    # print(torso_local_velocity[:2])
     error *= 1./(1. + jp.abs(control_input_velocity))
     error = jp.sum(jp.square(error))
+    # print("reward")
+    # print(jp.exp(-error/SIGMA))
     return jp.exp(-error/SIGMA)
 
 def track_ang_vel_r(control_input_yaw, local_ang_vel):
     SIGMA = 0.5
     # Reward tracking yaw angular velocity command
     ang_vel_error = jp.square(
-        (control_input_yaw - local_ang_vel[2])*2/jp.pi)
+        (control_input_yaw - local_ang_vel[2])*(2/jp.pi))
     return jp.exp(-ang_vel_error/SIGMA)
 
 # ##################### HELPER FUNCTIONS ################################## #

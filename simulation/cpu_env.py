@@ -57,7 +57,7 @@ class CPUEnv(gym.Env):
         self.action_space = spaces.Box(
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32
         )
-        observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
+        observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3 + 1
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float32
         )
@@ -244,10 +244,11 @@ class CPUEnv(gym.Env):
         if USE_CONTROL_INPUTS:
             self.control_input_velocity = jp.array(
                 [
-                    random.uniform(
-                        0.0,
-                        4.5,
-                    ),
+                    # random.uniform(
+                    #     0.0,
+                    #     4.5,
+                    # ),
+                    3,
                     random.uniform(
                         -0.75,
                         0.75,
@@ -607,8 +608,8 @@ if __name__ == "__main__":
     obs = sim.reset()
 
     while True:
-        action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        # action = np.zeros(len(JOINT_NAMES))
+        # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
+        action = np.zeros(len(JOINT_NAMES))
 
         obs, reward, isTerminal, _, _ = sim.step(action)
         # print(reward)
