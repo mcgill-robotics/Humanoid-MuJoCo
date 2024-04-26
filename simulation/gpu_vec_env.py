@@ -5,12 +5,11 @@ from mujoco import mjx
 import numpy as np
 from gymnasium import spaces
 from stable_baselines3.common.vec_env import VecEnv
-from .simulation_parameters import *
 from simulation.reward_functions import *
-from simulation.simulation_parameters import physics_steps_per_control_step, timestep
+from simulation.simulation_parameters import *
 import gc
 import random
-from .gpu_vec_env_utils import *
+from simulation.gpu_vec_env_utils import *
 from simulation import SIM_XML_PATH, reward_functions
 
 
@@ -21,7 +20,6 @@ class GPUVecEnv(VecEnv):
         reward_fn,
         xml_path=SIM_XML_PATH,
         randomization_factor=0,
-        verbose=False,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
     ):
@@ -33,20 +31,19 @@ class GPUVecEnv(VecEnv):
         self.platform = "GPU"
         self.xml_path = xml_path
         self.randomization_factor = randomization_factor
-        self.timestep = timestep
+        self.timestep = TIMESTEP
         self.num_envs = num_envs
         self.use_potential_rewards = bool(use_potential_rewards)
         if type(reward_fn) == str:
             reward_fn = getattr(reward_functions, reward_fn)
-        self.physics_steps_per_control_step = physics_steps_per_control_step
+        self.physics_steps_per_control_step = PHYSICS_STEPS_PER_CONTROL_STEP
         self.rng_key = jax.random.PRNGKey(42)
         self.rng = jax.random.split(self.rng_key, self.num_envs)
-        self.verbose = verbose
         self.render_mode = [[None]] * self.num_envs
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
-            else max_simulation_time
+            else MAX_SIM_TIME
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
@@ -211,7 +208,7 @@ class GPUVecEnv(VecEnv):
         self.next_force_directions = jp.zeros((self.num_envs, 2))
         self.last_actions = self.data_batch.ctrl
         self.action_change = jp.zeros(self.data_batch.ctrl.shape)
-        self.previous_rewards, _ = self._get_rewards()
+        self.previous_rewards, _ = self._get_rewards(override_potential=True)
 
     def _randomize_dynamics(self):
         # floor friction (0.5 to 1.0)
@@ -290,7 +287,7 @@ class GPUVecEnv(VecEnv):
             JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
         )
         joint_mask = jp.zeros(self.base_mjx_data.qpos.shape)
-        joint_mask.at[self.joint_qpos_idx].set(1.0)
+        joint_mask = joint_mask.at[self.joint_qpos_idx].set(1.0)
 
         self.data_batch = jax.vmap(
             lambda rng: self.base_mjx_data.replace(
@@ -368,9 +365,6 @@ class GPUVecEnv(VecEnv):
     def reset(self, seed=None, options=None):
         self.close()
 
-        if self.verbose:
-            print("Initializing simulations...      ", end="")
-
         # APPLY SEED
         if seed is not None:
             self.seed(seed)
@@ -383,13 +377,10 @@ class GPUVecEnv(VecEnv):
 
         self._init_GPU_model()
 
-        self._randomize_delays()
         self._randomize_joint_positions()
+        self._randomize_delays()
 
         self._init_sim_trackers()
-
-        if self.verbose:
-            print("Done")
 
         return self._get_obs()
 
@@ -417,9 +408,7 @@ class GPUVecEnv(VecEnv):
     def _get_torso_z_pos(self):
         return self.data_batch.xpos[:, self.torso_idx, 2]
 
-    def _get_rewards(self):
-        if self.verbose:
-            print("Computing rewards...             ", end="")
+    def _get_rewards(self, override_potential=False):
 
         torso_global_velocity = self._get_torso_velocity()
         torso_z_pos = self._get_torso_z_pos()
@@ -440,19 +429,14 @@ class GPUVecEnv(VecEnv):
             is_self_colliding,
         )
 
-        if self.use_potential_rewards:
+        if self.use_potential_rewards and not override_potential:
             _rewards = rewards - self.previous_rewards
             self.previous_rewards = rewards
             rewards = _rewards
 
-        if self.verbose:
-            print("Done")
-
         return np.array(rewards), np.array(areTerminal)
 
     def _get_obs(self):
-        if self.verbose:
-            print("Collecting observations...       ", end="")
 
         # joint positions
         joint_pos_noise = (
@@ -463,6 +447,7 @@ class GPUVecEnv(VecEnv):
             )
         )
         joint_angles = self._get_joint_positions() + joint_pos_noise
+        print(self._get_joint_positions())
 
         # joint velocities
         joint_vel_noise = (
@@ -481,6 +466,7 @@ class GPUVecEnv(VecEnv):
             * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3))
         )
         torso_quat = self._get_torso_quaternion()
+        print(torso_quat)
         local_ang_vel = (
             inverseRotateVectors(torso_quat, self._get_torso_angular_velocity())
             + ang_vel_noise
@@ -543,8 +529,10 @@ class GPUVecEnv(VecEnv):
                 local_ang_vel,  # rad / s
                 torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
-                contact_states[:, 0],  # for left foot (is it touching the ground?)
-                contact_states[:, 1],  # for right foot
+                contact_states[:, 0].reshape(
+                    -1, 1
+                ),  # for left foot (is it touching the ground?)
+                contact_states[:, 1].reshape(-1, 1),  # for right foot
                 self.control_inputs_velocity,  # as defined in reset
                 self.control_inputs_yaw,  # as defined in reset
                 clock_phase_sin,  # as defined in paper on potential rewards
@@ -553,16 +541,11 @@ class GPUVecEnv(VecEnv):
             )
         )
 
-        if self.verbose:
-            print("Done")
-
         return np.array(delayed_observations)
 
-    def _apply_action(self, action):
+    def _apply_action(self, actions):
         # cycle action through action buffer
-        if action is None:
-            action = self.data_batch.ctrl
-        self.action_buffer.append(action)
+        self.action_buffer.append(actions)
         action_to_take = self.action_buffer.pop(0)
         action_to_take = jp.clip(jp.array(action_to_take), -1.0, 1.0)
         action_to_take = action_to_take * (jp.pi / 2)
@@ -571,11 +554,10 @@ class GPUVecEnv(VecEnv):
         self.action_change = action_to_take - self.last_actions
         self.last_actions = action_to_take
 
-    def step(self, action=None):
-        if self.verbose:
-            print("Stepping simulations...          ", end="")
+    def step(self, actions=None):
 
-        self._apply_action(action)
+        if actions is not None:
+            self._apply_action(actions)
 
         # apply forces to the robot to destabilise it
         xfrc_applied = applyExternalForces(self)
@@ -586,6 +568,7 @@ class GPUVecEnv(VecEnv):
 
         obs = self._get_obs()
         rewards, terminals = self._get_rewards()
+    
         truncated = np.any(self.data_batch.time >= self.max_simulation_time)
         fraction_of_terminated = np.sum(terminals) / np.sum(np.ones(terminals.shape))
         done = truncated or fraction_of_terminated > TERMINAL_FRACTION_RESET_THRESHOLD
@@ -599,19 +582,15 @@ class GPUVecEnv(VecEnv):
                 infos[env_idx]["TimeLimit.truncated"] = not terminals[env_idx]
             obs = self.reset()
 
-        if self.verbose:
-            print("Done")
-
         return obs, rewards, dones, infos
 
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=256,
+        num_envs=1,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
-        verbose=True,
     )
 
     obs = sim_batch.reset()
@@ -620,7 +599,8 @@ if __name__ == "__main__":
 
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
-        action = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
+        actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
+        actions = None
 
         obs, rewards, terminals, _ = sim_batch.step(actions)
         print(rewards[0])

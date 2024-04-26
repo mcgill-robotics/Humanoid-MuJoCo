@@ -89,7 +89,7 @@ def controlInputRewardFn(
     # ACTION CHANGE REWARD
     CONTROL_CHANGE_REWARD_WEIGHT = 0  # -1e-3
     control_change_reward = CONTROL_CHANGE_REWARD_WEIGHT * jp.linalg.norm(
-        desired_control_frequency * ctrl_change
+        CONTROL_FREQUENCY * ctrl_change
     )
     reward += control_change_reward
     # print("control_std_reward", control_std_reward)

@@ -17,7 +17,7 @@ MIN_EXTERNAL_FORCE_MAGNITUDE = 0  # 5  # N
 MAX_EXTERNAL_FORCE_MAGNITUDE = 0  # 15  # N
 MIN_EXTERNAL_FORCE_INTERVAL = 1  # s
 MAX_EXTERNAL_FORCE_INTERVAL = 3  # s
-# INIAITL OFFSETS
+# INITIAL OFFSETS
 JOINT_INITIAL_OFFSET_MIN = 0.05  # rad
 JOINT_INITIAL_OFFSET_MAX = 0.1  # rad
 # JOINT PROPERTIES
@@ -35,9 +35,9 @@ ACCELEROMETER_NOISE_STDDEV = 0  # 0.05  # m/s^2
 VELOCIMETER_NOISE_STDDEV = 0  # 0.05  # m/s
 
 # SIMULATION PARAMETERS
-desired_control_frequency = 100
-timestep = 0.001
-max_simulation_time = -1  # let the simulation run indefinitely
+CONTROL_FREQUENCY = 100
+TIMESTEP = 0.001
+MAX_SIM_TIME = -1  # let the simulation run indefinitely
 TERMINAL_FRACTION_RESET_THRESHOLD = 0.5  # applies only to GPUVecEnv
 MIN_FORCE_FOR_CONTACT = 0.0  # N
 USE_POTENTIAL_REWARDS = False
@@ -55,7 +55,7 @@ RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT = False
 
 
 # DO NOT CHANGE
-physics_steps_per_control_step = int((1.0 / desired_control_frequency) // timestep)
+PHYSICS_STEPS_PER_CONTROL_STEP = int((1.0 / CONTROL_FREQUENCY) // TIMESTEP)
 ### URDF REFERENCE NAMES (DEFINED FROM MUJOCO .xml FILES, DO NOT CHANGE UNLESS .xml CHANGES)
 JOINT_NAMES = [
     "right_shoulder_pitch",

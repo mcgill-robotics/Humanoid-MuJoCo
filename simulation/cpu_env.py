@@ -6,13 +6,12 @@ from gymnasium import spaces
 import mujoco
 import cv2
 import random
-from .simulation_parameters import *
 from simulation.reward_functions import *
-from simulation.simulation_parameters import physics_steps_per_control_step, timestep
+from simulation.simulation_parameters import *
 from jax.scipy.spatial.transform import Rotation
+from simulation import SIM_XML_PATH, reward_functions
 import gc
 import os
-from simulation import SIM_XML_PATH, reward_functions
 
 inverseRotateVectors = (
     lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
@@ -27,19 +26,17 @@ class CPUEnv(gym.Env):
         reward_fn,
         xml_path=SIM_XML_PATH,
         randomization_factor=0,
-        verbose=False,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
     ):
         self.xml_path = xml_path
         self.randomization_factor = randomization_factor
-        self.timestep = timestep
+        self.timestep = TIMESTEP
         self.use_potential_rewards = bool(use_potential_rewards)
         if type(reward_fn) == str:
             reward_fn = getattr(reward_functions, reward_fn)
         self.reward_fn = reward_fn
-        self.physics_steps_per_control_step = physics_steps_per_control_step
-        self.verbose = verbose
+        self.physics_steps_per_control_step = PHYSICS_STEPS_PER_CONTROL_STEP
         self.num_envs = 1
         self.rng_key = jax.random.PRNGKey(0)
 
@@ -53,7 +50,7 @@ class CPUEnv(gym.Env):
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
-            else max_simulation_time
+            else MAX_SIM_TIME
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
@@ -282,9 +279,6 @@ class CPUEnv(gym.Env):
         else:
             self.rng_key = jax.random.PRNGKey(random.randint(0, 100))
 
-        if self.verbose:
-            print("Creating new simulation...       ", end="")
-
         self._randomize_control_inputs()
 
         self._init_model()
@@ -307,8 +301,6 @@ class CPUEnv(gym.Env):
         # clean up any unreferenced variables
         gc.collect()
 
-        if self.verbose:
-            print("Done")
 
         return self._get_obs(), {}
 
@@ -356,8 +348,6 @@ class CPUEnv(gym.Env):
         return binary_foot_contact_state_left, binary_foot_contact_state_right
 
     def _get_obs(self):
-        if self.verbose:
-            print("Collecting observations...       ", end="")
 
         # joint positions
         joint_pos_noise = (
@@ -460,8 +450,6 @@ class CPUEnv(gym.Env):
             )
         )
 
-        if self.verbose:
-            print("Done")
 
         return np.array(delayed_observations, dtype=np.float32)
 
@@ -476,8 +464,6 @@ class CPUEnv(gym.Env):
         return self_collision
 
     def _get_reward(self):
-        if self.verbose:
-            print("Computing reward...              ", end="")
 
         torso_global_velocity = self._get_torso_velocity()
         torso_z_pos = self._get_torso_z_pos()
@@ -500,9 +486,6 @@ class CPUEnv(gym.Env):
             _reward = reward - self.previous_reward
             self.previous_reward = reward
             reward = _reward
-
-        if self.verbose:
-            print("Done")
 
         return float(reward), bool(isTerminal)
 
@@ -558,8 +541,6 @@ class CPUEnv(gym.Env):
         self.lastAction = jp.expand_dims(action_to_take, axis=0)
 
     def step(self, action=None):
-        if self.verbose:
-            print("Stepping simulation...           ", end="")
 
         self._apply_action(action)
 
@@ -568,9 +549,6 @@ class CPUEnv(gym.Env):
         # step simulation
         for _ in range(self.physics_steps_per_control_step):
             mujoco.mj_step(self.model, self.data)
-
-        if self.verbose:
-            print("Done")
 
         reward, terminated = self._get_reward()
 
@@ -586,7 +564,7 @@ class CPUEnv(gym.Env):
         return self._get_obs(), reward, terminated, truncated, info
 
     def render(self, mode="rgb_array"):
-        if not os.environ.get("RENDER_SIM", "True") == "True":
+        if os.environ.get("RENDER_SIM", "True") != "True":
             return None
         self.renderer.update_scene(
             self.data, camera="track", scene_option=self.scene_option
@@ -610,7 +588,7 @@ if __name__ == "__main__":
         action = np.zeros(len(JOINT_NAMES))
 
         obs, reward, isTerminal, _, _ = sim.step(action)
-        # print(reward)
+        print(reward)
         sim.render("human")
         if isTerminal:
             sim.reset()
