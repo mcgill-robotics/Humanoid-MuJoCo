@@ -280,24 +280,26 @@ class GPUVecEnv(VecEnv):
         mj_data = mujoco.MjData(self.cpu_model)
         mujoco.mj_kinematics(self.cpu_model, mj_data)
         self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
+        self.data_batch = jax.vmap(lambda rng: self.base_mjx_data)(self.rng)
 
     def _randomize_joint_positions(self):
         # randomize joint initial states (GPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
             JOINT_INITIAL_OFFSET_MAX - JOINT_INITIAL_OFFSET_MIN
         )
-        joint_mask = jp.zeros(self.base_mjx_data.qpos.shape)
+        joint_mask = jp.zeros(self.base_mjx_data.qpos.shape, dtype=jp.float32)
         joint_mask = joint_mask.at[self.joint_qpos_idx].set(1.0)
+        joint_pos_range = joint_pos_range * joint_mask
 
         self.data_batch = jax.vmap(
             lambda rng: self.base_mjx_data.replace(
-                qpos=jax.random.uniform(
+                qpos=self.base_mjx_data.qpos
+                + jax.random.uniform(
                     rng,
                     self.base_mjx_data.qpos.shape,
                     minval=-joint_pos_range,
                     maxval=joint_pos_range,
                 )
-                * joint_mask
             )
         )(self.rng)
 
@@ -447,7 +449,6 @@ class GPUVecEnv(VecEnv):
             )
         )
         joint_angles = self._get_joint_positions() + joint_pos_noise
-        print(self._get_joint_positions())
 
         # joint velocities
         joint_vel_noise = (
@@ -466,7 +467,6 @@ class GPUVecEnv(VecEnv):
             * jax.random.normal(key=self.rng_key, shape=(self.num_envs, 3))
         )
         torso_quat = self._get_torso_quaternion()
-        print(torso_quat)
         local_ang_vel = (
             inverseRotateVectors(torso_quat, self._get_torso_angular_velocity())
             + ang_vel_noise
@@ -556,6 +556,7 @@ class GPUVecEnv(VecEnv):
 
     def step(self, actions=None):
 
+        # apply inputted actions
         if actions is not None:
             self._apply_action(actions)
 
@@ -568,7 +569,7 @@ class GPUVecEnv(VecEnv):
 
         obs = self._get_obs()
         rewards, terminals = self._get_rewards()
-    
+
         truncated = np.any(self.data_batch.time >= self.max_simulation_time)
         fraction_of_terminated = np.sum(terminals) / np.sum(np.ones(terminals.shape))
         done = truncated or fraction_of_terminated > TERMINAL_FRACTION_RESET_THRESHOLD
@@ -603,6 +604,6 @@ if __name__ == "__main__":
         actions = None
 
         obs, rewards, terminals, _ = sim_batch.step(actions)
-        print(rewards[0])
+        # print(rewards[0])
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
