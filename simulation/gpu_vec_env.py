@@ -11,6 +11,7 @@ import gc
 import random
 from simulation.gpu_vec_env_utils import *
 from simulation import SIM_XML_PATH, reward_functions
+import time
 
 
 class GPUVecEnv(VecEnv):
@@ -48,14 +49,22 @@ class GPUVecEnv(VecEnv):
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
         self.gravity_vector_batch = jp.array([jp.array([0, 0, -1])] * self.num_envs)
+        self.initialized_model_info = False
+        self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
+        self.control_inputs_yaw = jp.zeros((self.num_envs, 1))
 
-        # DEFINE JAX JITTED FUNCTIONS
-        def rollout(m, d):
-            for _ in range(self.physics_steps_per_control_step):
-                d = mjx.step(m, d)
-            return d
+        self.jax_step = jax.jit(
+            jax.vmap(
+                lambda m, d: jax.lax.fori_loop(
+                    jp.array(0),
+                    jp.array(self.physics_steps_per_control_step),
+                    lambda _, x: mjx.step(m, x),
+                    d,
+                ),
+                in_axes=(None, 0),
+            )
+        )
 
-        self.jax_step = jax.jit(jax.vmap(rollout, in_axes=(None, 0)))
         self.getContactSensorData = jax.jit(
             jax.vmap(getContactSensorData, in_axes=(None, 0))
         )
@@ -153,51 +162,28 @@ class GPUVecEnv(VecEnv):
         self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
         self.model.opt.iterations = 15
         self.model.opt.ls_iterations = 15
-        # save joint addresses
-        self.joint_qpos_idx = []
-        self.joint_dof_idx = []
-        for joint in JOINT_NAMES:
-            self.joint_dof_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
-            self.joint_qpos_idx.append(
-                self.model.jnt_qposadr[self.model.joint(joint).id]
-            )
-        self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
-        self.joint_dof_idx = jp.array(self.joint_dof_idx)
-        # save gravity vector
-        # save torso body index
-        self.torso_idx = self.model.body(TORSO_BODY_NAME).id
-        # get pressure sensor geom ids
-        self.pressure_sensor_ids = [
-            self.model.geom(pressure_sensor_geom).id
-            for pressure_sensor_geom in PRESSURE_GEOM_NAMES
-        ]
-        self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
 
     def _randomize_control_inputs(self):
         # initialize control inputs for each env
-        if USE_CONTROL_INPUTS:
-            self.control_inputs_velocity = jax.random.uniform(
-                self.rng_key,
-                (self.num_envs, 2),
-                minval=-1 * CONTROL_INPUT_MAX_VELOCITY,
-                maxval=CONTROL_INPUT_MAX_VELOCITY,
+        self.control_inputs_velocity = jax.random.uniform(
+            self.rng_key,
+            (self.num_envs, 2),
+            minval=-1 * CONTROL_INPUT_MAX_VELOCITY,
+            maxval=CONTROL_INPUT_MAX_VELOCITY,
+        )
+        self.control_inputs_yaw = jax.random.uniform(
+            self.rng_key,
+            (self.num_envs, 1),
+            minval=-1 * CONTROL_INPUT_MAX_YAW,
+            maxval=CONTROL_INPUT_MAX_YAW,
+        )
+        if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
+            self.control_inputs_yaw = (
+                self.control_inputs_yaw * self.randomization_factor
             )
-            self.control_inputs_yaw = jax.random.uniform(
-                self.rng_key,
-                (self.num_envs, 1),
-                minval=-1 * CONTROL_INPUT_MAX_YAW,
-                maxval=CONTROL_INPUT_MAX_YAW,
+            self.control_inputs_velocity = (
+                self.control_inputs_velocity * self.randomization_factor
             )
-            if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
-                self.control_inputs_yaw = (
-                    self.control_inputs_yaw * self.randomization_factor
-                )
-                self.control_inputs_velocity = (
-                    self.control_inputs_velocity * self.randomization_factor
-                )
-        else:
-            self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
-            self.control_inputs_yaw = jp.zeros((self.num_envs, 1))
 
     def _init_sim_trackers(self):
         # initialize instance parameters
@@ -280,7 +266,7 @@ class GPUVecEnv(VecEnv):
         mj_data = mujoco.MjData(self.cpu_model)
         mujoco.mj_kinematics(self.cpu_model, mj_data)
         self.base_mjx_data = mjx.put_data(self.cpu_model, mj_data)
-        self.data_batch = jax.vmap(lambda rng: self.base_mjx_data)(self.rng)
+        self.data_batch = jax.vmap(lambda _: self.base_mjx_data)(self.rng)
 
     def _randomize_joint_positions(self):
         # randomize joint initial states (GPU)
@@ -364,6 +350,27 @@ class GPUVecEnv(VecEnv):
             jp.array([[0, 0]] * self.num_envs)
         ] * self.contact_sensor_delay
 
+    def _init_model_info(self):
+        # save joint addresses
+        self.joint_qpos_idx = []
+        self.joint_dof_idx = []
+        for joint in JOINT_NAMES:
+            self.joint_dof_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
+            self.joint_qpos_idx.append(
+                self.model.jnt_qposadr[self.model.joint(joint).id]
+            )
+        self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
+        self.joint_dof_idx = jp.array(self.joint_dof_idx)
+        # save gravity vector
+        # save torso body index
+        self.torso_idx = self.model.body(TORSO_BODY_NAME).id
+        # get pressure sensor geom ids
+        self.pressure_sensor_ids = [
+            self.model.geom(pressure_sensor_geom).id
+            for pressure_sensor_geom in PRESSURE_GEOM_NAMES
+        ]
+        self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
+
     def reset(self, seed=None, options=None):
         self.close()
 
@@ -371,9 +378,13 @@ class GPUVecEnv(VecEnv):
         if seed is not None:
             self.seed(seed)
 
-        self._randomize_control_inputs()
+        if USE_CONTROL_INPUTS:
+            self._randomize_control_inputs()
 
         self._init_model()
+        if not self.initialized_model_info:
+            self._init_model_info()
+            self.initialized_model_info = True
         self._randomize_dynamics()
         self._randomize_joint_properties()
 
@@ -555,7 +566,6 @@ class GPUVecEnv(VecEnv):
         self.last_actions = action_to_take
 
     def step(self, actions=None):
-
         # apply inputted actions
         if actions is not None:
             self._apply_action(actions)
@@ -588,22 +598,33 @@ class GPUVecEnv(VecEnv):
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=1,
+        num_envs=64,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
     )
 
     obs = sim_batch.reset()
-    rewards = []
-    terminals = []
+    sim_batch.step()
 
+    total_step_time = 0
+    total_step_calls = 0
+
+    
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
         actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
-        actions = None
-
+    
+        start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
+        end_time = time.time()
+        total_step_time += end_time - start_time
+        total_step_calls += 1
+
+        print(
+            f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
+        )
+
         # print(rewards[0])
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")

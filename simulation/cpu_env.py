@@ -12,6 +12,7 @@ from jax.scipy.spatial.transform import Rotation
 from simulation import SIM_XML_PATH, reward_functions
 import gc
 import os
+import time
 
 inverseRotateVectors = (
     lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
@@ -301,7 +302,6 @@ class CPUEnv(gym.Env):
         # clean up any unreferenced variables
         gc.collect()
 
-
         return self._get_obs(), {}
 
     def _get_torso_velocity(self):  # NOTE: in global reference frame (NWU)
@@ -450,7 +450,6 @@ class CPUEnv(gym.Env):
             )
         )
 
-
         return np.array(delayed_observations, dtype=np.float32)
 
     def _check_self_collision(self):
@@ -583,12 +582,22 @@ if __name__ == "__main__":
     )
     obs = sim.reset()
 
+    total_step_time = 0
+    total_step_calls = 0
+
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = np.zeros(len(JOINT_NAMES))
 
+        start_time = time.time()
         obs, reward, isTerminal, _, _ = sim.step(action)
-        print(reward)
+        end_time = time.time()
+        total_step_time += end_time - start_time
+        total_step_calls += 1
+
+        print(f"Step Time: {total_step_time / total_step_calls}")
+
+        # print(reward)
         sim.render("human")
         if isTerminal:
             sim.reset()
