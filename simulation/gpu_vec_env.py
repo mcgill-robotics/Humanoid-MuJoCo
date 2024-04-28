@@ -598,7 +598,7 @@ class GPUVecEnv(VecEnv):
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=64,
+        num_envs=128,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
