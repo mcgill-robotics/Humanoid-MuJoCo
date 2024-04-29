@@ -585,6 +585,9 @@ if __name__ == "__main__":
     total_step_time = 0
     total_step_calls = 0
 
+    total_reward = 0
+    n_steps = 0
+
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = np.zeros(len(JOINT_NAMES))
@@ -594,10 +597,20 @@ if __name__ == "__main__":
         end_time = time.time()
         total_step_time += end_time - start_time
         total_step_calls += 1
+        # print(f"Step Time: {total_step_time / total_step_calls}")
 
-        print(f"Step Time: {total_step_time / total_step_calls}")
+        total_reward += reward
+        n_steps += 1
 
         # print(reward)
         sim.render("human")
         if isTerminal:
+            print(
+                "Cumulative Reward: ",
+                total_reward,
+                "Episode Length: ",
+                n_steps,
+            )
+            total_reward = 0
+            n_steps = 0
             sim.reset()

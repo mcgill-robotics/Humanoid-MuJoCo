@@ -598,7 +598,7 @@ class GPUVecEnv(VecEnv):
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=128,
+        num_envs=32,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
@@ -610,21 +610,31 @@ if __name__ == "__main__":
     total_step_time = 0
     total_step_calls = 0
 
-    
+    total_reward = 0
+    n_steps = 0
+
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
         actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
-    
+
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
         end_time = time.time()
         total_step_time += end_time - start_time
         total_step_calls += 1
 
-        print(
-            f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
-        )
+        # print(
+        #     f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
+        # )
+        
+        rewards[rewards == -100] = 0
+        total_reward += np.mean(rewards)
+        n_steps += 1
 
+        if terminals.any():
+            print("Avg. Total Reward: ", total_reward, "Episode Length: ", n_steps)
+            total_reward = 0
+            n_steps = 0
         # print(rewards[0])
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
