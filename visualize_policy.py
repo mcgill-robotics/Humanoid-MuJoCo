@@ -5,9 +5,9 @@ from stable_baselines3 import PPO, SAC, TD3
 
 
 MODEL_TYPE = PPO  # TD3 # SAC # PPO
-RANDOMIZATION_FACTOR = 0.1
+RANDOMIZATION_FACTOR = 1.0
 LOG_NAME = "PPO"
-CKPT_NAME = "checkpoint_1668096_steps"
+CKPT_NAME = "checkpoint_14376960_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
@@ -32,7 +32,7 @@ while True:
     episode_length = 0
     while not done:
         action, _ = agent.predict(obs, deterministic=True)
-        print(max(abs(action)))
+        #print(max(abs(action)))
         # print(action)
         obs, reward, done, _, _ = env.step(action)
         if not done:

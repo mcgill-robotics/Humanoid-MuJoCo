@@ -68,7 +68,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--ckpt",
     type=str,
-    default=None,
+    default="data/PPO/training_results_r1.0/checkpoint_12045312_steps",
     help="Path to checkpoint to continue training from (must point to .zip file, without the .zip extension in the path)",
 )
 argparser.add_argument(
