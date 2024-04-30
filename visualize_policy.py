@@ -6,7 +6,7 @@ from stable_baselines3 import PPO, SAC, TD3
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
-LOG_NAME = "SAC_CPU"
+LOG_NAME = "SAC_GPU_0"
 CKPT_NAME = "checkpoint_9999360_steps"
 
 

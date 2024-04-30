@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAME = "SAC_GPU_50"  # "SAC" # "PPO"
+LOG_NAME = "SAC_GPU_0"  # "SAC" # "PPO"
 RANDOMIZATION_FACTOR = 1.0
 evaluations = np.load(
     "data/{}/training_results_r{}/evaluations.npz".format(
@@ -30,7 +30,7 @@ for i in range(len(rewards)):
 
 # Plot the curve
 plt.plot(timesteps, rewards, label="Reward", color="blue")
-plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+# plt.plot(timesteps, running_avgs, label="Running Average", color="red")
 
 # Add labels and title
 plt.xlabel("Steps")
