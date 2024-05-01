@@ -38,7 +38,7 @@ VELOCIMETER_NOISE_STDDEV = 0  # 0.05  # m/s
 CONTROL_FREQUENCY = 100
 TIMESTEP = 0.001
 MAX_SIM_TIME = -1  # let the simulation run indefinitely
-TERMINAL_FRACTION_RESET_THRESHOLD = 0.0  # applies only to GPUVecEnv NOTE: setting this >= 1 will make the environment terminate only from time limit
+TERMINAL_FRACTION_RESET_THRESHOLD = 0.1  # applies only to GPUVecEnv NOTE: setting this >= 1 will make the environment terminate only from time limit
 MIN_FORCE_FOR_CONTACT = 0.0  # N
 USE_POTENTIAL_REWARDS = False
 
