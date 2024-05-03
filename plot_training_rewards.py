@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAME = "SAC_GPU_0"  # "SAC" # "PPO"
+LOG_NAME = "SAC_GPU_10"  # "SAC" # "PPO"
 RANDOMIZATION_FACTOR = 1.0
+eval_file = "evaluations.npz"
 evaluations = np.load(
-    "data/{}/training_results_r{}/evaluations.npz".format(
-        LOG_NAME, RANDOMIZATION_FACTOR
-    )
+    "data/{}/training_results_r{}/{}".format(LOG_NAME, RANDOMIZATION_FACTOR, eval_file)
 )
 
 timesteps = evaluations["timesteps"]
