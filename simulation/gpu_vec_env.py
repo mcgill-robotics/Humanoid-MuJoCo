@@ -195,34 +195,31 @@ class GPUVecEnv(VecEnv):
         # delays in actions and observations (10ms to 50ms)
         # round delays to be multiples of the timestep
         self.actual_timestep = self.timestep * self.physics_steps_per_control_step
-        max_timestep_delay = round(MAX_DELAY / self.actual_timestep)
+        max_timestep_delay = round(MAX_DELAY / self.actual_timestep) + 1
         # make buffers for observations and actions
-        self.action_buffer = jp.array([self.data_batch.ctrl] * (max_timestep_delay))
-        self.action_delay_indices = [(0, i) for i in range(self.num_envs)]
-        self.joint_angles_buffer = jp.array(
-            [jp.array([[0] * len(JOINT_NAMES)] * self.num_envs)] * max_timestep_delay
+        self.action_buffer = jp.zeros((self.num_envs, max_timestep_delay, len(JOINT_NAMES)))
+        self.joint_angles_buffer = jp.zeros(
+            (self.num_envs, max_timestep_delay, len(JOINT_NAMES))
         )
-        self.joint_angles_delay_indices = [(0, i) for i in range(self.num_envs)]
-        self.joint_velocities_buffer = jp.array(
-            [jp.array([[0] * len(JOINT_NAMES)] * self.num_envs)] * max_timestep_delay
+        self.joint_velocities_buffer = jp.zeros(
+            (self.num_envs, max_timestep_delay, len(JOINT_NAMES))
         )
-        self.joint_velocities_delay_indices = [(0, i) for i in range(self.num_envs)]
-        self.local_ang_vel_buffer = jp.array(
-            [jp.array([[0] * 3] * self.num_envs)] * max_timestep_delay
+        self.local_ang_vel_buffer = jp.zeros((self.num_envs, max_timestep_delay, 3))
+        self.torso_local_velocity_buffer = jp.zeros(
+            (self.num_envs, max_timestep_delay, 3)
         )
-        self.local_ang_vel_delay_indices = [(0, i) for i in range(self.num_envs)]
-        self.torso_local_velocity_buffer = jp.array(
-            [jp.array([[0] * 3] * self.num_envs)] * max_timestep_delay
+        self.local_gravity_vector_buffer = jp.zeros(
+            (self.num_envs, max_timestep_delay, 3)
         )
-        self.torso_local_velocity_delay_indices = [(0, i) for i in range(self.num_envs)]
-        self.local_gravity_vector_buffer = jp.array(
-            [jp.array([[0, 0, 0]] * self.num_envs)] * max_timestep_delay
-        )
-        self.local_gravity_vector_delay_indices = [(0, i) for i in range(self.num_envs)]
-        self.contact_sensor_buffer = jp.array(
-            [jp.array([[0, 0]] * self.num_envs)] * max_timestep_delay
-        )
-        self.contact_sensor_delay_indices = [(0, i) for i in range(self.num_envs)]
+        self.contact_sensor_buffer = jp.zeros((self.num_envs, max_timestep_delay, 2))
+
+        self.action_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.joint_angles_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.joint_velocities_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.local_ang_vel_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.torso_local_velocity_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.local_gravity_vector_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.contact_sensor_delay_indices = np.zeros((self.num_envs,), dtype=int)
 
     def _init_sim_trackers(self):
         # initialize instance parameters
@@ -240,27 +237,24 @@ class GPUVecEnv(VecEnv):
     #########################################################
 
     def _replace_data_index(self, idx, data_to_insert):
-        self.data_batch = jax.vmap(lambda i, d: d if i == idx else data_to_insert)(
-            jp.arange(self.num_envs), self.data_batch
-        )
+        data_leaf_to_insert = jax.tree.leaves(data_to_insert)
+        data_batch_leaves = jax.tree.leaves(self.data_batch)
+        treedef = jax.tree.structure(self.data_batch)
+        for field_i in range(len(data_batch_leaves)):
+            data_batch_leaves[field_i] = (
+                data_batch_leaves[field_i].at[idx].set(data_leaf_to_insert[field_i])
+            )
+        self.data_batch = jax.tree.unflatten(treedef, data_batch_leaves)
 
     def _replace_model_index(self, idx, model_to_insert):
-        # '__class__', '__delattr__', '__dir__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'fields', 'replace', 'tree_replace
-        for model in self.model_batch:
-            print(model)
-        # for field_name in [f.name for f in self.model_batch.fields()]:
-        #     print(field_name)
-        #     print(getattr(self.model_batch, field_name))
-        #     update_field_value = getattr(self.model_batch, field_name).at[idx].set(getattr(model_to_insert, field_name))
-        #     self.model_batch = self.model_batch.replace({field_name: getattr(model_to_insert, field_name)})
-        
-        # unstacked_model_batch = tree_unstack(self.model_batch)
-        # unstacked_model_batch[idx] = model_to_insert
-        
-        # self.model_batch = jax.vmap(lambda i, m: model_to_insert if i == idx else m)(
-        #     jp.arange(self.num_envs), self.model_batch
-        # )
-        # self.model_batch = tree_stack(unstacked_model_batch)
+        model_leaf_to_insert = jax.tree.leaves(model_to_insert)
+        model_batch_leaves = jax.tree.leaves(self.model_batch)
+        treedef = jax.tree.structure(self.model_batch)
+        for field_i in range(len(model_batch_leaves)):
+            model_batch_leaves[field_i] = (
+                model_batch_leaves[field_i].at[idx].set(model_leaf_to_insert[field_i])
+            )
+        self.model_batch = jax.tree.unflatten(treedef, model_batch_leaves)
 
     def _get_random_control_inputs(self):
         # initialize control inputs for each env
@@ -402,50 +396,113 @@ class GPUVecEnv(VecEnv):
             MIN_DELAY * self.randomization_factor / self.actual_timestep
         )
         # generate random delay indexes
-        self.action_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.action_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
-        self.joint_angles_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.joint_angles_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
-        self.joint_velocities_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.joint_velocities_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
-        self.local_ang_vel_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.local_ang_vel_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
-        self.torso_local_velocity_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.torso_local_velocity_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
-        self.local_gravity_vector_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.local_gravity_vector_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
-        self.contact_sensor_delay_indices[idx] = (
-            random.randint(self.min_timestep_delay, self.max_timestep_delay),
-            idx,
+        self.contact_sensor_delay_indices[idx] = random.randint(
+            self.min_timestep_delay, self.max_timestep_delay
         )
         # reset buffers to be only zeros for this env
-        self.action_buffer[:, idx] = self.action_buffer[:, idx] * 0
-        self.joint_angles_buffer[:, idx] = self.joint_angles_buffer[:, idx] * 0
-        self.joint_velocities_buffer[:, idx] = self.joint_velocities_buffer[:, idx] * 0
-        self.local_ang_vel_buffer[:, idx] = self.local_ang_vel_buffer[:, idx] * 0
-        self.torso_local_velocity_buffer[:, idx] = (
-            self.torso_local_velocity_buffer[:, idx] * 0
+        self.action_buffer = self.action_buffer.at[idx, :].set(
+            self.action_buffer[idx, :] * 0
         )
-        self.local_gravity_vector_buffer[:, idx] = (
-            self.local_gravity_vector_buffer[:, idx] * 0
+        self.joint_angles_buffer = self.joint_angles_buffer.at[idx, :].set(
+            self.joint_angles_buffer[idx, :] * 0
         )
-        self.contact_sensor_buffer[:, idx] = self.contact_sensor_buffer[:, idx] * 0
+        self.joint_velocities_buffer = self.joint_velocities_buffer.at[idx, :].set(
+            self.joint_velocities_buffer[idx, :] * 0
+        )
+        self.local_ang_vel_buffer = self.local_ang_vel_buffer.at[idx, :].set(
+            self.local_ang_vel_buffer[idx, :] * 0
+        )
+        self.torso_local_velocity_buffer = self.torso_local_velocity_buffer.at[
+            idx, :
+        ].set(self.torso_local_velocity_buffer[idx, :] * 0)
+        self.local_gravity_vector_buffer = self.local_gravity_vector_buffer.at[
+            idx, :
+        ].set(self.local_gravity_vector_buffer[idx, :] * 0)
+        self.contact_sensor_buffer = self.contact_sensor_buffer.at[idx, :].set(
+            self.contact_sensor_buffer[idx, :] * 0
+        )
 
     #########################################################
     ############### MUJOCO API HELPER METHODS ###############
     #########################################################
+
+    def _cycle_observations(
+        self,
+        _joint_angles,
+        _joint_velocities,
+        _local_ang_vel,
+        _torso_local_velocity,
+        _local_gravity_vector,
+        _contact_states,
+        idx
+    ):
+        # cycle observations through observation buffers
+        # shift all observations in the buffers
+        self.joint_angles_buffer = self.joint_angles_buffer.at[idx, 0:-1].set(
+            self.joint_angles_buffer[idx, 1:]
+        )
+        self.joint_velocities_buffer = self.joint_velocities_buffer.at[idx, 0:-1].set(
+            self.joint_velocities_buffer[idx, 1:]
+        )
+        self.local_ang_vel_buffer = self.local_ang_vel_buffer.at[idx, 0:-1].set(
+            self.local_ang_vel_buffer[idx, 1:]
+        )
+        self.torso_local_velocity_buffer = self.torso_local_velocity_buffer.at[
+            idx, 0:-1
+        ].set(self.torso_local_velocity_buffer[idx, 1:])
+        self.local_gravity_vector_buffer = self.local_gravity_vector_buffer.at[
+            idx, 0:-1
+        ].set(self.local_gravity_vector_buffer[idx, 1:])
+        self.contact_sensor_buffer = self.contact_sensor_buffer.at[idx, 0:-1].set(
+            self.contact_sensor_buffer[idx, 1:]
+        )
+        # insert latest observations in the buffers
+        self.joint_angles_buffer = self.joint_angles_buffer.at[
+            idx, self.joint_angles_delay_indices[idx]
+        ].set(_joint_angles)
+        self.joint_velocities_buffer = self.joint_velocities_buffer.at[
+            idx, self.joint_velocities_delay_indices[idx]
+        ].set(_joint_velocities)
+        self.local_ang_vel_buffer = self.local_ang_vel_buffer.at[
+            idx, self.local_ang_vel_delay_indices[idx]
+        ].set(_local_ang_vel)
+        self.torso_local_velocity_buffer = self.torso_local_velocity_buffer.at[
+            idx, self.torso_local_velocity_delay_indices[idx]
+        ].set(_torso_local_velocity)
+        self.local_gravity_vector_buffer = self.local_gravity_vector_buffer.at[
+            idx, self.local_gravity_vector_delay_indices[idx]
+        ].set(_local_gravity_vector)
+        self.contact_sensor_buffer = self.contact_sensor_buffer.at[
+            idx, self.contact_sensor_delay_indices[idx]
+        ].set(_contact_states)
+        
+        # get the first (oldest) observation in the buffer
+        joint_angles = self.joint_angles_buffer[idx, 0]
+        joint_velocities = self.joint_velocities_buffer[idx, 0]
+        local_ang_vel = self.local_ang_vel_buffer[idx, 0]
+        torso_local_velocity = self.torso_local_velocity_buffer[idx, 0]
+        local_gravity_vector = self.local_gravity_vector_buffer[idx, 0]
+        contact_states = self.contact_sensor_buffer[idx, 0]
+        
+        return joint_angles, joint_velocities, local_ang_vel, torso_local_velocity, local_gravity_vector, contact_states
 
     def _get_torso_velocity(self):  # NOTE: in global reference frame (NWU)
         return self.data_batch.cvel[:, self.torso_idx][:, 3:]
@@ -475,9 +532,13 @@ class GPUVecEnv(VecEnv):
         # convert actions to jax array clipped from -1 to 1
         actions = jp.clip(jp.array(actions), -1.0, 1.0) * (jp.pi / 2)
         # cycle action through action buffer
-        action_to_take = self.action_buffer[0]
-        self.action_buffer[0:-1] = self.action_buffer[1:]
-        self.action_buffer[self.action_delay_indices] = actions
+        self.action_buffer = self.action_buffer.at[:, 0:-1].set(
+            self.action_buffer[:, 1:]
+        )
+        self.action_buffer = self.action_buffer.at[:, self.action_delay_indices].set(
+            actions
+        )
+        action_to_take = self.action_buffer[:, 0]
         # apply actions (convert to radians first)
         self.data_batch = self.data_batch.replace(ctrl=action_to_take)
 
@@ -622,45 +683,29 @@ class GPUVecEnv(VecEnv):
 
         # foot contact states
         _contact_states = self.getContactSensorData(
-            self.pressure_sensor_ids, self.data_batch[idx]
-        )
+            self.pressure_sensor_ids, self.data_batch
+        )[idx]
 
-        # cycle observations through observation buffers
-        # get the first (oldest) observation in the buffer
-        joint_angles = self.joint_angles_buffer[0]
-        joint_velocities = self.joint_velocities_buffer[0]
-        local_ang_vel = self.local_ang_vel_buffer[0]
-        torso_local_velocity = self.torso_local_velocity_buffer[0]
-        local_gravity_vector = self.local_gravity_vector_buffer[0]
-        contact_states = self.contact_sensor_buffer[0]
-        # shift all observations in the buffers
-        self.joint_angles_buffer[0:-1] = self.joint_angles_buffer[1:]
-        self.joint_velocities_buffer[0:-1] = self.joint_velocities_buffer[1:]
-        self.local_ang_vel_buffer[0:-1] = self.local_ang_vel_buffer[1:]
-        self.torso_local_velocity_buffer[0:-1] = self.torso_local_velocity_buffer[1:]
-        self.local_gravity_vector_buffer[0:-1] = self.local_gravity_vector_buffer[1:]
-        self.contact_sensor_buffer[0:-1] = self.contact_sensor_buffer[1:]
-        # insert latest observations in the buffers
-        self.joint_angles_buffer[self.joint_angles_delay_indices[idx]] = _joint_angles
-        self.joint_velocities_buffer[self.joint_velocities_delay_indices[idx]] = (
-            _joint_velocities
-        )
-        self.local_ang_vel_buffer[self.local_ang_vel_delay_indices[idx]] = (
-            _local_ang_vel
-        )
-        self.torso_local_velocity_buffer[
-            self.torso_local_velocity_delay_indices[idx]
-        ] = _torso_local_velocity
-        self.local_gravity_vector_buffer[
-            self.local_gravity_vector_delay_indices[idx]
-        ] = _local_gravity_vector
-        self.contact_sensor_buffer[self.contact_sensor_delay_indices[idx]] = (
-            _contact_states
+        (
+            joint_angles,
+            joint_velocities,
+            local_ang_vel,
+            torso_local_velocity,
+            local_gravity_vector,
+            contact_states,
+        ) = self._cycle_observations(
+            _joint_angles,
+            _joint_velocities,
+            _local_ang_vel,
+            _torso_local_velocity,
+            _local_gravity_vector,
+            _contact_states,
+            idx
         )
 
         # calculate clock phase observations (no delay on these)
-        clock_phase_sin = jp.sin(self.data_batch.time).reshape(-1, 1)[idx]
-        clock_phase_cos = jp.cos(self.data_batch.time).reshape(-1, 1)[idx]
+        clock_phase_sin = jp.sin(self.data_batch.time[idx]).reshape(-1, 1)
+        clock_phase_cos = jp.cos(self.data_batch.time[idx]).reshape(-1, 1)
         clock_phase_complex = (
             (clock_phase_sin)
             / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))
@@ -677,8 +722,8 @@ class GPUVecEnv(VecEnv):
                     -1, 1
                 ),  # for left foot (is it touching the ground?)
                 contact_states[:, 1].reshape(-1, 1),  # for right foot
-                self.control_inputs_velocity,  # as defined in reset
-                self.control_inputs_yaw,  # as defined in reset
+                self.control_inputs_velocity[idx],  # as defined in reset
+                self.control_inputs_yaw[idx],  # as defined in reset
                 clock_phase_sin,  # as defined in paper on potential rewards
                 clock_phase_cos,  # as defined in paper on potential rewards
                 clock_phase_complex,  # as defined in paper on potential rewards
@@ -712,14 +757,14 @@ class GPUVecEnv(VecEnv):
                 info[env_idx]["terminal_observation"] = obs[env_idx]
                 info[env_idx]["TimeLimit.truncated"] = truncated[env_idx]
 
-        obs[done] = self.reset(idx=done)
+        if np.any(done): obs[done] = self.reset(idx=done)
 
         return obs, reward, done, info
 
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=2,
+        num_envs=256,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
@@ -731,9 +776,6 @@ if __name__ == "__main__":
     total_step_time = 0
     total_step_calls = 0
 
-    total_reward = 0
-    n_steps = 0
-
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
         actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
@@ -744,18 +786,10 @@ if __name__ == "__main__":
         total_step_time += end_time - start_time
         total_step_calls += 1
 
-        # print(
-        #     f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
-        # )
-
-        rewards[rewards == -100] = 0
-        total_reward += np.mean(rewards)
-        n_steps += 1
-
-        if terminals.any():
-            print("Avg. Total Reward: ", total_reward, "Episode Length: ", n_steps)
-            total_reward = 0
-            n_steps = 0
-        # print(rewards[0])
+        print(
+            f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
+        )
+        
+        print(rewards[0])
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
