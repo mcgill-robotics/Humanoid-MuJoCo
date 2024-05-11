@@ -98,8 +98,10 @@ RANDOMIZATION_INCREMENT = args.rand_increment
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = (
     np.inf if args.reward_goal <= 0 else args.reward_goal
 )
-if args.ckpt is not None: CHECKPOINT = args.ckpt.lstrip().rstrip()
-else: CHECKPOINT = None
+if args.ckpt is not None:
+    CHECKPOINT = args.ckpt.lstrip().rstrip()
+else:
+    CHECKPOINT = None
 
 if args.log_name is not None:
     log_dir = "data/{}/training_results".format(args.log_name.strip())
@@ -124,10 +126,22 @@ if SIMULATE_ON_GPU:
             randomization_factor=RANDOMIZATION_FACTOR,
         )
     )
+    eval_env = VecMonitor(
+        GPUVecEnv(
+            num_envs=N_EVAL_EPISODES,
+            xml_path=SIM_XML_PATH,
+            reward_fn=controlInputRewardFn,
+            randomization_factor=RANDOMIZATION_FACTOR,
+            use_potential_rewards=False,
+            max_simulation_time_override=10.0,
+        )
+    )
 
-    print("\nInitializing environment...      ", end="")
+    print("\nInitializing environments...      ", end="")
     env.reset()
     env.step(None)
+    eval_env.reset()
+    eval_env.step(None)
     print("Done")
 else:
     env = VecMonitor(
@@ -142,21 +156,20 @@ else:
             * NUM_ENVS
         )
     )
-
-eval_env = VecMonitor(
-    DummyVecEnv(
-        [
-            lambda: CPUEnv(
-                xml_path=SIM_XML_PATH,
-                reward_fn=controlInputRewardFn,
-                randomization_factor=RANDOMIZATION_FACTOR,
-                use_potential_rewards=False,
-                max_simulation_time_override=10.0,
-            )
-        ]
-        * N_EVAL_EPISODES
+    eval_env = VecMonitor(
+        DummyVecEnv(
+            [
+                lambda: CPUEnv(
+                    xml_path=SIM_XML_PATH,
+                    reward_fn=controlInputRewardFn,
+                    randomization_factor=RANDOMIZATION_FACTOR,
+                    use_potential_rewards=False,
+                    max_simulation_time_override=10.0,
+                )
+            ]
+            * N_EVAL_EPISODES
+        )
     )
-)
 
 
 env = VecCheckNan(env, raise_exception=True)
