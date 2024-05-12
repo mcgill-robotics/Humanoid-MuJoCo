@@ -27,26 +27,27 @@ for i in range(len(rewards)):
     running_avg = running_avg / n
     running_avgs.append(running_avg)
 
-# Plot the curve
-plt.plot(timesteps, rewards, label="Reward", color="blue")
-# plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+if len(rewards) > 1:
+    # Plot the curve
+    plt.plot(timesteps, rewards, label="Reward", color="blue")
+    # plt.plot(timesteps, running_avgs, label="Running Average", color="red")
 
-# Add labels and title
-plt.xlabel("Steps")
-plt.ylabel("Reward")
-plt.title(
-    "Evaluation Reward for Standing Behavior (avg. over {} episodes)".format(
-        num_episodes_averaged
+    # Add labels and title
+    plt.xlabel("Steps")
+    plt.ylabel("Reward")
+    plt.title(
+        "Evaluation Reward for Standing Behavior (avg. over {} episodes)".format(
+            num_episodes_averaged
+        )
     )
-)
 
-# Show grid
-plt.grid(True)
+    # Show grid
+    plt.grid(True)
 
-# Show the plot
-plt.legend()
-plt.show()
-
+    # Show the plot
+    plt.legend()
+    plt.show()
+print("Rewards: {}".format(rewards))
 #### PLOT EPISODE LENGTHS
 
 window_size = 100
@@ -60,22 +61,25 @@ for i in range(len(ep_lengths)):
     running_avg = running_avg / n
     running_avgs.append(running_avg)
 
-# Plot the curve
-plt.plot(timesteps, ep_lengths, label="Episode Length", color="blue")
-# plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+if len(ep_lengths) > 1:
+    # Plot the curve
+    plt.plot(timesteps, ep_lengths, label="Episode Length", color="blue")
+    # plt.plot(timesteps, running_avgs, label="Running Average", color="red")
 
-# Add labels and title
-plt.xlabel("Steps")
-plt.ylabel("Steps before termination")
-plt.title(
-    "Evaluation Episode Lengths for Standing Behavior (avg. over {} episodes per evaluation)".format(
-        num_episodes_averaged
+    # Add labels and title
+    plt.xlabel("Steps")
+    plt.ylabel("Steps before termination")
+    plt.title(
+        "Evaluation Episode Lengths for Standing Behavior (avg. over {} episodes per evaluation)".format(
+            num_episodes_averaged
+        )
     )
-)
 
-# Show grid
-plt.grid(True)
+    # Show grid
+    plt.grid(True)
 
-# Show the plot
-plt.legend()
-plt.show()
+    # Show the plot
+    plt.legend()
+    plt.show()
+
+print("Episode Lengths: {}".format(ep_lengths))

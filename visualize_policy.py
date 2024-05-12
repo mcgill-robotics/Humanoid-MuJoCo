@@ -7,7 +7,7 @@ from stable_baselines3 import PPO, SAC, TD3
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
 LOG_NAME = "SAC_GPU"
-CKPT_NAME = "checkpoint_8999424_steps"
+CKPT_NAME = "checkpoint_12999168_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
@@ -30,14 +30,19 @@ while True:
     obs, _ = env.reset()
     total_reward = 0
     episode_length = 0
-    while not done:
-        action, _ = agent.predict(obs, deterministic=True)
-        obs, reward, done, _, _ = env.step(action)
-        if not done:
-            episode_length += 1
-            total_reward += reward
-            print(reward)
-        env.render("human")
-    print(
-        " >>> Episode Length {}, Total Reward {}".format(episode_length, total_reward)
-    )
+    try:
+        while True:  # not done
+            action, _ = agent.predict(obs, deterministic=True)
+            print(action)
+            obs, reward, done, _, _ = env.step(action)
+            if not done:
+                episode_length += 1
+                total_reward += reward
+                print(reward)
+            env.render("human")
+    except KeyboardInterrupt:
+        print(
+            " >>> Episode Length {}, Total Reward {}".format(
+                episode_length, total_reward
+            )
+        )
