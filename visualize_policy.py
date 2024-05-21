@@ -44,15 +44,15 @@ while True:
     try:
         while True:  # not done
             action, _ = agent.predict(obs, deterministic=True)
-            print(action)
+            # print(action)
             try:
                 obs, reward, done, _, _ = env.step(action)
             except:
-                obs, reward, done, _ = env.step(action)
+                obs, reward, done, _ = env.step(action, reset_if_terminal=False)
             if not done:
                 episode_length += 1
                 total_reward += reward
-                print(reward)
+                # print(reward)
             env.render("human")
     except KeyboardInterrupt:
         print(

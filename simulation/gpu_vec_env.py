@@ -773,7 +773,7 @@ class GPUVecEnv(VecEnv):
 
         return np.array(delayed_observations)
 
-    def step(self, actions=None):
+    def step(self, actions=None, reset_if_terminal=True):
         # apply inputted actions
         if actions is not None:
             self._apply_action(actions)
@@ -798,7 +798,7 @@ class GPUVecEnv(VecEnv):
                 info[env_idx]["terminal_observation"] = obs[env_idx]
                 info[env_idx]["TimeLimit.truncated"] = truncated[env_idx]
 
-        if np.any(done):
+        if np.any(done) and reset_if_terminal:
             obs[done] = self.reset(idx=done)
 
         return obs, reward, done, info
@@ -820,7 +820,7 @@ if __name__ == "__main__":
 
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
-        actions = np.ones((sim_batch.num_envs, len(JOINT_NAMES)))
+        actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
 
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)

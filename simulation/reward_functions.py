@@ -68,18 +68,15 @@ def controlInputRewardFn(
 
     ### TORSO HEIGHT REWARD
     TORSO_HEIGHT_REWARD_WEIGHT = 1
-    TARGET_Z_POS = (
-        -0.1
-    )  # above this position, the reward is the same (only penalize the torso for being too low)
-    z_pos_reward = TORSO_HEIGHT_REWARD_WEIGHT * jp.exp(
-        -1 * (jp.clip(TARGET_Z_POS - z_pos, 0, jp.inf) ** 2) / EXP_SCALING_PARAM
-    )
+    TARGET_Z_POS = -0.1
+    MIN_Z_POS_FOR_REWARD = -0.3
+    z_pos_reward = jp.interp(z_pos, jp.array([MIN_Z_POS_FOR_REWARD, TARGET_Z_POS]), jp.array([0, TORSO_HEIGHT_REWARD_WEIGHT]))
     reward += z_pos_reward
     # print("z_pos_reward", z_pos_reward)
 
     # JOINT TORQUE REWARD
     MAX_JOINT_TORQUE = 1.5
-    JOINT_TORQUE_REWARD_WEIGHT = -5
+    JOINT_TORQUE_REWARD_WEIGHT = -0.1
     joint_torque_reward = JOINT_TORQUE_REWARD_WEIGHT * (
         jp.max(jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0, jp.inf)) ** 2
     )
@@ -93,14 +90,15 @@ def controlInputRewardFn(
         (jp.max(jp.abs(ctrl_change)) / CONTROL_FREQUENCY) ** 2
     )
     reward += control_change_reward
-    # print("control_std_reward", control_std_reward)
+    # print("control_change_reward", control_change_reward)
 
     # ACTION REGULARIZATION REWARD
-    MAX_SAFE_CONTROL_VALUE = 0.5
-    CONTROL_REGULARIZATION_REWARD_WEIGHT = -5
+    MAX_SAFE_CONTROL_VALUE = 0.25
+    MAX_CONTROL_VALUE = 1
+    CONTROL_REGULARIZATION_REWARD_WEIGHT = -2.5
     control_regularization_reward = CONTROL_REGULARIZATION_REWARD_WEIGHT * jp.max(
-        2 * jp.clip(jp.abs(latest_ctrl) - MAX_SAFE_CONTROL_VALUE, 0, 0.5)
-    )
+        jp.clip(jp.abs(latest_ctrl / (jp.pi / 2)) - MAX_SAFE_CONTROL_VALUE, 0, MAX_CONTROL_VALUE - MAX_SAFE_CONTROL_VALUE)
+    ) / (MAX_CONTROL_VALUE-MAX_SAFE_CONTROL_VALUE)
     reward += control_regularization_reward
     # print("control_regularization_reward", control_regularization_reward)
 
