@@ -86,4 +86,4 @@ PRESSURE_GEOM_NAMES = [
     "pressure_geom_RLF",
 ]
 TORSO_BODY_NAME = "humanoid"
-NON_ROBOT_GEOMS = ["floor"]
+NON_ROBOT_GEOMS = ["floor", "X_axis_ref", "Y_axis_ref", "Z_axis_ref"]

@@ -9,29 +9,6 @@ import numpy as np
 ### ADAPTED FROM MUJOCO SOURCE CODE https://github.com/google-deepmind/mujoco/blob/4ad1dc4b84b408ae585f5553fc4e78da7c95e530/mjx/mujoco/mjx/_src/io.py#L218
 ### ALLOWS US TO AVOID HAVING TO CALL get_data WHICH IS VERY SLOW
 def getContactSensorData(pressure_sensor_ids, d):
-    # below needs m, pressure_sensor_ids arguments
-    # ### ALL CODE BELOW WAS TAKEN FROM MUJOCO CODE, USED TO CALCULATE efc_address VALUES
-    # ne_connect = (m.eq_type == mujoco.mjtEq.mjEQ_CONNECT).sum()
-    # ne_weld = (m.eq_type == mujoco.mjtEq.mjEQ_WELD).sum()
-    # ne_joint = (m.eq_type == mujoco.mjtEq.mjEQ_JOINT).sum()
-    # ne = ne_connect * 3 + ne_weld * 6 + ne_joint
-    # nf = 0
-    # nl = int(m.jnt_limited.sum())
-    # nc = d.efc_J.shape[-2] - ne - nf - nl
-    # efc_type = jp.array([
-    #     0,#mujoco.mjtConstraint.mjCNSTR_EQUALITY,
-    #     1,#mujoco.mjtConstraint.mjCNSTR_FRICTION_DOF,
-    #     2,#mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT,
-    #     3,#mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL,
-    # ]).repeat(jp.array([ne, nf, nl, nc]))
-    # efc_active = (d.efc_J != 0).any(axis=1)
-    # efc_con = efc_type == 3#mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL
-    # nefc, nc = efc_active.sum(), (efc_active & efc_con).sum()
-    # efc_start = nefc - nc
-    # ncon = d.contact.dist.shape[0]
-    # efc_address = efc_start + jp.arange(0, ncon * 4, 4)
-    ##### END OF MUJOCO SOURCE CODE ADAPTATION
-
     ncon = d.contact.dist.shape[0]
     efc_address = jp.arange(0, ncon * 4, 4)
 
@@ -165,12 +142,25 @@ def applyExternalForces(sim_batch):
 def checkSelfCollision(non_robot_geom_ids, d):
     # check if any of the contact points are between robot geometries
     # to do this, we sum up the number of contacts between each robot geometry and any other geometry along each collision index
-    robot_collisions = jp.full(d.contact.geom1.shape, 0.0)
-    for id in non_robot_geom_ids:
-        robot_collisions += jp.where(d.contact.geom1 == id, 1, 0)
-        robot_collisions += jp.where(d.contact.geom2 == id, 1, 0)
+    ncon = d.contact.dist.shape[0]
+    efc_address = jp.arange(0, ncon * 4, 4)
+    ordered_efc_forces = jp.abs(d.efc_force[efc_address])
+
+    non_robot_collisions = jp.full(d.contact.geom1.shape, 0.0)
+    for gid in non_robot_geom_ids:
+        non_robot_collisions = non_robot_collisions + jp.where(
+            d.contact.geom1 == gid, 1, 0
+        )
+        non_robot_collisions = non_robot_collisions + jp.where(
+            d.contact.geom2 == gid, 1, 0
+        )
     # if the sum of robot contacts is greater or equal to 2 in one index (one collision), then we have a self-collision
-    return jp.any(robot_collisions >= 2)
+    return jp.any(
+        jp.logical_and(
+            jp.logical_and(non_robot_collisions == 0, ordered_efc_forces > 0),
+            d.contact.dist <= 0,
+        )
+    )
 
 
 # helper function (to turn global vectors into local vectors given orientation quaternion/vector pairs)

@@ -12,7 +12,8 @@ def controlInputRewardFn(
     target_yaw,
     z_pos,
     joint_torques,
-    ctrl_change,
+    previous_ctrl,
+    latest_ctrl,
     isSelfColliding,
 ):
     # ALL IN NWU
@@ -22,7 +23,6 @@ def controlInputRewardFn(
     # target_yaw in radians
     # z_pos in meters
     # joint torques in N m
-    # ctrl_change is (latest_action - previous_action)
     # isSelfColliding is a boolean (is robot colliding with itself?)
 
     EXP_SCALING_PARAM = 0.5
@@ -33,7 +33,7 @@ def controlInputRewardFn(
     ### HORIZONTAL VELOCITY REWARD
     VELOCITY_ERROR_REWARD_WEIGHT = 10
     hvelocity_reward = VELOCITY_ERROR_REWARD_WEIGHT * jp.exp(
-        -1 * jp.linalg.norm(velocity[0:2] - target_velocity) / EXP_SCALING_PARAM
+        -1 * (jp.linalg.norm(velocity[0:2] - target_velocity) ** 2) / EXP_SCALING_PARAM
     )
     reward += hvelocity_reward
     # print("hvelocity_reward", hvelocity_reward)
@@ -50,8 +50,8 @@ def controlInputRewardFn(
     rot_reward = ORIENTATION_REWARD_WEIGHT * jp.exp(
         -1
         * (
-            jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector)
-            + jp.linalg.norm(down_rot_vector - target_down_rot_vector)
+            jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector) ** 2
+            + jp.linalg.norm(down_rot_vector - target_down_rot_vector) ** 2
         )
         / EXP_SCALING_PARAM
     )
@@ -61,7 +61,7 @@ def controlInputRewardFn(
     ### VERTICAL VELOCITY REWARD
     VERTICAL_VELOCITY_REWARD_WEIGHT = 1
     vvelocity_reward = VERTICAL_VELOCITY_REWARD_WEIGHT * jp.exp(
-        -1 * jp.abs(velocity)[2] / EXP_SCALING_PARAM
+        -1 * (jp.abs(velocity)[2] ** 2) / EXP_SCALING_PARAM
     )
     reward += vvelocity_reward
     # print("vvelocity_reward", vvelocity_reward)
@@ -72,27 +72,37 @@ def controlInputRewardFn(
         -0.1
     )  # above this position, the reward is the same (only penalize the torso for being too low)
     z_pos_reward = TORSO_HEIGHT_REWARD_WEIGHT * jp.exp(
-        jp.clip(z_pos - TARGET_Z_POS, -jp.inf, 0) / EXP_SCALING_PARAM
+        -1 * (jp.clip(TARGET_Z_POS - z_pos, 0, jp.inf) ** 2) / EXP_SCALING_PARAM
     )
     reward += z_pos_reward
     # print("z_pos_reward", z_pos_reward)
 
     # JOINT TORQUE REWARD
     MAX_JOINT_TORQUE = 1.5
-    JOINT_TORQUE_REWARD_WEIGHT = -0.01
-    joint_torque_reward = JOINT_TORQUE_REWARD_WEIGHT * jp.linalg.norm(
-        jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0, jp.inf)
+    JOINT_TORQUE_REWARD_WEIGHT = -5
+    joint_torque_reward = JOINT_TORQUE_REWARD_WEIGHT * (
+        jp.max(jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0, jp.inf)) ** 2
     )
     reward += joint_torque_reward
     # print("joint_torque_reward", joint_torque_reward)
 
     # ACTION CHANGE REWARD
-    CONTROL_CHANGE_REWARD_WEIGHT = 0  # -1e-3
-    control_change_reward = CONTROL_CHANGE_REWARD_WEIGHT * jp.linalg.norm(
-        CONTROL_FREQUENCY * ctrl_change
+    CONTROL_CHANGE_REWARD_WEIGHT = 0
+    ctrl_change = latest_ctrl - previous_ctrl
+    control_change_reward = CONTROL_CHANGE_REWARD_WEIGHT * (
+        (jp.max(jp.abs(ctrl_change)) / CONTROL_FREQUENCY) ** 2
     )
     reward += control_change_reward
     # print("control_std_reward", control_std_reward)
+
+    # ACTION REGULARIZATION REWARD
+    MAX_SAFE_CONTROL_VALUE = 0.5
+    CONTROL_REGULARIZATION_REWARD_WEIGHT = -5
+    control_regularization_reward = CONTROL_REGULARIZATION_REWARD_WEIGHT * jp.max(
+        2 * jp.clip(jp.abs(latest_ctrl) - MAX_SAFE_CONTROL_VALUE, 0, 0.5)
+    )
+    reward += control_regularization_reward
+    # print("control_regularization_reward", control_regularization_reward)
 
     # SELF COLLISION REWARD
     SELF_COLLISION_PENALTY = 0

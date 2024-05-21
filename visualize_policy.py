@@ -1,4 +1,5 @@
 from simulation.cpu_env import CPUEnv
+from simulation.gpu_vec_env import GPUVecEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import *
 from stable_baselines3 import PPO, SAC, TD3
@@ -6,14 +7,21 @@ from stable_baselines3 import PPO, SAC, TD3
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
-LOG_NAME = "SAC_GPU"
-CKPT_NAME = "checkpoint_12999168_steps"
+LOG_NAME = "SAC_CPU"
+CKPT_NAME = "checkpoint_9999360_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
     LOG_NAME,
     RANDOMIZATION_FACTOR,
     CKPT_NAME,
+)
+
+env = GPUVecEnv(
+    num_envs=1,
+    xml_path=SIM_XML_PATH,
+    reward_fn=controlInputRewardFn,
+    randomization_factor=RANDOMIZATION_FACTOR,
 )
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
@@ -27,14 +35,20 @@ agent = MODEL_TYPE.load(
 
 while True:
     done = False
-    obs, _ = env.reset()
     total_reward = 0
     episode_length = 0
+    try:
+        obs, _ = env.reset()
+    except:
+        obs = env.reset()
     try:
         while True:  # not done
             action, _ = agent.predict(obs, deterministic=True)
             print(action)
-            obs, reward, done, _, _ = env.step(action)
+            try:
+                obs, reward, done, _, _ = env.step(action)
+            except:
+                obs, reward, done, _ = env.step(action)
             if not done:
                 episode_length += 1
                 total_reward += reward

@@ -59,8 +59,7 @@ class CPUEnv(gym.Env):
     def _init_model(self):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
-        if os.environ.get("RENDER_SIM", "True") == "True":
-            self.renderer = mujoco.Renderer(self.model, 720, 1080)
+        self.renderer = mujoco.Renderer(self.model, 720, 1080)
         self.model.opt.timestep = self.timestep
         self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
         self.model.opt.iterations = 15
@@ -96,7 +95,12 @@ class CPUEnv(gym.Env):
             self.model.geom(pressure_sensor_geom).id
             for pressure_sensor_geom in PRESSURE_GEOM_NAMES
         ]
-        self.non_robot_geom_ids = [self.model.geom(geom).id for geom in NON_ROBOT_GEOMS]
+        self.non_robot_geom_ids = []
+        for geom in NON_ROBOT_GEOMS:
+            try:
+                self.non_robot_geom_ids.append(self.model.geom(geom).id)
+            except:
+                print(f"Failed to find {geom} geom ID.")
 
     def _randomize_delays(self):
         # delays in actions and observations (10ms to 50ms)
@@ -259,8 +263,8 @@ class CPUEnv(gym.Env):
             self.control_input_yaw = jp.array([0])
 
     def _init_sim_trackers(self):
-        self.lastAction = self.data.ctrl
-        self.action_change = jp.zeros(self.data.ctrl.shape)
+        self.previous_action = self.data.ctrl
+        self.latest_action = self.data.ctrl
         self.previous_reward, _ = self._get_reward()
         self.next_force_start_time = 0
         self.next_force_direction = jp.zeros((2))
@@ -477,7 +481,8 @@ class CPUEnv(gym.Env):
             self.control_input_yaw,
             torso_z_pos,
             joint_torques,
-            self.action_change,
+            self.previous_action,
+            self.latest_action,
             is_self_colliding,
         )
 
@@ -536,8 +541,8 @@ class CPUEnv(gym.Env):
         action_to_take = jp.clip(jp.array(action_to_take), -1, 1)
         action_to_take = action_to_take * (jp.pi / 2)
         self.data.ctrl = action_to_take
-        self.action_change = action_to_take - self.lastAction[0]
-        self.lastAction = jp.expand_dims(action_to_take, axis=0)
+        self.previous_action = self.latest_action
+        self.latest_action = action_to_take
 
     def step(self, action=None):
 
@@ -563,14 +568,12 @@ class CPUEnv(gym.Env):
         return self._get_obs(), reward, terminated, truncated, info
 
     def render(self, mode="rgb_array"):
-        if os.environ.get("RENDER_SIM", "True") != "True":
-            return None
         self.renderer.update_scene(
             self.data, camera="track", scene_option=self.scene_option
         )
         frame = self.renderer.render()
         if mode == "human":
-            cv2.imshow("Sim View", frame)
+            cv2.imshow("CPU Sim View", frame)
             cv2.waitKey(1)
         else:
             return frame
@@ -604,6 +607,7 @@ if __name__ == "__main__":
 
         # print(reward)
         sim.render("human")
+
         if isTerminal:
             print(
                 "Cumulative Reward: ",

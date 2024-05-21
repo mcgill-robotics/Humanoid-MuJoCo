@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:22.04
 
 # Install all needed deps
 RUN apt-get update
@@ -21,6 +21,15 @@ RUN pip3 install nvidia-cudnn-cu11==8.9.6.50
 RUN pip3 install stable-baselines3[extra]
 RUN pip3 install tensorflow
 RUN pip3 install rl_zoo3
+
+# install dependencies for rendering with OpenCV
+RUN apt-get install -y libglfw3
+RUN apt-get install -y libglfw3-dev
+
+RUN apt-get install nvidia-cuda-toolkit; exit 0
+RUN apt --fix-broken install; exit 0
+
+RUN pip3 install --upgrade "jax[cuda12]"
 
 RUN apt-get autoremove -y
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*

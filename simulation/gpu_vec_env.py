@@ -12,6 +12,7 @@ import random
 from simulation.gpu_vec_env_utils import *
 from simulation import SIM_XML_PATH, reward_functions
 import time
+import cv2
 
 
 class GPUVecEnv(VecEnv):
@@ -40,7 +41,7 @@ class GPUVecEnv(VecEnv):
         self.physics_steps_per_control_step = PHYSICS_STEPS_PER_CONTROL_STEP
         self.rng_key = jax.random.PRNGKey(42)
         self.rng = jax.random.split(self.rng_key, self.num_envs)
-        self.render_mode = [[None]] * self.num_envs
+        self.render_mode = [["human"]] * self.num_envs
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
@@ -69,14 +70,15 @@ class GPUVecEnv(VecEnv):
         )
         self.reward_fn = jax.jit(
             jax.vmap(
-                lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, ctrl_change, isSelfColliding: reward_fn(
+                lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, previous_ctrl, last_ctrl, isSelfColliding: reward_fn(
                     velocity,
                     target_velocity,
                     torso_quat,
                     target_yaw,
                     z_pos,
                     joint_torques,
-                    ctrl_change,
+                    previous_ctrl,
+                    last_ctrl,
                     isSelfColliding,
                 )
             )
@@ -101,6 +103,8 @@ class GPUVecEnv(VecEnv):
         # populate sim trackers
         self._init_sim_trackers()
 
+        self._init_renderer()
+
         super().__init__(self.num_envs, self.observation_space, self.action_space)
 
     #########################################################
@@ -111,8 +115,17 @@ class GPUVecEnv(VecEnv):
         # clean up any unreferenced variables
         gc.collect()
 
-    def render(self, mode=None):
-        pass
+    def render(self, mode=None, index=0):
+        if mode == "human":
+            cpu_data_i = mjx.get_data(self.renderer_model, self.data_batch)[index]
+            self.renderer.update_scene(
+                cpu_data_i, camera="track", scene_option=self.scene_option
+            )
+            frame = self.renderer.render()
+            cv2.imshow("GPU Sim View", frame)
+            cv2.waitKey(1)
+        else:
+            return None
 
     def env_is_wrapped(self, wrapper_class, indices=None):
         return [False] * self.num_envs
@@ -180,7 +193,12 @@ class GPUVecEnv(VecEnv):
             model.geom(pressure_sensor_geom).id
             for pressure_sensor_geom in PRESSURE_GEOM_NAMES
         ]
-        self.non_robot_geom_ids = [model.geom(geom).id for geom in NON_ROBOT_GEOMS]
+        self.non_robot_geom_ids = []
+        for geom in NON_ROBOT_GEOMS:
+            try:
+                self.non_robot_geom_ids.append(model.geom(geom).id)
+            except:
+                print(f"Failed to find {geom} geom ID.")
 
     def _init_batches(self):
         cpu_model = self._make_model()
@@ -197,7 +215,9 @@ class GPUVecEnv(VecEnv):
         self.actual_timestep = self.timestep * self.physics_steps_per_control_step
         max_timestep_delay = round(MAX_DELAY / self.actual_timestep) + 1
         # make buffers for observations and actions
-        self.action_buffer = jp.zeros((self.num_envs, max_timestep_delay, len(JOINT_NAMES)))
+        self.action_buffer = jp.zeros(
+            (self.num_envs, max_timestep_delay, len(JOINT_NAMES))
+        )
         self.joint_angles_buffer = jp.zeros(
             (self.num_envs, max_timestep_delay, len(JOINT_NAMES))
         )
@@ -228,9 +248,19 @@ class GPUVecEnv(VecEnv):
         self.next_force_magnitudes = jp.zeros((self.num_envs))
         self.next_force_bodies = jp.zeros((self.num_envs))
         self.next_force_directions = jp.zeros((self.num_envs, 2))
+        self.previous_actions = jp.zeros((self.num_envs, len(self.joint_dof_idx)))
         self.last_actions = jp.zeros((self.num_envs, len(self.joint_dof_idx)))
-        self.action_change = jp.zeros((self.num_envs, len(self.joint_dof_idx)))
         self.previous_rewards, _ = self._get_rewards(override_potential=True)
+
+    def _init_renderer(self):
+        self.renderer_model = self._make_model()
+        self.renderer = mujoco.Renderer(self.renderer_model, 720, 1080)
+        self.scene_option = mujoco.MjvOption()
+        mujoco.mjv_defaultOption(self.scene_option)
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
 
     #########################################################
     ############## RESET/RANDOMIZATION METHODS ##############
@@ -297,7 +327,10 @@ class GPUVecEnv(VecEnv):
         self.last_actions = self.last_actions.at[idx].set(
             jp.zeros((self.num_envs, len(self.joint_dof_idx)))[idx]
         )
-        self.action_change = self.action_change.at[idx].set(
+        self.previous_actions = self.previous_actions.at[idx].set(
+            jp.zeros((self.num_envs, len(self.joint_dof_idx)))[idx]
+        )
+        self.last_actions = self.previous_actions.at[idx].set(
             jp.zeros((self.num_envs, len(self.joint_dof_idx)))[idx]
         )
         _previous_rewards, _ = self._get_rewards(override_potential=True)
@@ -452,7 +485,7 @@ class GPUVecEnv(VecEnv):
         _torso_local_velocity,
         _local_gravity_vector,
         _contact_states,
-        idx
+        idx,
     ):
         # cycle observations through observation buffers
         # shift all observations in the buffers
@@ -493,7 +526,7 @@ class GPUVecEnv(VecEnv):
         self.contact_sensor_buffer = self.contact_sensor_buffer.at[
             idx, self.contact_sensor_delay_indices[idx]
         ].set(_contact_states)
-        
+
         # get the first (oldest) observation in the buffer
         joint_angles = self.joint_angles_buffer[idx, 0]
         joint_velocities = self.joint_velocities_buffer[idx, 0]
@@ -501,8 +534,15 @@ class GPUVecEnv(VecEnv):
         torso_local_velocity = self.torso_local_velocity_buffer[idx, 0]
         local_gravity_vector = self.local_gravity_vector_buffer[idx, 0]
         contact_states = self.contact_sensor_buffer[idx, 0]
-        
-        return joint_angles, joint_velocities, local_ang_vel, torso_local_velocity, local_gravity_vector, contact_states
+
+        return (
+            joint_angles,
+            joint_velocities,
+            local_ang_vel,
+            torso_local_velocity,
+            local_gravity_vector,
+            contact_states,
+        )
 
     def _get_torso_velocity(self):  # NOTE: in global reference frame (NWU)
         return self.data_batch.cvel[:, self.torso_idx][:, 3:]
@@ -542,7 +582,7 @@ class GPUVecEnv(VecEnv):
         # apply actions (convert to radians first)
         self.data_batch = self.data_batch.replace(ctrl=action_to_take)
 
-        self.action_change = action_to_take - self.last_actions
+        self.previous_actions = self.last_actions
         self.last_actions = action_to_take
 
     #########################################################
@@ -611,7 +651,8 @@ class GPUVecEnv(VecEnv):
             self.control_inputs_yaw,
             torso_z_pos,
             joint_torques,
-            self.action_change,
+            self.previous_actions,
+            self.last_actions,
             is_self_colliding,
         )
 
@@ -700,7 +741,7 @@ class GPUVecEnv(VecEnv):
             _torso_local_velocity,
             _local_gravity_vector,
             _contact_states,
-            idx
+            idx,
         )
 
         # calculate clock phase observations (no delay on these)
@@ -757,14 +798,15 @@ class GPUVecEnv(VecEnv):
                 info[env_idx]["terminal_observation"] = obs[env_idx]
                 info[env_idx]["TimeLimit.truncated"] = truncated[env_idx]
 
-        if np.any(done): obs[done] = self.reset(idx=done)
+        if np.any(done):
+            obs[done] = self.reset(idx=done)
 
         return obs, reward, done, info
 
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=256,
+        num_envs=1,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
@@ -778,10 +820,11 @@ if __name__ == "__main__":
 
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
-        actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
+        actions = np.ones((sim_batch.num_envs, len(JOINT_NAMES)))
 
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
+        sim_batch.render(mode="human", index=0)
         end_time = time.time()
         total_step_time += end_time - start_time
         total_step_calls += 1
@@ -789,7 +832,7 @@ if __name__ == "__main__":
         print(
             f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
         )
-        
+
         print(rewards[0])
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
