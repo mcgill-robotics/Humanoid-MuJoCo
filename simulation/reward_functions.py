@@ -84,7 +84,7 @@ def controlInputRewardFn(
     # print("joint_torque_reward", joint_torque_reward)
 
     # ACTION CHANGE REWARD
-    CONTROL_CHANGE_REWARD_WEIGHT = 0
+    CONTROL_CHANGE_REWARD_WEIGHT = -1e-3
     ctrl_change = latest_ctrl - previous_ctrl
     control_change_reward = CONTROL_CHANGE_REWARD_WEIGHT * (
         (jp.max(jp.abs(ctrl_change)) / CONTROL_FREQUENCY) ** 2

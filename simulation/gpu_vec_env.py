@@ -806,7 +806,7 @@ class GPUVecEnv(VecEnv):
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=1,
+        num_envs=256,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
@@ -824,8 +824,8 @@ if __name__ == "__main__":
 
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
-        sim_batch.render(mode="human", index=0)
         end_time = time.time()
+        sim_batch.render(mode="human", index=0)
         total_step_time += end_time - start_time
         total_step_calls += 1
 
