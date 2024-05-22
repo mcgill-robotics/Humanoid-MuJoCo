@@ -17,17 +17,17 @@ checkpoint = "./data/{}/training_results_r{}/{}".format(
     CKPT_NAME,
 )
 
-# env = GPUVecEnv(
-#     num_envs=1,
-#     xml_path=SIM_XML_PATH,
-#     reward_fn=controlInputRewardFn,
-#     randomization_factor=RANDOMIZATION_FACTOR,
-# )
-env = CPUEnv(
+env = GPUVecEnv(
+    num_envs=1,
     xml_path=SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
     randomization_factor=RANDOMIZATION_FACTOR,
 )
+# env = CPUEnv(
+#     xml_path=SIM_XML_PATH,
+#     reward_fn=controlInputRewardFn,
+#     randomization_factor=RANDOMIZATION_FACTOR,
+# )
 agent = MODEL_TYPE.load(
     path=checkpoint,
     env=env,
