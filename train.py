@@ -124,6 +124,7 @@ if SIMULATE_ON_GPU:
             xml_path=SIM_XML_PATH,
             reward_fn=controlInputRewardFn,
             randomization_factor=RANDOMIZATION_FACTOR,
+            enable_rendering=False,
         )
     )
     eval_env = VecMonitor(
@@ -134,6 +135,7 @@ if SIMULATE_ON_GPU:
             randomization_factor=RANDOMIZATION_FACTOR,
             use_potential_rewards=False,
             max_simulation_time_override=10.0,
+            enable_rendering=False,
         )
     )
 
@@ -151,6 +153,7 @@ else:
                     xml_path=SIM_XML_PATH,
                     reward_fn=controlInputRewardFn,
                     randomization_factor=RANDOMIZATION_FACTOR,
+                    enable_rendering=False,
                 )
             ]
             * NUM_ENVS
@@ -165,6 +168,7 @@ else:
                     randomization_factor=RANDOMIZATION_FACTOR,
                     use_potential_rewards=False,
                     max_simulation_time_override=10.0,
+                    enable_rendering=False,
                 )
             ]
             * N_EVAL_EPISODES

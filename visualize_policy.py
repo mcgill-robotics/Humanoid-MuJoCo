@@ -22,11 +22,13 @@ env = GPUVecEnv(
     xml_path=SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
     randomization_factor=RANDOMIZATION_FACTOR,
+    enable_rendering=True,
 )
 # env = CPUEnv(
 #     xml_path=SIM_XML_PATH,
 #     reward_fn=controlInputRewardFn,
 #     randomization_factor=RANDOMIZATION_FACTOR,
+#     enable_rendering=True
 # )
 agent = MODEL_TYPE.load(
     path=checkpoint,

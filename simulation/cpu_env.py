@@ -29,6 +29,7 @@ class CPUEnv(gym.Env):
         randomization_factor=0,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
+        enable_rendering=False,
     ):
         self.xml_path = xml_path
         self.randomization_factor = randomization_factor
@@ -40,6 +41,7 @@ class CPUEnv(gym.Env):
         self.physics_steps_per_control_step = PHYSICS_STEPS_PER_CONTROL_STEP
         self.num_envs = 1
         self.rng_key = jax.random.PRNGKey(0)
+        self.enable_rendering = enable_rendering
 
         self.action_space = spaces.Box(
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32
@@ -59,7 +61,8 @@ class CPUEnv(gym.Env):
     def _init_model(self):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
-        self.renderer = mujoco.Renderer(self.model, 720, 1080)
+        if self.enable_rendering:
+            self.renderer = mujoco.Renderer(self.model, 720, 1080)
         self.model.opt.timestep = self.timestep
         self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
         self.model.opt.iterations = 15
@@ -568,20 +571,24 @@ class CPUEnv(gym.Env):
         return self._get_obs(), reward, terminated, truncated, info
 
     def render(self, mode="rgb_array"):
-        self.renderer.update_scene(
-            self.data, camera="track", scene_option=self.scene_option
-        )
-        frame = self.renderer.render()
-        if mode == "human":
-            cv2.imshow("CPU Sim View", frame)
-            cv2.waitKey(1)
-        else:
-            return frame
+        if self.enable_rendering:
+            self.renderer.update_scene(
+                self.data, camera="track", scene_option=self.scene_option
+            )
+            frame = self.renderer.render()
+            if mode == "human":
+                cv2.imshow("CPU Sim View", frame)
+                cv2.waitKey(1)
+            else:
+                return frame
 
 
 if __name__ == "__main__":
     sim = CPUEnv(
-        xml_path=SIM_XML_PATH, reward_fn=controlInputRewardFn, randomization_factor=1
+        xml_path=SIM_XML_PATH,
+        reward_fn=controlInputRewardFn,
+        randomization_factor=1,
+        enable_rendering=True,
     )
     obs = sim.reset()
 

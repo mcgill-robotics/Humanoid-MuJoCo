@@ -24,6 +24,7 @@ class GPUVecEnv(VecEnv):
         randomization_factor=0,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
+        enable_rendering=False,
     ):
         if jax.default_backend() != "gpu":
             print("ERROR: Failed to find GPU device.")
@@ -103,7 +104,9 @@ class GPUVecEnv(VecEnv):
         # populate sim trackers
         self._init_sim_trackers()
 
-        self._init_renderer()
+        self.enable_rendering = enable_rendering
+        if enable_rendering:
+            self._init_renderer()
 
         super().__init__(self.num_envs, self.observation_space, self.action_space)
 
@@ -116,7 +119,7 @@ class GPUVecEnv(VecEnv):
         gc.collect()
 
     def render(self, mode=None, index=0):
-        if mode == "human":
+        if mode == "human" and self.enable_rendering:
             cpu_data_i = mjx.get_data(self.renderer_model, self.data_batch)[index]
             self.renderer.update_scene(
                 cpu_data_i, camera="track", scene_option=self.scene_option
@@ -810,6 +813,7 @@ if __name__ == "__main__":
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
+        enable_rendering=True,
     )
 
     obs = sim_batch.reset()
