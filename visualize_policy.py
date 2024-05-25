@@ -7,8 +7,8 @@ from stable_baselines3 import PPO, SAC, TD3
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
-LOG_NAME = "SAC_GPU"
-CKPT_NAME = "checkpoint_4999680_steps"
+LOG_NAME = "SAC_CPU"
+CKPT_NAME = "checkpoint_9999360_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
@@ -17,19 +17,19 @@ checkpoint = "./data/{}/training_results_r{}/{}".format(
     CKPT_NAME,
 )
 
-env = GPUVecEnv(
-    num_envs=1,
+# env = GPUVecEnv(
+#     num_envs=1,
+#     xml_path=SIM_XML_PATH,
+#     reward_fn=controlInputRewardFn,
+#     randomization_factor=RANDOMIZATION_FACTOR,
+#     enable_rendering=True,
+# )
+env = CPUEnv(
     xml_path=SIM_XML_PATH,
     reward_fn=controlInputRewardFn,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )
-# env = CPUEnv(
-#     xml_path=SIM_XML_PATH,
-#     reward_fn=controlInputRewardFn,
-#     randomization_factor=RANDOMIZATION_FACTOR,
-#     enable_rendering=True
-# )
 agent = MODEL_TYPE.load(
     path=checkpoint,
     env=env,

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAME = "SAC_GPU"  # "SAC" # "PPO"
+LOG_NAME = "SAC_CPU"  # "SAC" # "PPO"
 RANDOMIZATION_FACTOR = 1.0
 eval_file = "evaluations.npz"
 evaluations = np.load(
