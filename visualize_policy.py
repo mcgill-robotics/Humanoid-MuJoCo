@@ -7,8 +7,8 @@ from stable_baselines3 import PPO, SAC, TD3
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 1.0
-LOG_NAME = "SAC_CPU"
-CKPT_NAME = "checkpoint_9999360_steps"
+LOG_NAME = "SAC_CPU_p2"
+CKPT_NAME = "checkpoint_19998720_steps"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
@@ -44,7 +44,7 @@ while True:
     except:
         obs = env.reset()
     try:
-        while True:  # not done
+        while not done:
             action, _ = agent.predict(obs, deterministic=True)
             # print(action)
             try:

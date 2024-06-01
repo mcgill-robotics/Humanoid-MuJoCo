@@ -1,17 +1,29 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAME = "SAC_CPU"  # "SAC" # "PPO"
-RANDOMIZATION_FACTOR = 1.0
-eval_file = "evaluations.npz"
-evaluations = np.load(
-    "data/{}/training_results_r{}/{}".format(LOG_NAME, RANDOMIZATION_FACTOR, eval_file)
-)
+LOG_NAMES = ["SAC_CPU", "SAC_CPU_p2"]
+RANDOMIZATION_FACTORS = [1.0]
+eval_files = ["evaluations.npz"]
 
-timesteps = evaluations["timesteps"]
-rewards = np.mean(evaluations["results"], axis=1)
-ep_lengths = np.mean(evaluations["ep_lengths"], axis=1)
-num_episodes_averaged = evaluations["results"].shape[1]
+#####################
+
+timesteps = []
+rewards = []
+ep_lengths = []
+
+for i in range(len(LOG_NAMES)):
+    evaluations = np.load(
+        "data/{}/training_results_r{}/{}".format(
+            LOG_NAMES[i % len(LOG_NAMES)],
+            RANDOMIZATION_FACTORS[i % len(RANDOMIZATION_FACTORS)],
+            eval_files[i % len(eval_files)],
+        )
+    )
+
+    timesteps.extend(evaluations["timesteps"])
+    rewards.extend(np.mean(evaluations["results"], axis=1))
+    ep_lengths.extend(np.mean(evaluations["ep_lengths"], axis=1))
+    num_episodes_averaged = evaluations["results"].shape[1]
 
 
 #### PLOT REWARDS
