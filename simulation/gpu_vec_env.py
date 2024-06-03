@@ -306,9 +306,9 @@ class GPUVecEnv(VecEnv):
             maxval=CONTROL_INPUT_MAX_YAW,
         )
         if RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT:
-            control_inputs_yaw = self.control_inputs_yaw * self.randomization_factor
+            control_inputs_yaw = control_inputs_yaw * self.randomization_factor
             control_inputs_velocity = (
-                self.control_inputs_velocity * self.randomization_factor
+                control_inputs_velocity * self.randomization_factor
             )
         return control_inputs_velocity, control_inputs_yaw
 
