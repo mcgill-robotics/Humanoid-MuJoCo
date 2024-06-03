@@ -30,6 +30,7 @@ class CPUEnv(gym.Env):
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
         enable_rendering=False,
+        reward_override=None,
     ):
         self.xml_path = xml_path
         self.randomization_factor = randomization_factor
@@ -57,6 +58,8 @@ class CPUEnv(gym.Env):
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
+
+        self.reward_override = reward_override
 
     def _init_model(self):
         # load model from XML
@@ -488,6 +491,9 @@ class CPUEnv(gym.Env):
             self.latest_action,
             is_self_colliding,
         )
+
+        if self.reward_override is not None:
+            return float(self.reward_override), bool(isTerminal)
 
         if self.use_potential_rewards:
             _reward = reward - self.previous_reward

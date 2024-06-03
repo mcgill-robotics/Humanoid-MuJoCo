@@ -25,6 +25,7 @@ class GPUVecEnv(VecEnv):
         use_potential_rewards=USE_POTENTIAL_REWARDS,
         max_simulation_time_override=None,
         enable_rendering=False,
+        reward_override=None,
     ):
         if jax.default_backend() != "gpu":
             print("ERROR: Failed to find GPU device.")
@@ -33,6 +34,7 @@ class GPUVecEnv(VecEnv):
 
         self.platform = "GPU"
         self.xml_path = xml_path
+        self.reward_override = reward_override
         self.randomization_factor = randomization_factor
         self.timestep = TIMESTEP
         self.num_envs = num_envs
@@ -658,6 +660,11 @@ class GPUVecEnv(VecEnv):
             self.last_actions,
             is_self_colliding,
         )
+
+        if self.reward_override is not None:
+            return np.array([float(self.reward_override)] * self.num_envs), np.array(
+                areTerminal
+            )
 
         if self.use_potential_rewards and not override_potential:
             _rewards = rewards - self.previous_rewards

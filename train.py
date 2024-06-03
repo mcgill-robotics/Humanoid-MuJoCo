@@ -48,7 +48,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--n-steps",
     type=int,
-    default=1_000_000,
+    default=50_000_000,
     help="Total timesteps to train policy for, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
@@ -63,7 +63,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--reward-goal",
     type=int,
-    default=950,  # best possible reward is 1150 (by definition of reward function)
+    default=9500,  # best possible reward is 10 / timestep == 10_000
     help="Reward goal to reach. Ends training or increments randomization factor once reached in evaluation.",
 )
 argparser.add_argument(
@@ -95,6 +95,7 @@ NUM_CHECKPOINTS = args.n_checkpoints
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
 RANDOMIZATION_INCREMENT = args.rand_increment
+MAX_EVAL_SIM_TIME = 10.0
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = (
     np.inf if args.reward_goal <= 0 else args.reward_goal
 )
@@ -136,6 +137,7 @@ if SIMULATE_ON_GPU:
             use_potential_rewards=False,
             max_simulation_time_override=10.0,
             enable_rendering=False,
+            reward_override=1.0,
         )
     )
 
@@ -167,8 +169,9 @@ else:
                     reward_fn=controlInputRewardFn,
                     randomization_factor=RANDOMIZATION_FACTOR,
                     use_potential_rewards=False,
-                    max_simulation_time_override=10.0,
+                    max_simulation_time_override=MAX_EVAL_SIM_TIME,
                     enable_rendering=False,
+                    reward_override=1.0,
                 )
             ]
             * N_EVAL_EPISODES
