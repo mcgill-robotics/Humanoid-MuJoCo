@@ -5,6 +5,134 @@ from simulation.simulation_parameters import *
 # REWARD INFO FROM https://arxiv.org/pdf/2304.13653.pdf and https://arxiv.org/abs/2307.10142
 
 
+def scaled_exp(x):
+    EXP_SCALING_PARAM = 0.5
+    return jp.exp(-x / EXP_SCALING_PARAM)
+
+
+def sqr(x):
+    return jp.square(x)
+
+
+def horizontal_velocity_reward(velocity, target_velocity):
+    VELOCITY_ERROR_REWARD_WEIGHT = 10
+    hvelocity_reward = VELOCITY_ERROR_REWARD_WEIGHT * scaled_exp(
+        sqr(jp.linalg.norm(velocity[0:2] - target_velocity))
+    )
+    # print("hvelocity_reward", hvelocity_reward)
+    return hvelocity_reward
+
+
+def target_orientation_reward(torso_quat_obj, target_yaw):
+    ORIENTATION_REWARD_WEIGHT = 10
+    fwd_rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
+    target_fwd_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
+    down_rot_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
+    target_down_rot_vector = jp.array([0, 0, -1])
+    rot_reward = ORIENTATION_REWARD_WEIGHT * scaled_exp(
+        (
+            sqr(
+                jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector)
+                + jp.linalg.norm(down_rot_vector - target_down_rot_vector)
+            )
+        )
+    )
+    # print("rot_reward", rot_reward)
+    return rot_reward
+
+
+def vertical_velocity_reward(velocity):
+    VERTICAL_VELOCITY_REWARD_WEIGHT = 5
+    vvelocity_reward = VERTICAL_VELOCITY_REWARD_WEIGHT * scaled_exp(sqr(velocity[2]))
+    # print("vvelocity_reward", vvelocity_reward)
+    return vvelocity_reward
+
+
+def torso_height_reward(z_pos):
+    TORSO_HEIGHT_REWARD_WEIGHT = 5
+    TARGET_Z_POS = -0.1
+    MIN_Z_POS_FOR_REWARD = -0.3
+    z_pos_reward = jp.interp(
+        z_pos,
+        jp.array([MIN_Z_POS_FOR_REWARD, TARGET_Z_POS]),
+        jp.array([0, TORSO_HEIGHT_REWARD_WEIGHT]),
+    )
+    # print("z_pos_reward", z_pos_reward)
+    return z_pos_reward
+
+
+def joint_torque_reward(joint_torques):
+    JOINT_TORQUE_REWARD_WEIGHT = 2
+    MAX__SAFE_JOINT_TORQUE = 1.25
+    joint_torque_reward = (
+        JOINT_TORQUE_REWARD_WEIGHT
+        * jp.sum(
+            scaled_exp(
+                sqr(jp.clip(jp.abs(joint_torques) - MAX__SAFE_JOINT_TORQUE, 0, jp.inf))
+            )
+        )
+        / len(joint_torques)
+    )
+    # print("joint_torque_reward", joint_torque_reward)
+    return joint_torque_reward
+
+
+def control_change_reward(previous_ctrl, latest_ctrl):
+    CONTROL_CHANGE_REWARD_WEIGHT = 1
+    ctrl_change = latest_ctrl - previous_ctrl
+    control_change_reward = (
+        CONTROL_CHANGE_REWARD_WEIGHT
+        * jp.sum(scaled_exp(sqr(ctrl_change * CONTROL_FREQUENCY)))
+        / len(ctrl_change)
+    )
+    # print("control_change_reward", control_change_reward)
+    return control_change_reward
+
+
+def control_regularization_reward(ctrl):
+    CONTROL_REG_REWARD_WEIGHT = 2
+    control_regularization_reward = (
+        CONTROL_REG_REWARD_WEIGHT * jp.sum(scaled_exp(sqr(ctrl))) / len(ctrl)
+    )
+    # print("control_regularization_reward", control_regularization_reward)
+    return control_regularization_reward
+
+
+def symmetry_reward(ctrl):
+    SYMMETRY_REWARD_WEIGHT = 1
+    EQUAL_REG_JOINTS = [("left_hip_yaw", "right_hip_yaw")]
+    OPPOSITE_REG_JOINTS = [
+        ("left_hip_roll", "right_hip_roll"),
+        ("left_hip_pitch", "right_hip_pitch"),
+        ("left_knee", "right_knee"),
+        ("left_ankle_pitch", "right_ankle_pitch"),
+        ("left_shoulder_pitch", "right_shoulder_pitch"),
+        ("left_elbow", "right_elbow"),
+    ]
+    symmetry_reward = 0
+    for joint_a, joint_b in EQUAL_REG_JOINTS:
+        i, j = JOINT_ACTUATOR_NAMES.index(joint_a), JOINT_ACTUATOR_NAMES.index(joint_b)
+        symmetry_reward += scaled_exp(sqr(ctrl[i] - ctrl[j]))
+    for joint_a, joint_b in OPPOSITE_REG_JOINTS:
+        i, j = JOINT_ACTUATOR_NAMES.index(joint_a), JOINT_ACTUATOR_NAMES.index(joint_b)
+        symmetry_reward += scaled_exp(sqr(ctrl[i] + ctrl[j]))
+
+    symmetry_reward = (
+        SYMMETRY_REWARD_WEIGHT
+        * symmetry_reward
+        / (len(EQUAL_REG_JOINTS) + len(OPPOSITE_REG_JOINTS))
+    )
+    # print("symmetry_reward", symmetry_reward)
+    return symmetry_reward
+
+
+def self_collision_reward(isSelfColliding):
+    SELF_COLLISION_PENALTY = 0
+    self_collision_reward = jp.where(isSelfColliding, SELF_COLLISION_PENALTY, 0)
+    # print("self_collision_reward", self_collision_reward)
+    return self_collision_reward
+
+
 def controlInputRewardFn(
     velocity,
     target_velocity,
@@ -25,88 +153,38 @@ def controlInputRewardFn(
     # joint torques in N m
     # isSelfColliding is a boolean (is robot colliding with itself?)
 
-    EXP_SCALING_PARAM = 0.5
-
     ### COMPUTE REWARD
     reward = 0
 
     ### HORIZONTAL VELOCITY REWARD
-    VELOCITY_ERROR_REWARD_WEIGHT = 10
-    hvelocity_reward = VELOCITY_ERROR_REWARD_WEIGHT * jp.exp(
-        -1 * (jp.linalg.norm(velocity[0:2] - target_velocity) ** 2) / EXP_SCALING_PARAM
-    )
-    reward += hvelocity_reward
-    # print("hvelocity_reward", hvelocity_reward)
+    reward += horizontal_velocity_reward(velocity, target_velocity)
 
     # TARGET ORIENTATION REWARD
-    ORIENTATION_REWARD_WEIGHT = 5  # CUSTOM -> paper does not penalize high tilts
     torso_quat_obj = Rotation.from_quat(
         [torso_quat[1], torso_quat[2], torso_quat[3], torso_quat[0]]
     )
-    fwd_rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
-    target_fwd_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
-    down_rot_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
-    target_down_rot_vector = jp.array([0, 0, -1])
-    rot_reward = ORIENTATION_REWARD_WEIGHT * jp.exp(
-        -1
-        * (
-            jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector) ** 2
-            + jp.linalg.norm(down_rot_vector - target_down_rot_vector) ** 2
-        )
-        / EXP_SCALING_PARAM
-    )
-    reward += rot_reward
-    # print("rot_reward", rot_reward)
+    reward += target_orientation_reward(torso_quat_obj, target_yaw)
 
     ### VERTICAL VELOCITY REWARD
-    VERTICAL_VELOCITY_REWARD_WEIGHT = 1
-    vvelocity_reward = VERTICAL_VELOCITY_REWARD_WEIGHT * jp.exp(
-        -1 * (jp.abs(velocity)[2] ** 2) / EXP_SCALING_PARAM
-    )
-    reward += vvelocity_reward
-    # print("vvelocity_reward", vvelocity_reward)
+    reward += vertical_velocity_reward(velocity)
 
     ### TORSO HEIGHT REWARD
-    TORSO_HEIGHT_REWARD_WEIGHT = 1
-    TARGET_Z_POS = -0.1
-    MIN_Z_POS_FOR_REWARD = -0.3
-    z_pos_reward = jp.interp(z_pos, jp.array([MIN_Z_POS_FOR_REWARD, TARGET_Z_POS]), jp.array([0, TORSO_HEIGHT_REWARD_WEIGHT]))
-    reward += z_pos_reward
-    # print("z_pos_reward", z_pos_reward)
+    reward += torso_height_reward(z_pos)
 
     # JOINT TORQUE REWARD
-    MAX_JOINT_TORQUE = 1.5
-    JOINT_TORQUE_REWARD_WEIGHT = -0.1
-    joint_torque_reward = JOINT_TORQUE_REWARD_WEIGHT * (
-        jp.max(jp.clip(jp.abs(joint_torques) - MAX_JOINT_TORQUE, 0, jp.inf)) ** 2
-    )
-    reward += joint_torque_reward
-    # print("joint_torque_reward", joint_torque_reward)
+    reward += joint_torque_reward(joint_torques)
 
-    # ACTION CHANGE REWARD
-    CONTROL_CHANGE_REWARD_WEIGHT = -1e-3
-    ctrl_change = latest_ctrl - previous_ctrl
-    control_change_reward = CONTROL_CHANGE_REWARD_WEIGHT * (
-        (jp.max(jp.abs(ctrl_change)) / CONTROL_FREQUENCY) ** 2
-    )
-    reward += control_change_reward
-    # print("control_change_reward", control_change_reward)
+    # CONTROL CHANGE REWARD
+    reward += control_change_reward(previous_ctrl, latest_ctrl)
 
-    # ACTION REGULARIZATION REWARD
-    MAX_SAFE_CONTROL_VALUE = 0.25
-    MAX_CONTROL_VALUE = 1
-    CONTROL_REGULARIZATION_REWARD_WEIGHT = -2.5
-    control_regularization_reward = CONTROL_REGULARIZATION_REWARD_WEIGHT * jp.max(
-        jp.clip(jp.abs(latest_ctrl / (jp.pi / 2)) - MAX_SAFE_CONTROL_VALUE, 0, MAX_CONTROL_VALUE - MAX_SAFE_CONTROL_VALUE)
-    ) / (MAX_CONTROL_VALUE-MAX_SAFE_CONTROL_VALUE)
-    reward += control_regularization_reward
-    # print("control_regularization_reward", control_regularization_reward)
+    # CONTROL REGULARIZATION REWARD
+    reward += control_regularization_reward(latest_ctrl)
+
+    # SYMMETRY REWARD
+    reward += symmetry_reward(latest_ctrl)
 
     # SELF COLLISION REWARD
-    SELF_COLLISION_PENALTY = 0
-    self_collision_reward = jp.where(isSelfColliding, SELF_COLLISION_PENALTY, 0)
-    reward += self_collision_reward
-    # print("self_collision_reward", self_collision_reward)
+    reward += self_collision_reward(isSelfColliding)
 
     # CONSTANT REWARD OFFSET
     CONSTANT_REWARD_OFFSET = 0.0

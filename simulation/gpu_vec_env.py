@@ -656,8 +656,8 @@ class GPUVecEnv(VecEnv):
             self.control_inputs_yaw,
             torso_z_pos,
             joint_torques,
-            self.previous_actions,
-            self.last_actions,
+            self.previous_actions / (jp.pi / 2),
+            self.last_actions / (jp.pi / 2),
             is_self_colliding,
         )
 

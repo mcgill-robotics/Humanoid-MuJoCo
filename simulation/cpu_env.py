@@ -487,8 +487,8 @@ class CPUEnv(gym.Env):
             self.control_input_yaw,
             torso_z_pos,
             joint_torques,
-            self.previous_action,
-            self.latest_action,
+            self.previous_action / (jp.pi / 2),
+            self.latest_action / (jp.pi / 2),
             is_self_colliding,
         )
 
