@@ -449,33 +449,35 @@ class GPUVecEnv(VecEnv):
         self.torso_local_velocity_delay_indices[idx] = random.randint(
             self.min_timestep_delay, self.max_timestep_delay
         )
+        print(idx, " reset   :   delay ", self.local_gravity_vector_delay_indices)
         self.local_gravity_vector_delay_indices[idx] = random.randint(
             self.min_timestep_delay, self.max_timestep_delay
         )
+        print(idx, " reset   :   delay ", self.local_gravity_vector_delay_indices)
         self.contact_sensor_delay_indices[idx] = random.randint(
             self.min_timestep_delay, self.max_timestep_delay
         )
         # reset buffers to be only zeros for this env
-        self.action_buffer = self.action_buffer.at[idx, :].set(
-            self.action_buffer[idx, :] * 0
+        self.action_buffer = self.action_buffer.at[idx].set(
+            self.action_buffer[idx] * 0
         )
-        self.joint_angles_buffer = self.joint_angles_buffer.at[idx, :].set(
-            self.joint_angles_buffer[idx, :] * 0
+        self.joint_angles_buffer = self.joint_angles_buffer.at[idx].set(
+            self.joint_angles_buffer[idx] * 0
         )
-        self.joint_velocities_buffer = self.joint_velocities_buffer.at[idx, :].set(
-            self.joint_velocities_buffer[idx, :] * 0
+        self.joint_velocities_buffer = self.joint_velocities_buffer.at[idx].set(
+            self.joint_velocities_buffer[idx] * 0
         )
-        self.local_ang_vel_buffer = self.local_ang_vel_buffer.at[idx, :].set(
-            self.local_ang_vel_buffer[idx, :] * 0
+        self.local_ang_vel_buffer = self.local_ang_vel_buffer.at[idx].set(
+            self.local_ang_vel_buffer[idx] * 0
         )
         self.torso_local_velocity_buffer = self.torso_local_velocity_buffer.at[
-            idx, :
-        ].set(self.torso_local_velocity_buffer[idx, :] * 0)
+            idx
+        ].set(self.torso_local_velocity_buffer[idx] * 0)
         self.local_gravity_vector_buffer = self.local_gravity_vector_buffer.at[
-            idx, :
-        ].set(self.local_gravity_vector_buffer[idx, :] * 0)
-        self.contact_sensor_buffer = self.contact_sensor_buffer.at[idx, :].set(
-            self.contact_sensor_buffer[idx, :] * 0
+            idx
+        ].set(self.local_gravity_vector_buffer[idx] * 0)
+        self.contact_sensor_buffer = self.contact_sensor_buffer.at[idx].set(
+            self.contact_sensor_buffer[idx] * 0
         )
 
     #########################################################
@@ -539,6 +541,11 @@ class GPUVecEnv(VecEnv):
         torso_local_velocity = self.torso_local_velocity_buffer[idx, 0]
         local_gravity_vector = self.local_gravity_vector_buffer[idx, 0]
         contact_states = self.contact_sensor_buffer[idx, 0]
+
+        print(idx)
+        if jp.sum(idx) == 0: 
+            print(self.local_gravity_vector_buffer[idx, :, 0])
+            print(local_gravity_vector[idx, 0])
 
         return (
             joint_angles,
@@ -816,7 +823,7 @@ class GPUVecEnv(VecEnv):
 
 if __name__ == "__main__":
     sim_batch = GPUVecEnv(
-        num_envs=256,
+        num_envs=4,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
         randomization_factor=1,
@@ -832,7 +839,7 @@ if __name__ == "__main__":
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
         actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
-
+        
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
         end_time = time.time()
@@ -844,6 +851,5 @@ if __name__ == "__main__":
             f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
         )
 
-        print(rewards[0])
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
