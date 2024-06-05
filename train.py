@@ -34,16 +34,16 @@ argparser.add_argument(
     help="Number of episodes to evaluate the model on",
 )
 argparser.add_argument(
-    "--n-evals",
+    "--eval-freq",
     type=int,
-    default=100,
-    help="Number of evaluations to run, per randomization factor (can do less if reward threshold is reached early)",
+    default=100_000,
+    help="Frequency of evaluations in timesteps",
 )
 argparser.add_argument(
-    "--n-checkpoints",
+    "--checkpoint-freq",
     type=int,
-    default=10,
-    help="Number of checkpoints to save, per randomization factor (can do less if reward threshold is reached early)",
+    default=1_000_000,
+    help="Frequency of checkpoint saving, in timesteps",
 )
 argparser.add_argument(
     "--n-steps",
@@ -63,8 +63,8 @@ argparser.add_argument(
 argparser.add_argument(
     "--reward-goal",
     type=int,
-    default=9500,  # best possible reward is 10 / timestep == 10_000
-    help="Reward goal to reach. Ends training or increments randomization factor once reached in evaluation.",
+    default=950,  # best possible reward is 1 / timestep == 1_000
+    help="Reward goal to reach (per second of sim time). Ends training or increments randomization factor once reached in evaluation.",
 )
 argparser.add_argument(
     "--ckpt",
@@ -90,14 +90,12 @@ MODEL_TYPE = {"td3": TD3, "sac": SAC, "ppo": PPO}[args.algo.lower()]
 NUM_ENVS = args.n_envs
 SIMULATE_ON_GPU = not args.cpu
 N_EVAL_EPISODES = args.n_eval_episodes
-NUM_EVALS = args.n_evals
-NUM_CHECKPOINTS = args.n_checkpoints
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
 RANDOMIZATION_INCREMENT = args.rand_increment
 MAX_EVAL_SIM_TIME = 10.0
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = (
-    np.inf if args.reward_goal <= 0 else args.reward_goal
+    np.inf if args.reward_goal <= 0 else args.reward_goal * MAX_EVAL_SIM_TIME
 )
 if args.ckpt is not None:
     CHECKPOINT = args.ckpt.lstrip().rstrip()
@@ -108,8 +106,8 @@ if args.log_name is not None:
     log_dir = "data/{}/training_results".format(args.log_name.strip())
 else:
     log_dir = "data/{}/training_results".format(args.algo.upper().strip())
-EVAL_FREQ = TOTAL_TIMESTEPS // (NUM_EVALS * NUM_ENVS)
-CHECKPOINT_FREQ = TOTAL_TIMESTEPS // (NUM_CHECKPOINTS * NUM_ENVS)
+EVAL_FREQ = args.eval_freq
+CHECKPOINT_FREQ = args.checkpoint_freq
 
 ##########################
 ##  ENVIRONMENT  SETUP  ##

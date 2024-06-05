@@ -490,6 +490,7 @@ class CPUEnv(gym.Env):
             self.previous_action / (jp.pi / 2),
             self.latest_action / (jp.pi / 2),
             is_self_colliding,
+            self.data.time,
         )
 
         if self.reward_override is not None:
@@ -544,6 +545,13 @@ class CPUEnv(gym.Env):
         # cycle action through action buffer
         if action is None:
             action = self.data.ctrl
+        else:
+            action_noise = (
+                self.randomization_factor
+                * (JOINT_ACTION_NOISE_STDDEV / 180.0 * jp.pi)
+                * jax.random.normal(key=self.rng_key, shape=action.shape)
+            )
+            action = action + action_noise
         self.action_buffer.append(action)
         action_to_take = self.action_buffer.pop(0)
         # actions should be inputted to the environment in the -1 to 1 range, and they are mapped here to -pi/2 and pi/2 accordingly

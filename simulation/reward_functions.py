@@ -127,7 +127,7 @@ def symmetry_reward(ctrl):
 
 
 def self_collision_reward(isSelfColliding):
-    SELF_COLLISION_PENALTY = 0
+    SELF_COLLISION_PENALTY = -10
     self_collision_reward = jp.where(isSelfColliding, SELF_COLLISION_PENALTY, 0)
     # print("self_collision_reward", self_collision_reward)
     return self_collision_reward
@@ -143,6 +143,7 @@ def controlInputRewardFn(
     previous_ctrl,
     latest_ctrl,
     isSelfColliding,
+    timestep,
 ):
     # ALL IN NWU
     # velocity in m/s (x/y/z)
@@ -207,6 +208,9 @@ def controlInputRewardFn(
     terminal = jp.where(isNotUpright, ALLOW_EARLY_TERMINATION, False)
     if TERMINATE_ON_SELF_COLLISION:
         terminal = jp.where(isSelfColliding, ALLOW_EARLY_TERMINATION, terminal)
+
+    # DO NOT TERMINATE IF WITHIN GRACE PERIOD
+    terminal = jp.where(timestep < GRACE_PERIOD_AFTER_RESET, False, terminal)
 
     # OVERRIDE TERMINAL REWARD IF DESIRED
     OVERRIDE_TERMINAL_REWARD = True

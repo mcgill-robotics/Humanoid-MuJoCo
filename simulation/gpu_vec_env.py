@@ -73,7 +73,7 @@ class GPUVecEnv(VecEnv):
         )
         self.reward_fn = jax.jit(
             jax.vmap(
-                lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, previous_ctrl, last_ctrl, isSelfColliding: reward_fn(
+                lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, previous_ctrl, last_ctrl, isSelfColliding, timestep: reward_fn(
                     velocity,
                     target_velocity,
                     torso_quat,
@@ -83,6 +83,7 @@ class GPUVecEnv(VecEnv):
                     previous_ctrl,
                     last_ctrl,
                     isSelfColliding,
+                    timestep,
                 )
             )
         )
@@ -449,18 +450,14 @@ class GPUVecEnv(VecEnv):
         self.torso_local_velocity_delay_indices[idx] = random.randint(
             self.min_timestep_delay, self.max_timestep_delay
         )
-        print(idx, " reset   :   delay ", self.local_gravity_vector_delay_indices)
         self.local_gravity_vector_delay_indices[idx] = random.randint(
             self.min_timestep_delay, self.max_timestep_delay
         )
-        print(idx, " reset   :   delay ", self.local_gravity_vector_delay_indices)
         self.contact_sensor_delay_indices[idx] = random.randint(
             self.min_timestep_delay, self.max_timestep_delay
         )
         # reset buffers to be only zeros for this env
-        self.action_buffer = self.action_buffer.at[idx].set(
-            self.action_buffer[idx] * 0
-        )
+        self.action_buffer = self.action_buffer.at[idx].set(self.action_buffer[idx] * 0)
         self.joint_angles_buffer = self.joint_angles_buffer.at[idx].set(
             self.joint_angles_buffer[idx] * 0
         )
@@ -470,12 +467,12 @@ class GPUVecEnv(VecEnv):
         self.local_ang_vel_buffer = self.local_ang_vel_buffer.at[idx].set(
             self.local_ang_vel_buffer[idx] * 0
         )
-        self.torso_local_velocity_buffer = self.torso_local_velocity_buffer.at[
-            idx
-        ].set(self.torso_local_velocity_buffer[idx] * 0)
-        self.local_gravity_vector_buffer = self.local_gravity_vector_buffer.at[
-            idx
-        ].set(self.local_gravity_vector_buffer[idx] * 0)
+        self.torso_local_velocity_buffer = self.torso_local_velocity_buffer.at[idx].set(
+            self.torso_local_velocity_buffer[idx] * 0
+        )
+        self.local_gravity_vector_buffer = self.local_gravity_vector_buffer.at[idx].set(
+            self.local_gravity_vector_buffer[idx] * 0
+        )
         self.contact_sensor_buffer = self.contact_sensor_buffer.at[idx].set(
             self.contact_sensor_buffer[idx] * 0
         )
@@ -542,11 +539,6 @@ class GPUVecEnv(VecEnv):
         local_gravity_vector = self.local_gravity_vector_buffer[idx, 0]
         contact_states = self.contact_sensor_buffer[idx, 0]
 
-        print(idx)
-        if jp.sum(idx) == 0: 
-            print(self.local_gravity_vector_buffer[idx, :, 0])
-            print(local_gravity_vector[idx, 0])
-
         return (
             joint_angles,
             joint_velocities,
@@ -583,6 +575,12 @@ class GPUVecEnv(VecEnv):
     def _apply_action(self, actions):
         # convert actions to jax array clipped from -1 to 1
         actions = jp.clip(jp.array(actions), -1.0, 1.0) * (jp.pi / 2)
+        action_noise = (
+            self.randomization_factor
+            * (JOINT_ACTION_NOISE_STDDEV / 180.0 * jp.pi)
+            * jax.random.normal(key=self.rng_key, shape=actions.shape)
+        )
+        actions = actions + action_noise
         # cycle action through action buffer
         self.action_buffer = self.action_buffer.at[:, 0:-1].set(
             self.action_buffer[:, 1:]
@@ -666,6 +664,7 @@ class GPUVecEnv(VecEnv):
             self.previous_actions / (jp.pi / 2),
             self.last_actions / (jp.pi / 2),
             is_self_colliding,
+            self.data_batch.time,
         )
 
         if self.reward_override is not None:
@@ -839,7 +838,7 @@ if __name__ == "__main__":
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
         actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
-        
+
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
         end_time = time.time()
