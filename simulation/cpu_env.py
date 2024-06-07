@@ -446,17 +446,66 @@ class CPUEnv(gym.Env):
         delayed_observations = jp.concatenate(
             (
                 joint_angles,  # rad
+                # 0 : 0.039253025
+                # 1 : 0.00343594177
+                # 2 : 0.01672166399999997
+                # 3 : 0.0026692443250000003
+                # 4 : 0.18353158199999997
+                # 5 : 0.040043240000000035
+                # 6 : 0.04661026899999998
+                # 7 : 0.01992178
+                # 8 : 0.009539132000000006
+                # 9 : 0.2924758169999999
+                # 10 : 0.08057451699999996
+                # 11 : 0.05238458899999998
+                # 12 : 0.03389507699999994
+                # 13 : 0.01406067600000005
+                # 14 : 0.21972393999999995
+                # 15 : 0.03813486799999999
                 joint_velocities,  # rad / s
+                # 16 : 1.97274602
+                # 17 : 0.4230492819
+                # 18 : 0.9102086999999992
+                # 19 : 0.229677416
+                # 20 : 7.70878201
+                # 21 : 8.6083184
+                # 22 : 2.1655368900000003
+                # 23 : 5.163919590000001
+                # 24 : 3.036411760000001
+                # 25 : 15.06553125
+                # 26 : 3.0963626000000004
+                # 27 : 6.441293290000001
+                # 28 : 3.9982752800000005
+                # 29 : 5.04596286
+                # 30 : 8.79332649
+                # 31 : 2.2873816400000004
                 local_ang_vel,  # rad/s
+                # 32 : 0.5788562599999998
+                # 33 : 1.5177979099999996
+                # 34 : 2.9235466590000003
                 torso_local_velocity,  # m/s
+                # 35 : 0.22458505399999995
+                # 36 : 0.48415967410000005
+                # 37 : 0.22590792999999998
                 local_gravity_vector,  # unit vector
+                # 38 : 0.021505353000000005
+                # 39 : 0.045610018
+                # 40 : 0.02539235299999998
                 np.array([binary_foot_contact_state_left]),
+                # 41 : 0.0
                 np.array([binary_foot_contact_state_right]),
+                # 42 : 0.0
                 self.control_input_velocity,  # as defined in reset
+                # 43 : 0.0
+                # 44 : 0.0
                 self.control_input_yaw,  # as defined in reset
+                # 45 : 0.0
                 clock_phase_sin,  # as defined in paper on potential rewards
+                # 46 : 6.599999999301609e-08
                 clock_phase_cos,  # as defined in paper on potential rewards
+                # 47 : 4.999999969612645e-09
                 clock_phase_complex,  # as defined in paper on potential rewards
+                # 48 : 1.229999999630138e-07
             )
         )
 
@@ -601,7 +650,7 @@ if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
-        randomization_factor=1,
+        randomization_factor=0,
         enable_rendering=True,
     )
     obs = sim.reset()
@@ -615,9 +664,11 @@ if __name__ == "__main__":
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = np.zeros(len(JOINT_NAMES))
+        # action = np.arange(len(JOINT_NAMES))
 
         start_time = time.time()
         obs, reward, isTerminal, _, _ = sim.step(action)
+        # print(obs)
         end_time = time.time()
         total_step_time += end_time - start_time
         total_step_calls += 1

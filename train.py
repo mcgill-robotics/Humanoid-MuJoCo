@@ -106,8 +106,8 @@ if args.log_name is not None:
     log_dir = "data/{}/training_results".format(args.log_name.strip())
 else:
     log_dir = "data/{}/training_results".format(args.algo.upper().strip())
-EVAL_FREQ = args.eval_freq
-CHECKPOINT_FREQ = args.checkpoint_freq
+EVAL_FREQ = args.eval_freq // NUM_ENVS
+CHECKPOINT_FREQ = args.checkpoint_freq // NUM_ENVS
 
 ##########################
 ##  ENVIRONMENT  SETUP  ##

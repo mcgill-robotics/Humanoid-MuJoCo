@@ -62,7 +62,7 @@ def torso_height_reward(z_pos):
 
 
 def joint_torque_reward(joint_torques):
-    JOINT_TORQUE_REWARD_WEIGHT = 2
+    JOINT_TORQUE_REWARD_WEIGHT = 1
     MAX__SAFE_JOINT_TORQUE = 1.25
     joint_torque_reward = (
         JOINT_TORQUE_REWARD_WEIGHT
@@ -78,7 +78,7 @@ def joint_torque_reward(joint_torques):
 
 
 def control_change_reward(previous_ctrl, latest_ctrl):
-    CONTROL_CHANGE_REWARD_WEIGHT = 1
+    CONTROL_CHANGE_REWARD_WEIGHT = 0.5
     ctrl_change = latest_ctrl - previous_ctrl
     control_change_reward = (
         CONTROL_CHANGE_REWARD_WEIGHT
@@ -90,7 +90,7 @@ def control_change_reward(previous_ctrl, latest_ctrl):
 
 
 def control_regularization_reward(ctrl):
-    CONTROL_REG_REWARD_WEIGHT = 2
+    CONTROL_REG_REWARD_WEIGHT = 0.5
     control_regularization_reward = (
         CONTROL_REG_REWARD_WEIGHT * jp.sum(scaled_exp(sqr(ctrl))) / len(ctrl)
     )

@@ -825,7 +825,7 @@ if __name__ == "__main__":
         num_envs=4,
         xml_path=SIM_XML_PATH,
         reward_fn=controlInputRewardFn,
-        randomization_factor=1,
+        randomization_factor=0,
         enable_rendering=True,
     )
 
@@ -834,21 +834,37 @@ if __name__ == "__main__":
 
     total_step_time = 0
     total_step_calls = 0
+    total_reward = 0
+    ep_length = 0
 
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
-        actions = np.zeros((sim_batch.num_envs, len(JOINT_NAMES)))
+        # actions = np.array([np.arange(len(JOINT_NAMES))] * sim_batch.num_envs)
 
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)
+        print(obs[0])
         end_time = time.time()
         sim_batch.render(mode="human", index=0)
         total_step_time += end_time - start_time
         total_step_calls += 1
 
-        print(
-            f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
-        )
+        ep_length += 1
+        total_reward += rewards[0]
+
+        if terminals[0]:
+            print(
+                "Cumulative Reward: ",
+                total_reward,
+                "Episode Length: ",
+                ep_length,
+            )
+            total_reward = 0
+            ep_length = 0
+
+        # print(
+        #     f"{sim_batch.num_envs} Step Time: {total_step_time / (sim_batch.num_envs*total_step_calls)}"
+        # )
 
         if np.isnan(obs).any() or np.isnan(rewards).any() or np.isnan(terminals).any():
             print("ERROR: NaN value in observations/rewards/terminals.")
