@@ -47,7 +47,8 @@ class CPUEnv(gym.Env):
         self.action_space = spaces.Box(
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32
         )
-        observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
+        # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
+        observation_size = len(JOINT_NAMES) + 3 + 3 + 2
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float32
         )
@@ -446,17 +447,17 @@ class CPUEnv(gym.Env):
         delayed_observations = jp.concatenate(
             (
                 joint_angles,  # rad
-                joint_velocities,  # rad / s
+                # joint_velocities,  # rad / s
                 local_ang_vel,  # rad/s
-                torso_local_velocity,  # m/s
+                # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
                 np.array([binary_foot_contact_state_left]),
                 np.array([binary_foot_contact_state_right]),
-                self.control_input_velocity,  # as defined in reset
-                self.control_input_yaw,  # as defined in reset
-                clock_phase_sin,  # as defined in paper on potential rewards
-                clock_phase_cos,  # as defined in paper on potential rewards
-                clock_phase_complex,  # as defined in paper on potential rewards
+                # self.control_input_velocity,  # as defined in reset
+                # self.control_input_yaw,  # as defined in reset
+                # clock_phase_sin,  # as defined in paper on potential rewards
+                # clock_phase_cos,  # as defined in paper on potential rewards
+                # clock_phase_complex,  # as defined in paper on potential rewards
             )
         )
 

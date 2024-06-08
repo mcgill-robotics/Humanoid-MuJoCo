@@ -62,21 +62,23 @@ PHYSICS_STEPS_PER_CONTROL_STEP = int((1.0 / CONTROL_FREQUENCY) // TIMESTEP)
 ### URDF REFERENCE NAMES (DEFINED FROM MUJOCO .xml FILES, DO NOT CHANGE UNLESS .xml CHANGES)
 JOINT_NAMES = [
     "right_shoulder_pitch",
+    "right_shoulder_roll",
     "right_elbow",
     "left_shoulder_pitch",
+    "left_shoulder_roll",
     "left_elbow",
-    "left_hip_yaw",
+    # "left_hip_yaw",
     "left_hip_roll",
     "left_hip_pitch",
     "left_knee",
-    "left_ankle_pitch",
-    "right_hip_yaw",
+    # "left_ankle_pitch",
+    # "right_hip_yaw",
     "right_hip_roll",
     "right_hip_pitch",
     "right_knee",
-    "right_ankle_pitch",
-    "torso_yaw",
-    "torso_roll",
+    # "right_ankle_pitch",
+    # "torso_yaw",
+    # "torso_roll",
 ]
 JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = [

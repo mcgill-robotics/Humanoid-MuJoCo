@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
 # Read the text file
-with open("cpu_obs", "r") as file:
-    data_cpu = file.read()
 with open("gpu_obs", "r") as file:
+    data_cpu = file.read()
+with open("cpu_obs_1", "r") as file:
     data_gpu = file.read()
 
 

@@ -100,14 +100,17 @@ def control_regularization_reward(ctrl):
 
 def symmetry_reward(ctrl):
     SYMMETRY_REWARD_WEIGHT = 1
-    EQUAL_REG_JOINTS = [("left_hip_yaw", "right_hip_yaw")]
+    EQUAL_REG_JOINTS = [
+        # ("left_hip_yaw", "right_hip_yaw"),
+        ("left_elbow", "right_elbow"),
+    ]
     OPPOSITE_REG_JOINTS = [
         ("left_hip_roll", "right_hip_roll"),
         ("left_hip_pitch", "right_hip_pitch"),
         ("left_knee", "right_knee"),
-        ("left_ankle_pitch", "right_ankle_pitch"),
+        # ("left_ankle_pitch", "right_ankle_pitch"),
         ("left_shoulder_pitch", "right_shoulder_pitch"),
-        ("left_elbow", "right_elbow"),
+        ("left_shoulder_roll", "right_shoulder_roll"),
     ]
     symmetry_reward = 0
     for joint_a, joint_b in EQUAL_REG_JOINTS:
