@@ -136,7 +136,7 @@ def applyExternalForces(sim_batch):
         ] = np.array([applied_forces_x, applied_forces_y]).T
 
     # finally, return the updated forces to be applied
-    return jp.array(xfrc_applied, dtype=float)
+    return jp.array(xfrc_applied, dtype=jp.float64)
 
 
 def checkSelfCollision(non_robot_geom_ids, d):

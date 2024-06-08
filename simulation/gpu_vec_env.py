@@ -91,12 +91,12 @@ class GPUVecEnv(VecEnv):
 
         # DEFINE ACTION AND OBSERVATION SPACES
         self.action_space = spaces.Box(
-            -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32
+            -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
         observation_size = len(JOINT_NAMES) + 3 + 3 + 2
         self.observation_space = spaces.Box(
-            -10, 10, shape=(observation_size,), dtype=np.float32
+            -10, 10, shape=(observation_size,), dtype=np.float64
         )
 
         # save the important info of the mujoco model (indices for joints, torso, etc.)
@@ -240,13 +240,17 @@ class GPUVecEnv(VecEnv):
         )
         self.contact_sensor_buffer = jp.zeros((self.num_envs, max_timestep_delay, 2))
 
-        self.action_delay_indices = np.zeros((self.num_envs,), dtype=int)
-        self.joint_angles_delay_indices = np.zeros((self.num_envs,), dtype=int)
-        self.joint_velocities_delay_indices = np.zeros((self.num_envs,), dtype=int)
-        self.local_ang_vel_delay_indices = np.zeros((self.num_envs,), dtype=int)
-        self.torso_local_velocity_delay_indices = np.zeros((self.num_envs,), dtype=int)
-        self.local_gravity_vector_delay_indices = np.zeros((self.num_envs,), dtype=int)
-        self.contact_sensor_delay_indices = np.zeros((self.num_envs,), dtype=int)
+        self.action_delay_indices = np.zeros((self.num_envs,), dtype=np.int64)
+        self.joint_angles_delay_indices = np.zeros((self.num_envs,), dtype=np.int64)
+        self.joint_velocities_delay_indices = np.zeros((self.num_envs,), dtype=np.int64)
+        self.local_ang_vel_delay_indices = np.zeros((self.num_envs,), dtype=np.int64)
+        self.torso_local_velocity_delay_indices = np.zeros(
+            (self.num_envs,), dtype=np.int64
+        )
+        self.local_gravity_vector_delay_indices = np.zeros(
+            (self.num_envs,), dtype=np.int64
+        )
+        self.contact_sensor_delay_indices = np.zeros((self.num_envs,), dtype=np.int64)
 
     def _init_sim_trackers(self):
         # initialize instance parameters

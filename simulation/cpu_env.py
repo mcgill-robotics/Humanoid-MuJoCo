@@ -45,12 +45,12 @@ class CPUEnv(gym.Env):
         self.enable_rendering = enable_rendering
 
         self.action_space = spaces.Box(
-            -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float32
+            -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
         observation_size = len(JOINT_NAMES) + 3 + 3 + 2
         self.observation_space = spaces.Box(
-            -10, 10, shape=(observation_size,), dtype=np.float32
+            -10, 10, shape=(observation_size,), dtype=np.float64
         )
         self.max_simulation_time = (
             max_simulation_time_override
@@ -461,7 +461,7 @@ class CPUEnv(gym.Env):
             )
         )
 
-        return np.array(delayed_observations, dtype=np.float32)
+        return np.array(delayed_observations, dtype=np.float64)
 
     def _check_self_collision(self):
         self_collision = False
