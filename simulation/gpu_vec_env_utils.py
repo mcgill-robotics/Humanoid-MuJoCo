@@ -27,8 +27,12 @@ def getContactSensorData(pressure_sensor_ids, d):
     # convert to binary (above some threshold is considered a contact point)
     pressure_values = jp.where(pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0)
     # convert to left/right contact states
-    binary_foot_contact_state_left = jp.clip(jp.sum(pressure_values[:4]), 0, 1)
-    binary_foot_contact_state_right = jp.clip(jp.sum(pressure_values[4:]), 0, 1)
+    binary_foot_contact_state_left = jp.clip(
+        jp.sum(pressure_values[: len(pressure_sensor_ids) // 2]), 0, 1
+    )
+    binary_foot_contact_state_right = jp.clip(
+        jp.sum(pressure_values[len(pressure_sensor_ids) // 2 :]), 0, 1
+    )
 
     return jp.array([binary_foot_contact_state_left, binary_foot_contact_state_right])
 

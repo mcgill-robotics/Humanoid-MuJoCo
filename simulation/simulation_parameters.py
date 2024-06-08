@@ -82,14 +82,16 @@ JOINT_NAMES = [
 ]
 JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = [
-    "pressure_geom_LLB",
-    "pressure_geom_LRB",
-    "pressure_geom_LRF",
-    "pressure_geom_LLF",
-    "pressure_geom_RLB",
-    "pressure_geom_RRB",
-    "pressure_geom_RRF",
-    "pressure_geom_RLF",
+    "pressure_geom_L",
+    "pressure_geom_R",
+    # "pressure_geom_LLB",
+    # "pressure_geom_LRB",
+    # "pressure_geom_LRF",
+    # "pressure_geom_LLF",
+    # "pressure_geom_RLB",
+    # "pressure_geom_RRB",
+    # "pressure_geom_RRF",
+    # "pressure_geom_RLF",
 ]
 TORSO_BODY_NAME = "humanoid"
 NON_ROBOT_GEOMS = ["floor", "X_axis_ref", "Y_axis_ref", "Z_axis_ref"]

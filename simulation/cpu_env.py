@@ -354,8 +354,12 @@ class CPUEnv(gym.Env):
                         + 0.0001  # add a small amount to the force since sometimes contacts have a force of 0 (for binary contact checking, we want all contacts to have a force)
                     )
         pressure_values = np.where(pressure_values > MIN_FORCE_FOR_CONTACT, 1.0, 0.0)
-        binary_foot_contact_state_left = np.clip(np.sum(pressure_values[:4]), 0, 1)
-        binary_foot_contact_state_right = np.clip(np.sum(pressure_values[4:]), 0, 1)
+        binary_foot_contact_state_left = np.clip(
+            np.sum(pressure_values[: len(self.pressure_sensor_ids) // 2]), 0, 1
+        )
+        binary_foot_contact_state_right = np.clip(
+            np.sum(pressure_values[len(self.pressure_sensor_ids) // 2 :]), 0, 1
+        )
         return binary_foot_contact_state_left, binary_foot_contact_state_right
 
     def _get_obs(self):
@@ -615,7 +619,7 @@ if __name__ == "__main__":
 
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        action = np.zeros(len(JOINT_NAMES))
+        # action = np.zeros(len(JOINT_NAMES))
         # action = np.arange(len(JOINT_NAMES))
 
         start_time = time.time()
