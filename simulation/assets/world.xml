@@ -12,9 +12,22 @@
     <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="32" height="512"/>
   </asset>
 
-  <!-- <option jacobian="dense"> <flag eulerdamp="disable"/> </option> -->
+  <option jacobian="dense"> <flag eulerdamp="disable"/> </option>
   
   <include file="robot.xml"/>
+
+  <contact>
+    <exclude body1="hip_left" body2="hip_left"/>
+    <exclude body1="hip_left" body2="shoulder_right"/>
+    <exclude body1="hip_left" body2="torso"/>
+    <exclude body1="shoulder_left" body2="shoulder_left"/>
+    <exclude body1="shoulder_left" body2="hip_right"/>
+    <exclude body1="shoulder_left" body2="shoulder_right"/>
+    <exclude body1="hip_right" body2="hip_right"/>
+    <exclude body1="hip_right" body2="torso"/>
+    <exclude body1="shoulder_right" body2="shoulder_right"/>
+    <exclude body1="torso" body2="torso"/>
+  </contact>
 
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="humanoid" diffuse=".8 .8 .8" specular="0.3 0.3 0.3" pos="0 -6 4" cutoff="30"/>
