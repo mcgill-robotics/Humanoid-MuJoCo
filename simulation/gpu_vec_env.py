@@ -177,8 +177,8 @@ class GPUVecEnv(VecEnv):
         model = mujoco.MjModel.from_xml_path(self.xml_path)
         model.opt.timestep = self.timestep
         model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-        model.opt.iterations = 15 * 4
-        model.opt.ls_iterations = 15 * 4
+        model.opt.iterations = 15
+        model.opt.ls_iterations = 15
         return model
 
     def _init_model_info(self):
