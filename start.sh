@@ -31,6 +31,8 @@ execute_test() {
     git add -A
     git commit -m "Finished $1" --quiet
     git push --quiet
+
+    echo "Finished $1."
 }
 
 while true; do
