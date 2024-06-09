@@ -6,11 +6,12 @@ execute_test() {
     git_branch=${lines[0]}
     string=${lines[1]}
 
-    echo "Git branch: $git_branch"
-    echo "String: $string"
+    echo " >> branch: $git_branch"
+    echo " >> command: $string"
 
     mv $1 $1.in_progress
-    git commit -am "Running test $1"
+    git add $1.in_progress
+    git commit -m "Running $1"
     git push
 
     git checkout $git_branch
@@ -26,9 +27,10 @@ execute_test() {
 }
 
 while true; do
-    git pull
+    git pull > /dev/null
     for file in *.test; do
         if [[ -e $file ]]; then
+            echo "Test found. Executing..."
             execute_test $file
         fi
     done
