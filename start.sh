@@ -12,18 +12,18 @@ execute_test() {
     mv $1 $1.in_progress
     git add $1.in_progress
     git commit -m "Running $1"
-    git push
+    git push > /dev/null
 
     git checkout $git_branch
-    exec $string
+    exec "$string"
     
     git commit -am "Test results"
-    git push
+    git push > /dev/null
 
     git checkout train_queue
     mv $1.in_progress $1.done
     git commit -am "Finished $1"
-    git push
+    git push > /dev/null
 }
 
 while true; do
