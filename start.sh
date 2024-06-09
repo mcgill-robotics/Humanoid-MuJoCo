@@ -4,6 +4,7 @@ execute_test() {
     mapfile -t lines < "$1"
 
     git_branch=${lines[0]}
+    git_branch=$(echo $git_branch | sed 's/[^[:print:]]//g')
     command=${lines[1]}
 
     echo " >> branch: $git_branch"
