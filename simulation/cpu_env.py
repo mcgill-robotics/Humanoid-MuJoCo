@@ -645,4 +645,4 @@ if __name__ == "__main__":
             )
             total_reward = 0
             n_steps = 0
-            sim.reset()
+            # sim.reset()

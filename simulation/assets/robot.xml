@@ -2,7 +2,7 @@
   <compiler angle="radian"/>
   <worldbody>
     <!-- CUSTOM -->
-    <body name="humanoid" pos="0 0 -0.075" quat="0.7 0 0 0.7">
+    <body name="humanoid" pos="0 0 -0.075" quat="1 0 0 0">
       <joint range="-1.5708 1.5708" limited="true" name="humanoid_free" type="free"/>
       <!-- CUSTOM -->
       <body name="torso" pos="0 0 0" quat="1 0 0 0">
