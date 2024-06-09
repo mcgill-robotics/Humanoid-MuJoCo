@@ -11,16 +11,17 @@ execute_test() {
 
     mv $1 $1.in_progress
     git add $1.in_progress
-    git commit -m "Running $1"
+    git commit -m "Running $1"  > /dev/null
     git push > /dev/null
 
     # CHECKOUT TO TEST BRANCH AND RUN TEST
     git checkout $git_branch
-    git reset --hard HEAD
-    exec "$string"
+    git reset --hard HEAD > /dev/null
+    $string &> "$1.logs"
     
     # PUSH TEST RESULTS TO TEST BRANCH
-    git commit -am "Test results"
+    git add -A
+    git commit -m "Test results" > /dev/null
     git push > /dev/null
 
     # RETURN TO TRAIN_QUEUE BRANCH TO MOVE TEST STATUS TO DONE AND CONTINUE POLLING
