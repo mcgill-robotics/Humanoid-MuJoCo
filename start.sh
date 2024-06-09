@@ -15,8 +15,8 @@ execute_test() {
     git push --quiet
 
     # CHECKOUT TO TEST BRANCH AND RUN TEST
-    git checkout $git_branch --quiet
-    git reset --hard --quiet HEAD
+    git fetch --quiet
+    git checkout origin/$git_branch --quiet
     eval $command &> "$1.logs"
     
     # PUSH TEST RESULTS TO TEST BRANCH
@@ -26,7 +26,6 @@ execute_test() {
 
     # RETURN TO TRAIN_QUEUE BRANCH TO MOVE TEST STATUS TO DONE AND CONTINUE POLLING
     git checkout train_queue --quiet
-    git reset --hard --quiet HEAD
     mv $1.in_progress $1.done
     git add -A
     git commit -m "Finished $1" --quiet
