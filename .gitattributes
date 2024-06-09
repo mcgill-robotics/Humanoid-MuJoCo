@@ -1,2 +1,3 @@
 *.pth binary
 *.pkl binary
+*.sh text eol=lf
