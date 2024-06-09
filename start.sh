@@ -28,7 +28,8 @@ execute_test() {
     git checkout train_queue
     git reset --hard HEAD
     mv $1.in_progress $1.done
-    git commit -am "Finished $1"
+    git add $1.done
+    git commit -m "Finished $1"
     git push > /dev/null
 }
 
