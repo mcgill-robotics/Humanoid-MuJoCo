@@ -7,8 +7,8 @@ services:
     volumes:
       - ../.:/root/Humanoid-MuJoCo
     image: "mcgillrobotics/mujoco:latest"
-    # command: bash -c "./root/Humanoid-MuJoCo/start.sh"
-    command: bash -c "tail -f /dev/null"
+    command: bash -c "./root/Humanoid-MuJoCo/start.sh"
+    # command: bash -c "tail -f /dev/null"
     deploy:
       resources:
         reservations:
