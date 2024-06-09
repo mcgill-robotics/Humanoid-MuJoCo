@@ -4,10 +4,10 @@ execute_test() {
     mapfile -t lines < "$1"
 
     git_branch=${lines[0]}
-    string=${lines[1]}
+    command=${lines[1]}
 
     echo " >> branch: $git_branch"
-    echo " >> command: $string"
+    echo " >> command: $command"
 
     mv $1 $1.in_progress
     git add $1.in_progress
@@ -17,7 +17,7 @@ execute_test() {
     # CHECKOUT TO TEST BRANCH AND RUN TEST
     git checkout $git_branch --quiet
     git reset --hard --quiet HEAD
-    $string &> "$1.logs"
+    $command &> "$1.logs"
     
     # PUSH TEST RESULTS TO TEST BRANCH
     git add -A
