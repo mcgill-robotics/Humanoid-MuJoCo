@@ -21,7 +21,7 @@ execute_test() {
     
     # PUSH TEST RESULTS TO TEST BRANCH
     git add -A
-    git commit -m --quiet "Test results"
+    git commit -m "Test results" --quiet 
     git push --quiet
 
     # RETURN TO TRAIN_QUEUE BRANCH TO MOVE TEST STATUS TO DONE AND CONTINUE POLLING
@@ -29,7 +29,7 @@ execute_test() {
     git reset --hard --quiet HEAD
     mv $1.in_progress $1.done
     git add --quiet $1.done
-    git commit --quiet -m "Finished $1"
+    git commit -m "Finished $1" --quiet
     git push --quiet
 }
 
