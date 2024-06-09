@@ -28,7 +28,7 @@ execute_test() {
     git checkout train_queue --quiet
     git reset --hard --quiet HEAD
     mv $1.in_progress $1.done
-    git add --quiet $1.done
+    git add $1.done
     git commit -m "Finished $1" --quiet
     git push --quiet
 }
