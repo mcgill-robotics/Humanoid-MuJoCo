@@ -16,6 +16,7 @@ execute_test() {
 
     # CHECKOUT TO TEST BRANCH AND RUN TEST
     git fetch --quiet
+    echo $git_branch
     git checkout origin/$git_branch --quiet
     eval $command &> "$1.logs"
     
