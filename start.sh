@@ -17,7 +17,7 @@ execute_test() {
     # CHECKOUT TO TEST BRANCH AND RUN TEST
     git checkout $git_branch --quiet
     git reset --hard --quiet HEAD
-    $command &> "$1.logs"
+    exec $command &> "$1.logs"
     
     # PUSH TEST RESULTS TO TEST BRANCH
     git add -A
