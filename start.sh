@@ -10,7 +10,7 @@ execute_test() {
     echo " >> command: $string"
 
     mv $1 $1.in_progress
-    git add $1.in_progress --quiet
+    git add $1.in_progress
     git commit -m "Running $1" --quiet
     git push --quiet
 
