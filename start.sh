@@ -1,7 +1,7 @@
 echo "Starting..."
 
 execute_test() {
-    mapfile -t lines < "$1"
+    mapfile -t lines < "$1.test"
 
     git_branch=${lines[0]}
     git_branch=$(echo $git_branch | sed 's/[^[:print:]]//g')
@@ -10,15 +10,14 @@ execute_test() {
     echo " >> branch: $git_branch"
     echo " >> command: $command"
 
-    mv $1 $1.in_progress
+    mv $1.test $1.in_progress
     git add -A
-    git commit -m "Running $1" --quiet
+    git commit -m "Running $1.test" --quiet
     git push --quiet
 
     # CHECKOUT TO TEST BRANCH AND RUN TEST
     git fetch --quiet
-    echo $git_branch
-    git checkout origin/$git_branch --quiet
+    git checkout $git_branch --quiet
     eval $command &> "$1.logs"
     
     # PUSH TEST RESULTS TO TEST BRANCH
@@ -39,7 +38,8 @@ while true; do
     for file in *.test; do
         if [[ -e $file ]]; then
             echo "Test found. Executing..."
-            execute_test $file
+            base_name="${file%.test}"
+            execute_test $base_name
         fi
     done
     sleep 60
