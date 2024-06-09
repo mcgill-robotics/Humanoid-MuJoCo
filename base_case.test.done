@@ -1,2 +1,2 @@
 antoine
-echo "this shit working" > test.result
+python3 -c "print('Hello world')"
