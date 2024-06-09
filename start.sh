@@ -16,6 +16,7 @@ execute_test() {
 
     # CHECKOUT TO TEST BRANCH AND RUN TEST
     git checkout $git_branch
+    git reset --hard HEAD
     exec "$string"
     
     # PUSH TEST RESULTS TO TEST BRANCH
@@ -24,6 +25,7 @@ execute_test() {
 
     # RETURN TO TRAIN_QUEUE BRANCH TO MOVE TEST STATUS TO DONE AND CONTINUE POLLING
     git checkout train_queue
+    git reset --hard HEAD
     mv $1.in_progress $1.done
     git commit -am "Finished $1"
     git push > /dev/null
