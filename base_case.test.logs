@@ -1,1 +1,4 @@
-"this shit working" > test.result
+  File "<string>", line 1
+    "print('Hello
+    ^
+SyntaxError: unterminated string literal (detected at line 1)
