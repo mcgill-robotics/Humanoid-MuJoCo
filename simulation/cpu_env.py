@@ -618,8 +618,8 @@ if __name__ == "__main__":
     n_steps = 0
 
     while True:
-        action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        # action = np.zeros(len(JOINT_NAMES))
+        # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
+        action = 1 * np.ones(len(JOINT_NAMES))
         # action = np.arange(len(JOINT_NAMES))
 
         start_time = time.time()

@@ -14,18 +14,22 @@
 
   <option jacobian="dense"> <flag eulerdamp="disable"/> </option>
   
-  <include file="robot.xml"/>
+  <include file="humanoid.xml"/>
 
   <contact>
-    <exclude body1="hip_left" body2="hip_left"/>
-    <exclude body1="hip_left" body2="shoulder_right"/>
-    <exclude body1="hip_left" body2="torso"/>
-    <exclude body1="shoulder_left" body2="shoulder_left"/>
-    <exclude body1="shoulder_left" body2="hip_right"/>
-    <exclude body1="shoulder_left" body2="shoulder_right"/>
-    <exclude body1="hip_right" body2="hip_right"/>
-    <exclude body1="hip_right" body2="torso"/>
-    <exclude body1="shoulder_right" body2="shoulder_right"/>
+    <exclude body1="left_waist_roll_link" body2="left_waist_roll_link"/>
+    <exclude body1="left_waist_roll_link" body2="right_shoulder_roll_link"/>
+    <exclude body1="left_waist_roll_link" body2="torso"/>
+    <exclude body1="left_shoulder_roll_link" body2="left_shoulder_roll_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="left_shoulder_pitch_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="left_forearm_pitch_link"/>
+    <exclude body1="left_forearm_pitch_link" body2="left_forearm_pitch_link"/>
+    <exclude body1="left_shoulder_pitch_link" body2="left_forearm_pitch_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="right_waist_roll_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="right_shoulder_roll_link"/>
+    <exclude body1="right_waist_roll_link" body2="right_waist_roll_link"/>
+    <exclude body1="right_waist_roll_link" body2="torso"/>
+    <exclude body1="right_shoulder_roll_link" body2="right_shoulder_roll_link"/>
     <exclude body1="torso" body2="torso"/>
   </contact>
 

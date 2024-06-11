@@ -15,7 +15,7 @@ def sqr(x):
 
 
 def horizontal_velocity_reward(velocity, target_velocity):
-    VELOCITY_ERROR_REWARD_WEIGHT = 10
+    VELOCITY_ERROR_REWARD_WEIGHT = 15
     hvelocity_reward = VELOCITY_ERROR_REWARD_WEIGHT * scaled_exp(
         sqr(jp.linalg.norm(velocity[0:2] - target_velocity))
     )

@@ -10,7 +10,20 @@
     <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="32" height="512"/>
   </asset>
   
-  <include file="robot.xml"/>
+  <include file="humanoid.xml"/>
+
+  <contact>
+    <exclude body1="left_waist_roll_link" body2="left_waist_roll_link"/>
+    <exclude body1="left_waist_roll_link" body2="right_shoulder_roll_link"/>
+    <exclude body1="left_waist_roll_link" body2="torso"/>
+    <exclude body1="left_shoulder_roll_link" body2="left_shoulder_roll_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="right_waist_roll_link"/>
+    <exclude body1="left_shoulder_roll_link" body2="right_shoulder_roll_link"/>
+    <exclude body1="right_waist_roll_link" body2="right_waist_roll_link"/>
+    <exclude body1="right_waist_roll_link" body2="torso"/>
+    <exclude body1="right_shoulder_roll_link" body2="right_shoulder_roll_link"/>
+    <exclude body1="torso" body2="torso"/>
+  </contact>
 
   <worldbody>
     <light name="spotlight" mode="targetbodycom" target="humanoid" diffuse=".8 .8 .8" specular="0.3 0.3 0.3" pos="0 -6 4" cutoff="30"/>
