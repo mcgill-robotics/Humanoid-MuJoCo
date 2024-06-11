@@ -24,19 +24,19 @@ def horizontal_velocity_reward(velocity, target_velocity):
 
 
 def target_orientation_reward(torso_quat_obj, target_yaw):
-    ORIENTATION_REWARD_WEIGHT = 10
+    YAW_REWARD_WEIGHT = 0
+    UPRIGHT_REWARD_WEIGHT = 10
     fwd_rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
     target_fwd_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
     down_rot_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     target_down_rot_vector = jp.array([0, 0, -1])
-    rot_reward = ORIENTATION_REWARD_WEIGHT * scaled_exp(
-        (
-            sqr(
-                jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector)
-                + jp.linalg.norm(down_rot_vector - target_down_rot_vector)
-            )
-        )
+    upright_reward = UPRIGHT_REWARD_WEIGHT * scaled_exp(
+        (sqr(jp.linalg.norm(down_rot_vector - target_down_rot_vector)))
     )
+    yaw_reward = YAW_REWARD_WEIGHT * scaled_exp(
+        (sqr(jp.linalg.norm(fwd_rot_vector - target_fwd_rot_vector)))
+    )
+    rot_reward = upright_reward + yaw_reward
     # print("rot_reward", rot_reward)
     return rot_reward
 
