@@ -62,8 +62,8 @@ def torso_height_reward(z_pos):
 
 
 def joint_torque_reward(joint_torques):
-    JOINT_TORQUE_REWARD_WEIGHT = 1
-    MAX__SAFE_JOINT_TORQUE = 1.25
+    JOINT_TORQUE_REWARD_WEIGHT = 2.5
+    MAX__SAFE_JOINT_TORQUE = 1.0
     joint_torque_reward = (
         JOINT_TORQUE_REWARD_WEIGHT
         * jp.sum(
