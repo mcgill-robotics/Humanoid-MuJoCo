@@ -21,14 +21,14 @@
     <exclude body1="left_waist_roll_link" body2="right_shoulder_roll_link"/>
     <exclude body1="left_waist_roll_link" body2="torso"/>
     <exclude body1="left_shoulder_roll_link" body2="left_shoulder_roll_link"/>
-    <exclude body1="left_shoulder_roll_link" body2="left_shoulder_pitch_link"/>
-    <exclude body1="left_shoulder_roll_link" body2="left_forearm_pitch_link"/>
-    <exclude body1="left_forearm_pitch_link" body2="left_forearm_pitch_link"/>
-    <exclude body1="left_shoulder_pitch_link" body2="left_forearm_pitch_link"/>
     <exclude body1="left_shoulder_roll_link" body2="right_waist_roll_link"/>
     <exclude body1="left_shoulder_roll_link" body2="right_shoulder_roll_link"/>
     <exclude body1="right_waist_roll_link" body2="right_waist_roll_link"/>
     <exclude body1="right_waist_roll_link" body2="torso"/>
+    <exclude body1="left_shoulder_roll_link" body2="torso"/>
+    <exclude body1="right_shoulder_roll_link" body2="torso"/>
+    <exclude body1="left_shoulder_pitch_link" body2="torso"/>
+    <exclude body1="right_shoulder_pitch_link" body2="torso"/>
     <exclude body1="right_shoulder_roll_link" body2="right_shoulder_roll_link"/>
     <exclude body1="torso" body2="torso"/>
   </contact>
