@@ -17,7 +17,7 @@
   </asset>
   <worldbody>
     <body name="humanoid" pos="0 0 -0.2" quat="-0.7 0 0 0.7">
-      <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 1.5708" limited="true" name="humanoid_free" type="free"/>
+      <!-- <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 1.5708" limited="true" name="humanoid_free" type="free"/> -->
       <body name="torso">
         <geom type="mesh" rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
       </body>
