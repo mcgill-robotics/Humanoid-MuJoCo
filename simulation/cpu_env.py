@@ -619,8 +619,7 @@ if __name__ == "__main__":
 
     while True:
         # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        action = 1 * np.ones(len(JOINT_NAMES))
-        # action = np.arange(len(JOINT_NAMES))
+        action = 0 * np.ones(len(JOINT_NAMES))
 
         start_time = time.time()
         obs, reward, isTerminal, _, _ = sim.step(action)
@@ -645,4 +644,4 @@ if __name__ == "__main__":
             )
             total_reward = 0
             n_steps = 0
-            # sim.reset()
+            sim.reset()

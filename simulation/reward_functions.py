@@ -50,8 +50,8 @@ def vertical_velocity_reward(velocity):
 
 def torso_height_reward(z_pos):
     TORSO_HEIGHT_REWARD_WEIGHT = 5
-    TARGET_Z_POS = -0.1
-    MIN_Z_POS_FOR_REWARD = -0.3
+    TARGET_Z_POS = -0.275
+    MIN_Z_POS_FOR_REWARD = -0.35
     z_pos_reward = jp.interp(
         z_pos,
         jp.array([MIN_Z_POS_FOR_REWARD, TARGET_Z_POS]),
@@ -202,7 +202,7 @@ def controlInputRewardFn(
     # CHECK TERMINATION CONDITION AND REWARD
     TERMINATE_ON_SELF_COLLISION = True
     ALLOW_EARLY_TERMINATION = True
-    MIN_Z_BEFORE_GROUNDED = -0.3
+    MIN_Z_BEFORE_GROUNDED = -0.35
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
     local_gravity_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     isNotUpright = jp.where(

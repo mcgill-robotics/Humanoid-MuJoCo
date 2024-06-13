@@ -844,7 +844,7 @@ if __name__ == "__main__":
 
     while True:
         actions = np.random.uniform(-1, 1, (sim_batch.num_envs, len(JOINT_NAMES)))
-        # actions = np.array([np.arange(len(JOINT_NAMES))] * sim_batch.num_envs)
+        # actions = 0 * np.ones((sim_batch.num_envs, len(JOINT_NAMES)))
 
         start_time = time.time()
         obs, rewards, terminals, _ = sim_batch.step(actions)

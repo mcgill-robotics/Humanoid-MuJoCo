@@ -5,9 +5,6 @@
     <mesh name="left_shoulder_roll_link" file="humanoid_urdf/left_shoulder_roll_link.STL"/>
     <mesh name="left_shoulder_pitch_link" file="humanoid_urdf/left_shoulder_pitch_link.STL"/>
     <mesh name="left_forearm_pitch_link" file="humanoid_urdf/left_forearm_pitch_link.STL"/>
-    <mesh name="right_shoulder_roll_link" file="humanoid_urdf/right_shoulder_roll_link.STL"/>
-    <mesh name="right_shoulder_pitch_link" file="humanoid_urdf/right_shoulder_pitch_link.STL"/>
-    <mesh name="right_forearm_pitch_link" file="humanoid_urdf/right_forearm_pitch_link.STL"/>
     <mesh name="left_waist_roll_link" file="humanoid_urdf/left_waist_roll_link.STL"/>
     <mesh name="left_waist_pitch_link" file="humanoid_urdf/left_waist_pitch_link.STL"/>
     <mesh name="left_knee_pitch_link" file="humanoid_urdf/left_knee_pitch_link.STL"/>
@@ -16,8 +13,9 @@
     <mesh name="right_knee_pitch_link" file="humanoid_urdf/right_knee_pitch_link.STL"/>
   </asset>
   <worldbody>
-    <body name="humanoid" pos="0 0 -0.2" quat="-0.7 0 0 0.7">
+    <body name="humanoid_world_link" pos="0 0 -0.275" quat="-0.7 0 0 0.7">
       <joint name="humanoid_free" type="free"/>
+      <body name="humanoid" pos="0 0 0" quat="0.7 0 0 0.7" />
       <body name="torso">
         <geom type="mesh" rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
       </body>
