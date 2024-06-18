@@ -90,7 +90,7 @@ def control_change_reward(previous_ctrl, latest_ctrl):
 
 
 def control_regularization_reward(ctrl):
-    CONTROL_REG_REWARD_WEIGHT = 2.5
+    CONTROL_REG_REWARD_WEIGHT = 5
     control_regularization_reward = (
         CONTROL_REG_REWARD_WEIGHT * jp.sum(scaled_exp(sqr(ctrl))) / len(ctrl)
     )

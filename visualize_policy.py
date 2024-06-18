@@ -8,7 +8,7 @@ from stable_baselines3 import PPO, SAC, TD3
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 0.2
 LOG_NAME = "SAC_CPU"
-CKPT_NAME = "checkpoint_11000064_steps"
+CKPT_NAME = "checkpoint_13999104_steps"
 
 RAND_FACTOR_IN_PRACTICE = 0  # RANDOMIZATION_FACTOR
 
