@@ -9,9 +9,9 @@ nvidia-cudnn-cu11==8.9.6.50
 stable-baselines3[extra]
 tensorflow==2.14.0
 -e git+https://github.com/mcgill-robotics/Humanoid-rl-baselines3-zoo.git@1ac73b7abba2a463daf9f397301c644fc8d10bf9#egg=rl_zoo3
---index-url https://download.pytorch.org/whl/cu118
-torch==2.0.1+cu118
-torchaudio==2.0.2+cu118
-torchvision==0.15.2+cu118
+--index-url https://download.pytorch.org/whl/cu121
+torch==2.0.1+cu121
+torchaudio==2.0.2+cu121
+torchvision==0.15.2+cu121
 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 jax[cuda11_pip]

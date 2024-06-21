@@ -6,9 +6,9 @@ from stable_baselines3 import PPO, SAC, TD3
 
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
-RANDOMIZATION_FACTOR = 0.0
-LOG_NAME = "SAC_CPU"
-CKPT_NAME = "checkpoint_7999488_steps"
+RANDOMIZATION_FACTOR = 0.1
+LOG_NAME = "SAC_CPU_Vincent"
+CKPT_NAME = "best_model"
 
 
 checkpoint = "./data/{}/training_results_r{}/{}".format(
