@@ -6,7 +6,7 @@ from stable_baselines3 import PPO, SAC, TD3
 
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
-RANDOMIZATION_FACTOR = 0.1
+RANDOMIZATION_FACTOR = 0.2
 LOG_NAME = "SAC_CPU_Vincent"
 CKPT_NAME = "best_model"
 
