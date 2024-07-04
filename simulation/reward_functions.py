@@ -202,7 +202,7 @@ def controlInputRewardFn(
     # CHECK TERMINATION CONDITION AND REWARD
     TERMINATE_ON_SELF_COLLISION = True
     ALLOW_EARLY_TERMINATION = True
-    MIN_Z_BEFORE_GROUNDED = -0.35
+    MIN_Z_BEFORE_GROUNDED = -0.4
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
     local_gravity_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     isNotUpright = jp.where(
