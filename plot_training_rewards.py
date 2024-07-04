@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAMES = ["SAC_CPU_Vincent"]
-RANDOMIZATION_FACTORS = [0.1]
+LOG_NAMES = ["SAC_CPU"]
+RANDOMIZATION_FACTORS = [0.0]
 eval_files = ["evaluations.npz"]
 
 #####################

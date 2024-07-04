@@ -55,12 +55,6 @@ argparser.add_argument(
     "--rand-init", type=float, default=0, help="Initial randomization factor value"
 )
 argparser.add_argument(
-    "--rand-increment",
-    type=float,
-    default=0.1,
-    help="How much to increment the randomization factor once reward threshold is reached",
-)
-argparser.add_argument(
     "--reward-goal",
     type=int,
     default=950,  # best possible reward is 1 / timestep == 1_000
@@ -92,7 +86,14 @@ SIMULATE_ON_GPU = not args.cpu
 N_EVAL_EPISODES = args.n_eval_episodes
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
-RANDOMIZATION_INCREMENT = args.rand_increment
+RAND_FACTOR_INCREMENTS = [0.1, 0.05, 0.05, 0.05, 0.01, 0.01, 0.01]
+if abs(RANDOMIZATION_FACTOR + sum(RAND_FACTOR_INCREMENTS) - 1.0) > 0.001:
+    print(
+        "ERR: Randomization factor increments do not sum to 1.0 when starting from {:.1f}".format(
+            RANDOMIZATION_FACTOR
+        )
+    )
+    exit()
 MAX_EVAL_SIM_TIME = 10.0
 SUCCESSFUL_TRAINING_REWARD_THRESHOLD = (
     np.inf if args.reward_goal <= 0 else args.reward_goal * MAX_EVAL_SIM_TIME
@@ -285,7 +286,7 @@ else:
 ##    TRAINING  LOOP    ##
 ##########################
 
-while True:
+for randomization_increment in RAND_FACTOR_INCREMENTS:
     print(" >> TRAINING WITH RANDOMIZATION FACTOR {:.1f}".format(RANDOMIZATION_FACTOR))
     env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
     eval_env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
@@ -330,8 +331,5 @@ while True:
         )
     )
 
-    if RANDOMIZATION_FACTOR == 1:
-        break
-
-    RANDOMIZATION_FACTOR += RANDOMIZATION_INCREMENT
+    RANDOMIZATION_FACTOR += randomization_increment
     RANDOMIZATION_FACTOR = 1 if RANDOMIZATION_FACTOR > 1 else RANDOMIZATION_FACTOR

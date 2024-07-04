@@ -7,15 +7,7 @@ from stable_baselines3 import PPO, SAC, TD3
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
 RANDOMIZATION_FACTOR = 0.1
-LOG_NAME = "SAC_CPU_Vincent"
-CKPT_NAME = "best_model"
-
-
-checkpoint = "./data/{}/training_results_r{}/{}".format(
-    LOG_NAME,
-    RANDOMIZATION_FACTOR,
-    CKPT_NAME,
-)
+CKPT = "data\SAC_CPU/training_results_r0.2\checkpoint_21000192_steps.zip"
 
 # env = GPUVecEnv(
 #     num_envs=1,
@@ -31,7 +23,7 @@ env = CPUEnv(
     enable_rendering=True,
 )
 agent = MODEL_TYPE.load(
-    path=checkpoint,
+    path=CKPT,
     env=env,
 )
 

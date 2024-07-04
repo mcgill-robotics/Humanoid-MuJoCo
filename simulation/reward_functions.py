@@ -78,7 +78,7 @@ def joint_torque_reward(joint_torques):
 
 
 def control_change_reward(previous_ctrl, latest_ctrl):
-    CONTROL_CHANGE_REWARD_WEIGHT = 0.5
+    CONTROL_CHANGE_REWARD_WEIGHT = 2
     ctrl_change = latest_ctrl - previous_ctrl
     control_change_reward = (
         CONTROL_CHANGE_REWARD_WEIGHT

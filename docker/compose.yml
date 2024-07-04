@@ -15,7 +15,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    runtime: nvidia
 
   novnc:
     image: theasp/novnc:latest
