@@ -86,7 +86,7 @@ SIMULATE_ON_GPU = not args.cpu
 N_EVAL_EPISODES = args.n_eval_episodes
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
-RAND_FACTOR_INCREMENTS = [0.05] * 8 + [0.025] * 12 + [0.01] * 10
+RAND_FACTOR_INCREMENTS = [0.05] * 16
 if abs(RANDOMIZATION_FACTOR + sum(RAND_FACTOR_INCREMENTS) - 1.0) > 0.001:
     print(
         "ERR: Randomization factor increments do not sum to 1.0 ({} + {}).".format(
