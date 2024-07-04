@@ -46,12 +46,6 @@ argparser.add_argument(
     help="Frequency of checkpoint saving, in timesteps",
 )
 argparser.add_argument(
-    "--n-steps",
-    type=int,
-    default=50_000_000,
-    help="Total timesteps to train policy for, per randomization factor (can do less if reward threshold is reached early)",
-)
-argparser.add_argument(
     "--rand-init", type=float, default=0, help="Initial randomization factor value"
 )
 argparser.add_argument(
@@ -84,9 +78,9 @@ MODEL_TYPE = {"td3": TD3, "sac": SAC, "ppo": PPO}[args.algo.lower()]
 NUM_ENVS = args.n_envs
 SIMULATE_ON_GPU = not args.cpu
 N_EVAL_EPISODES = args.n_eval_episodes
-TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR = args.rand_init
 RAND_FACTOR_INCREMENTS = [0.05] * 16
+TRAINING_STEPS = [2_000_000] * 16
 if abs(RANDOMIZATION_FACTOR + sum(RAND_FACTOR_INCREMENTS) - 1.0) > 0.001:
     print(
         "ERR: Randomization factor increments do not sum to 1.0 ({} + {}).".format(
@@ -286,7 +280,7 @@ else:
 ##    TRAINING  LOOP    ##
 ##########################
 
-for randomization_increment in RAND_FACTOR_INCREMENTS:
+for n_steps, randomization_increment in zip(TRAINING_STEPS, RAND_FACTOR_INCREMENTS):
     print(" >> TRAINING WITH RANDOMIZATION FACTOR {:.1f}".format(RANDOMIZATION_FACTOR))
     env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
     eval_env.set_attr("randomization_factor", RANDOMIZATION_FACTOR)
@@ -317,7 +311,7 @@ for randomization_increment in RAND_FACTOR_INCREMENTS:
     )
 
     model.learn(
-        total_timesteps=TOTAL_TIMESTEPS,
+        total_timesteps=n_steps,
         callback=[checkpoint_callback, eval_callback],
         log_interval=1,
         tb_log_name="Standing_r{:.1f}".format(RANDOMIZATION_FACTOR),
