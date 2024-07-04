@@ -1,1 +1,1 @@
-python3 train.py --algo sac --log-name SAC_CPU_exp_2 --cpu --rand-init 0.2 --ckpt data\SAC_CPU\training_results_r0.1\checkpoint_19999488_steps.zip
+python3 train.py --algo sac --log-name SAC_CPU_exp_1 --cpu --rand-init 0.2 --ckpt data\SAC_CPU\training_results_r0.1\checkpoint_19999488_steps.zip
