@@ -34,13 +34,13 @@ argparser.add_argument(
 argparser.add_argument(
     "--eval-freq",
     type=int,
-    default=100_000,
+    default=10_000,
     help="Frequency of evaluations in timesteps",
 )
 argparser.add_argument(
     "--checkpoint-freq",
     type=int,
-    default=1_000_000,
+    default=100_000,
     help="Frequency of checkpoint saving, in timesteps",
 )
 argparser.add_argument(
@@ -65,7 +65,7 @@ argparser.add_argument(
     "--rand-init", type=float, default=0, help="Initial randomization factor value"
 )
 argparser.add_argument(
-    "--success-goal",
+    "--target-success-rate",
     type=int,
     default=0.8,
     help="Target portion of successful evaluations (if we are above this, decrease randomization, if we are below, increase randomization factor)",
@@ -90,7 +90,7 @@ N_EVAL_EPISODES = args.n_eval_episodes
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR_INIT = args.rand_init
 MAX_EVAL_SIM_TIME = args.max_eval_time
-SUCCESSFUL_TRAINING_TARGET = args.success_goal
+TARGET_SUCCESS_RATE = args.target_success_rate
 RANDOMIZATION_ADAPTATION_INCREMENT = 0.01
 if args.ckpt is not None:
     CHECKPOINT = args.ckpt.lstrip().rstrip()
@@ -100,7 +100,7 @@ MAX_EVALS_AT_MAX_REWARD = (
     10  # after 10 successful evaluations at max randomization, end training
 )
 
-log_dir = "data/{}/".format(args.log_name.strip())
+log_dir = "data/{}/".format(args.name.strip())
 EVAL_FREQ = args.eval_freq // NUM_ENVS
 CHECKPOINT_FREQ = args.checkpoint_freq // NUM_ENVS
 
@@ -223,10 +223,10 @@ reward_adaptation_callback = RewardAdaptationCallback(
     envs=[env, eval_env],
     eval_freq=EVAL_FREQ,
     eval_cb=eval_callback,
-    success_threshold=SUCCESSFUL_TRAINING_TARGET,
+    success_threshold=TARGET_SUCCESS_RATE,
     max_evals_at_max_reward=MAX_EVALS_AT_MAX_REWARD,
     initial_randomization_factor=RANDOMIZATION_FACTOR_INIT,
-    randomization_increment=RANDOMIZATION_ADAPTATION_INCREMENT
+    randomization_increment=RANDOMIZATION_ADAPTATION_INCREMENT,
     verbose=0,
 )
 
