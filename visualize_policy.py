@@ -4,7 +4,7 @@ from simulation.reward_functions import *
 from stable_baselines3 import SAC
 
 
-MODEL_TYPE = SAC  # TD3 # SAC # PPO
+MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0.1
 CKPT = "data\SAC_CPU/training_results_r0.2\checkpoint_21000192_steps.zip"
 

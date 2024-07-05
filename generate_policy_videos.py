@@ -1,12 +1,12 @@
 from simulation.cpu_env import CPUEnv
 from simulation import GREEN_SCREEN_SIM_XML_PATH
 from simulation.reward_functions import *
-from stable_baselines3 import PPO, SAC, TD3
+from stable_baselines3 import SAC
 import os
 import cv2
 
 
-MODEL_TYPE = SAC  # TD3 # PPO
+MODEL_TYPE = SAC
 LOG_NAME = "SAC"
 RANDOMIZATION_FACTOR = 0
 CKPT_NAME = "best_model"

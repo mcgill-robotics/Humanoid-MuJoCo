@@ -20,7 +20,7 @@ import argparse
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
-    "--n-envs", type=int, default=256, help="Number of environments to run in parallel"
+    "--n-envs", type=int, default=64, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
     "--cpu", action="store_true", help="Pass this flag to run on CPU"
@@ -228,6 +228,7 @@ reward_adaptation_callback = RewardAdaptationCallback(
     initial_randomization_factor=RANDOMIZATION_FACTOR_INIT,
     randomization_increment=RANDOMIZATION_ADAPTATION_INCREMENT,
     verbose=0,
+    log_dir=log_dir,
 )
 
 model.learn(

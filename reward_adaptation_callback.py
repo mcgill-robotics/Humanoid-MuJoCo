@@ -12,6 +12,7 @@ class RewardAdaptationCallback(BaseCallback):
         initial_randomization_factor,
         randomization_increment,
         verbose,
+        log_dir,
     ):
         super().__init__(verbose)
         self.envs = envs
@@ -23,6 +24,12 @@ class RewardAdaptationCallback(BaseCallback):
         self.current_randomization_factor = initial_randomization_factor
         self.current_evals_at_max_reward = 0
         self.randomization_increment = randomization_increment
+        self.log_dir = log_dir
+        self._log_randomization_factor()
+
+    def _log_randomization_factor(self):
+        with open(self.log_dir + "/randomization_factors.csv", "a") as f:
+            f.write(str(self.current_randomization_factor) + "\n")
 
     def _update_randomization_factor(self, new_randomization_factor):
         if new_randomization_factor > 1:
@@ -31,11 +38,21 @@ class RewardAdaptationCallback(BaseCallback):
             new_randomization_factor = 0
         if self.current_randomization_factor == new_randomization_factor:
             return
-
+        print(
+            "{} randomization factor to",
+            (
+                "Increasing"
+                if new_randomization_factor > self.current_randomization_factor
+                else "Decreasing"
+            ),
+            new_randomization_factor,
+        )
         self.current_randomization_factor = new_randomization_factor
+        self._log_randomization_factor()
         self.current_evals_at_max_reward = 0
         for env in self.envs:
             env.set_attr("randomization_factor", self.current_randomization_factor)
+            env.reset()
 
     def _on_step(self):
         continue_training = True
