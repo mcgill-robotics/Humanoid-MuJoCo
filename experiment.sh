@@ -1,1 +1,0 @@
-python3 train.py --algo sac --log-name SAC_CPU --n-steps 10_000_000 --cpu --rand-init 0.2 --ckpt data\SAC_CPU\training_results_r0.1\checkpoint_19999488_steps.zip

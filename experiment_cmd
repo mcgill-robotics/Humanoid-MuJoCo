@@ -1,0 +1,1 @@
+python3 train.py --name SAC_CPU --cpu --ckpt data/initial.zip

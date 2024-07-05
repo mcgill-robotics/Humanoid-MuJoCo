@@ -1,8 +1,7 @@
 from simulation.cpu_env import CPUEnv
-from simulation.gpu_vec_env import GPUVecEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import *
-from stable_baselines3 import PPO, SAC, TD3
+from stable_baselines3 import SAC
 
 
 MODEL_TYPE = SAC  # TD3 # SAC # PPO
