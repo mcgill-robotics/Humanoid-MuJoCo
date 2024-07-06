@@ -10,7 +10,7 @@ rewards = []
 ep_lengths = []
 
 for i in range(len(eval_files)):
-    evaluations = np.load(eval_files[i % len(eval_files)])
+    evaluations = np.load(eval_files[i])
 
     timesteps.extend(evaluations["timesteps"])
     rewards.extend(np.mean(evaluations["results"], axis=1))

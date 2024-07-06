@@ -25,10 +25,9 @@ class RewardAdaptationCallback(BaseCallback):
         self.current_evals_at_max_reward = 0
         self.randomization_increment = randomization_increment
         self.log_dir = log_dir
-        self._log_randomization_factor()
 
     def _log_randomization_factor(self):
-        with open(self.log_dir + "/randomization_factors.csv", "a") as f:
+        with open(self.log_dir + "/randomization_factors.csv", "a+") as f:
             f.write(str(self.current_randomization_factor) + "\n")
 
     def _update_randomization_factor(self, new_randomization_factor):
