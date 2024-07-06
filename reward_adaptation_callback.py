@@ -48,7 +48,6 @@ class RewardAdaptationCallback(BaseCallback):
             new_randomization_factor,
         )
         self.current_randomization_factor = new_randomization_factor
-        self._log_randomization_factor()
         self.current_evals_at_max_reward = 0
         for env in self.envs:
             env.set_attr("randomization_factor", self.current_randomization_factor)
@@ -71,6 +70,7 @@ class RewardAdaptationCallback(BaseCallback):
                     self.current_randomization_factor - self.randomization_increment
                 )
 
+            self._log_randomization_factor()
             if self.current_evals_at_max_reward >= self.max_evals_at_max_reward:
                 continue_training = False
 

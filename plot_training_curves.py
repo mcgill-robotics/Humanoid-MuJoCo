@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-LOG_NAMES = ["SAC_CPU"]
-RANDOMIZATION_FACTORS = [0.0]
-eval_files = ["evaluations.npz"]
+eval_files = ["data\SAC_CPU\evaluations.npz"]
 
 #####################
 
@@ -11,14 +9,8 @@ timesteps = []
 rewards = []
 ep_lengths = []
 
-for i in range(len(LOG_NAMES)):
-    evaluations = np.load(
-        "data/{}/training_results_r{}/{}".format(
-            LOG_NAMES[i % len(LOG_NAMES)],
-            RANDOMIZATION_FACTORS[i % len(RANDOMIZATION_FACTORS)],
-            eval_files[i % len(eval_files)],
-        )
-    )
+for i in range(len(eval_files)):
+    evaluations = np.load(eval_files[i % len(eval_files)])
 
     timesteps.extend(evaluations["timesteps"])
     rewards.extend(np.mean(evaluations["results"], axis=1))
