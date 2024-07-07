@@ -90,13 +90,16 @@ class CPUEnv(gym.Env):
         # save joint addresses
         self.joint_qpos_idx = []
         self.joint_dof_idx = []
+        self.joint_actuator_idx = []
         for joint in JOINT_NAMES:
             self.joint_dof_idx.append(self.model.jnt_dofadr[self.model.joint(joint).id])
             self.joint_qpos_idx.append(
                 self.model.jnt_qposadr[self.model.joint(joint).id]
             )
+            self.joint_actuator_idx.append(self.model.actuator(joint).id)
         self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
         self.joint_dof_idx = jp.array(self.joint_dof_idx)
+        self.joint_actuator_idx = jp.array(self.joint_actuator_idx)
         # get pressure sensor geometries
         self.pressure_sensor_ids = [
             self.model.geom(pressure_sensor_geom).id
@@ -184,7 +187,7 @@ class CPUEnv(gym.Env):
                 random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)
                 * self.randomization_factor
             )
-        for joint in JOINT_ACTUATOR_NAMES:
+        for joint in JOINT_NAMES:
             self.model.actuator(joint).forcerange[0] += (
                 random.uniform(
                     -JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE
@@ -562,7 +565,7 @@ class CPUEnv(gym.Env):
         # actions should be inputted to the environment in the -1 to 1 range, and they are mapped here to -pi/2 and pi/2 accordingly
         action_to_take = jp.clip(jp.array(action_to_take), -1, 1)
         action_to_take = action_to_take * (jp.pi / 2)
-        self.data.ctrl = action_to_take
+        self.data.ctrl = action_to_take[self.joint_actuator_idx]
         self.previous_action = self.latest_action
         self.latest_action = action_to_take
 
@@ -620,6 +623,22 @@ if __name__ == "__main__":
     while True:
         # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = 0 * np.ones(len(JOINT_NAMES))
+        action = np.array(
+            [
+                9.43151516e-01,
+                8.00408257e-04,
+                0.00000000e00,
+                -6.55152978e-01,
+                1.38922797e-03,
+                -7.70483568e-01,
+                1.13423665e-04,
+                -2.01752387e-01,
+                4.41015964e-01,
+                3.57747396e-02,
+                5.38301086e-01,
+                -4.85399034e-04,
+            ]
+        )
 
         start_time = time.time()
         obs, reward, isTerminal, _, _ = sim.step(action)

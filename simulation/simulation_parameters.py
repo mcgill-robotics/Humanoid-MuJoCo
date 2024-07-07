@@ -80,7 +80,6 @@ JOINT_NAMES = [
     # "torso_yaw",
     # "torso_roll",
 ]
-JOINT_ACTUATOR_NAMES = JOINT_NAMES
 PRESSURE_GEOM_NAMES = [
     "pressure_geom_L",
     "pressure_geom_R",

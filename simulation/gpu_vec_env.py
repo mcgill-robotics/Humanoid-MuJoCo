@@ -187,11 +187,14 @@ class GPUVecEnv(VecEnv):
         # save joint addresses
         self.joint_qpos_idx = []
         self.joint_dof_idx = []
+        self.joint_actuator_idx = []
         for joint in JOINT_NAMES:
             self.joint_dof_idx.append(model.jnt_dofadr[model.joint(joint).id])
             self.joint_qpos_idx.append(model.jnt_qposadr[model.joint(joint).id])
+            self.joint_actuator_idx.append(self.model.actuator(joint).id)
         self.joint_qpos_idx = jp.array(self.joint_qpos_idx)
         self.joint_dof_idx = jp.array(self.joint_dof_idx)
+        self.joint_actuator_idx = jp.array(self.joint_actuator_idx)
         # save gravity vector
         # save torso body index
         self.torso_idx = model.body(TORSO_BODY_NAME).id
@@ -398,7 +401,7 @@ class GPUVecEnv(VecEnv):
                 random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)
                 * self.randomization_factor
             )
-        for joint in JOINT_ACTUATOR_NAMES:
+        for joint in JOINT_NAMES:
             model.actuator(joint).forcerange[0] += (
                 random.uniform(
                     -JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE
@@ -594,6 +597,7 @@ class GPUVecEnv(VecEnv):
             actions
         )
         action_to_take = self.action_buffer[:, 0]
+        action_to_take = action_to_take[self.joint_actuator_idx]
         # apply actions (convert to radians first)
         self.data_batch = self.data_batch.replace(ctrl=action_to_take)
 

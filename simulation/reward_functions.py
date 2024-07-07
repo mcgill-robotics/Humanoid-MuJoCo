@@ -114,10 +114,10 @@ def symmetry_reward(ctrl):
     ]
     symmetry_reward = 0
     for joint_a, joint_b in EQUAL_REG_JOINTS:
-        i, j = JOINT_ACTUATOR_NAMES.index(joint_a), JOINT_ACTUATOR_NAMES.index(joint_b)
+        i, j = JOINT_NAMES.index(joint_a), JOINT_NAMES.index(joint_b)
         symmetry_reward += scaled_exp(sqr(ctrl[i] - ctrl[j]))
     for joint_a, joint_b in OPPOSITE_REG_JOINTS:
-        i, j = JOINT_ACTUATOR_NAMES.index(joint_a), JOINT_ACTUATOR_NAMES.index(joint_b)
+        i, j = JOINT_NAMES.index(joint_a), JOINT_NAMES.index(joint_b)
         symmetry_reward += scaled_exp(sqr(ctrl[i] + ctrl[j]))
 
     symmetry_reward = (
