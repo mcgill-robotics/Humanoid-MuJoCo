@@ -177,12 +177,13 @@ eval_env = VecCheckNan(eval_env, raise_exception=True)
 print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
-    additional_kwargs = {}
+    additional_kwargs = {
+        "batch_size": 128,
+    }
     policy_args = {
         "net_arch": dict(pi=[64, 64], qf=[64, 64]),
         "activation_fn": nn.Tanh,
         "log_std_init": -1,
-        "batch_size": 128,
     }
 
     model = SAC(
