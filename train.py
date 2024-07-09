@@ -20,7 +20,7 @@ import argparse
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
-    "--n-envs", type=int, default=64, help="Number of environments to run in parallel"
+    "--n-envs", type=int, default=32, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
     "--cpu", action="store_true", help="Pass this flag to run on CPU"
@@ -179,9 +179,10 @@ print("\nBeginning training.\n")
 if CHECKPOINT is None:
     additional_kwargs = {}
     policy_args = {
-        "net_arch": dict(pi=[64, 64, 64], qf=[64, 64, 64]),
+        "net_arch": dict(pi=[64, 64], qf=[64, 64]),
         "activation_fn": nn.Tanh,
         "log_std_init": -1,
+        "batch_size": 128,
     }
 
     model = SAC(
