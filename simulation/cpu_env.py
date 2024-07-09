@@ -455,7 +455,7 @@ class CPUEnv(gym.Env):
             (
                 joint_angles,  # rad
                 # joint_velocities,  # rad / s
-                local_ang_vel,  # rad/s
+                # local_ang_vel,  # rad/s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
                 np.array([binary_foot_contact_state_left]),
