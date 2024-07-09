@@ -48,7 +48,7 @@ class CPUEnv(gym.Env):
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) + 3 + 3 + 2
+        observation_size = len(JOINT_NAMES) + 3 + 3
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
@@ -458,8 +458,8 @@ class CPUEnv(gym.Env):
                 local_ang_vel,  # rad/s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
-                np.array([binary_foot_contact_state_left]),
-                np.array([binary_foot_contact_state_right]),
+                # np.array([binary_foot_contact_state_left]),
+                # np.array([binary_foot_contact_state_right]),
                 # self.control_input_velocity,  # as defined in reset
                 # self.control_input_yaw,  # as defined in reset
                 # clock_phase_sin,  # as defined in paper on potential rewards

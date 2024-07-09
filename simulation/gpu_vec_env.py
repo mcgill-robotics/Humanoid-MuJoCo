@@ -94,7 +94,7 @@ class GPUVecEnv(VecEnv):
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) + 3 + 3 + 2
+        observation_size = len(JOINT_NAMES) + 3 + 3
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
@@ -784,10 +784,10 @@ class GPUVecEnv(VecEnv):
                 local_ang_vel,  # rad / s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
-                contact_states[:, 0].reshape(
-                    -1, 1
-                ),  # for left foot (is it touching the ground?)
-                contact_states[:, 1].reshape(-1, 1),  # for right foot
+                # contact_states[:, 0].reshape(
+                #     -1, 1
+                # ),  # for left foot (is it touching the ground?)
+                # contact_states[:, 1].reshape(-1, 1),  # for right foot
                 # self.control_inputs_velocity[idx],  # as defined in reset
                 # self.control_inputs_yaw[idx],  # as defined in reset
                 # clock_phase_sin,  # as defined in paper on potential rewards
