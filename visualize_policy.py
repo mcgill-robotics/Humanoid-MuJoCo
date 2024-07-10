@@ -11,13 +11,13 @@ CKPT = "data\SAC_CPU/ckpt_8897152_steps.zip"
 # env = GPUVecEnv(
 #     num_envs=1,
 #     xml_path=SIM_XML_PATH,
-#     reward_fn=controlInputRewardFn,
+#     reward_fn=standupReward,
 #     randomization_factor=RANDOMIZATION_FACTOR,
 #     enable_rendering=True,
 # )
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
-    reward_fn=controlInputRewardFn,
+    reward_fn=standupReward,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )

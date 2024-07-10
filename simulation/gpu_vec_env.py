@@ -930,7 +930,7 @@ if __name__ == "__main__":
     sim_batch = GPUVecEnv(
         num_envs=4,
         xml_path=SIM_XML_PATH,
-        reward_fn=controlInputRewardFn,
+        reward_fn=standupReward,
         randomization_factor=0,
         enable_rendering=True,
     )

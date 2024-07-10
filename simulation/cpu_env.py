@@ -659,7 +659,6 @@ class CPUEnv(gym.Env):
 if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
-        # reward_fn=controlInputRewardFn,
         reward_fn=standupReward,
         randomization_factor=0,
         enable_rendering=True,

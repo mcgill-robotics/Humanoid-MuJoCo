@@ -17,7 +17,7 @@ video_duration = 5  # seconds
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
-    reward_fn=controlInputRewardFn,
+    reward_fn=standupReward,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )

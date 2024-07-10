@@ -111,7 +111,7 @@ def self_collision_penalty(isSelfColliding):
     return self_collision_penalty
 
 
-def controlInputRewardFn(
+def standupReward(
     velocity,
     target_velocity,
     torso_quat,
