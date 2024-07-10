@@ -52,6 +52,8 @@ class GPUVecEnv(VecEnv):
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
+        if self.reward_fn == standupReward:
+            self.max_simulation_time = STANDUP_MAX_SIM_TIME
         self.gravity_vector_batch = jp.array([jp.array([0, 0, -1])] * self.num_envs)
         self.initialized_model_info = False
         self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
@@ -185,6 +187,9 @@ class GPUVecEnv(VecEnv):
         # load model from XML
         model = self._make_model()
         # save joint addresses
+        self.free_joint_qpos_idx = self.model.jnt_qposadr[
+            self.model.joint(FREE_JOINT_NAME).id
+        ]
         self.joint_qpos_idx = []
         self.joint_dof_idx = []
         self.joint_actuator_idx = []
@@ -435,6 +440,34 @@ class GPUVecEnv(VecEnv):
             )
         )
 
+    def _randomize_starting_position(self, data):
+        # randomize initial position (GPU)
+        xy_offset = XY_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            XY_POSITION_INITIAL_OFFSET_MAX - XY_POSITION_INITIAL_OFFSET_MIN
+        )
+        z_offset = Z_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            Z_POSITION_INITIAL_OFFSET_MAX - Z_POSITION_INITIAL_OFFSET_MIN
+        )
+
+        pos_min_offset = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 1].set(-xy_offset)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 2].set(-xy_offset)
+
+        pos_max_offset = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx].set(z_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 1].set(xy_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 2].set(xy_offset)
+
+        return data.replace(
+            qpos=data.qpos
+            + jax.random.uniform(
+                self.rng_key,
+                data.qpos.shape,
+                minval=pos_min_offset,
+                maxval=pos_max_offset,
+            )
+        )
+
     def _randomize_delays(self, idx):
         self.max_timestep_delay = round(
             MAX_DELAY * self.randomization_factor / self.actual_timestep
@@ -640,6 +673,7 @@ class GPUVecEnv(VecEnv):
             gpu_data = mjx.put_data(cpu_model, cpu_data)
             # randomize GPU data
             gpu_data = self._randomize_joint_positions(gpu_data)
+            gpu_data = self._randomize_starting_position(gpu_data)
 
             # insert data and model into batches
             self._replace_model_index(i, gpu_model)

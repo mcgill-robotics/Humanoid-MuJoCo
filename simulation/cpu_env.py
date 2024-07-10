@@ -48,7 +48,7 @@ class CPUEnv(gym.Env):
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) + 3 + 3 + 2
+        observation_size = len(JOINT_NAMES) + 3 + 3
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
@@ -59,6 +59,8 @@ class CPUEnv(gym.Env):
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
+        if self.reward_fn == standupReward:
+            self.max_simulation_time = STANDUP_MAX_SIM_TIME
 
         self.reward_override = reward_override
 
@@ -87,6 +89,9 @@ class CPUEnv(gym.Env):
         ### SAVE MODEL IDs
         # save torso body index
         self.torso_idx = self.model.body(TORSO_BODY_NAME).id
+        self.free_joint_qpos_idx = self.model.jnt_qposadr[
+            self.model.joint(FREE_JOINT_NAME).id
+        ]
         # save joint addresses
         self.joint_qpos_idx = []
         self.joint_dof_idx = []
@@ -238,6 +243,22 @@ class CPUEnv(gym.Env):
             random_val = random.uniform(-joint_pos_range, joint_pos_range)
             self.data.qpos[i] = self.data.qpos[i] + random_val
 
+    def _randomize_starting_position(self):
+        # randomize initial position of the robot
+        xy_offset = XY_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            XY_POSITION_INITIAL_OFFSET_MAX - XY_POSITION_INITIAL_OFFSET_MIN
+        )
+        z_offset = Z_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            Z_POSITION_INITIAL_OFFSET_MAX - Z_POSITION_INITIAL_OFFSET_MIN
+        )
+        self.data.qpos[self.free_joint_qpos_idx] += random.uniform(
+            -xy_offset, xy_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 1] += random.uniform(
+            -xy_offset, xy_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 2] += random.uniform(0, z_offset)
+
     def _randomize_control_inputs(self):
         # initialize random control inputs
         if USE_CONTROL_INPUTS:
@@ -309,6 +330,7 @@ class CPUEnv(gym.Env):
         # call self.data-dependent randomizations
         self._randomize_delays()
         self._randomize_joint_positions()
+        self._randomize_starting_position()
 
         # initialize environment trackers
         self._init_sim_trackers()
@@ -458,8 +480,8 @@ class CPUEnv(gym.Env):
                 local_ang_vel,  # rad/s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
-                np.array([binary_foot_contact_state_left]),
-                np.array([binary_foot_contact_state_right]),
+                # np.array([binary_foot_contact_state_left]),
+                # np.array([binary_foot_contact_state_right]),
                 # self.control_input_velocity,  # as defined in reset
                 # self.control_input_yaw,  # as defined in reset
                 # clock_phase_sin,  # as defined in paper on potential rewards
@@ -623,22 +645,6 @@ if __name__ == "__main__":
     while True:
         # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = 0 * np.ones(len(JOINT_NAMES))
-        action = np.array(
-            [
-                9.43151516e-01,
-                8.00408257e-04,
-                0.00000000e00,
-                -6.55152978e-01,
-                1.38922797e-03,
-                -7.70483568e-01,
-                1.13423665e-04,
-                -2.01752387e-01,
-                4.41015964e-01,
-                3.57747396e-02,
-                5.38301086e-01,
-                -4.85399034e-04,
-            ]
-        )
 
         start_time = time.time()
         obs, reward, isTerminal, _, _ = sim.step(action)
