@@ -251,13 +251,30 @@ class CPUEnv(gym.Env):
         z_offset = Z_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
             Z_POSITION_INITIAL_OFFSET_MAX - Z_POSITION_INITIAL_OFFSET_MIN
         )
-        self.data.qpos[self.free_joint_qpos_idx] += random.uniform(
+        quat_offset = QUAT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            QUAT_INITIAL_OFFSET_MAX - QUAT_INITIAL_OFFSET_MIN
+        )
+        self.data.qpos[self.free_joint_qpos_idx] = X_INITIAL_POS + random.uniform(
             -xy_offset, xy_offset
         )
-        self.data.qpos[self.free_joint_qpos_idx + 1] += random.uniform(
+        self.data.qpos[self.free_joint_qpos_idx + 1] = Y_INITIAL_POS + random.uniform(
             -xy_offset, xy_offset
         )
-        self.data.qpos[self.free_joint_qpos_idx + 2] += random.uniform(0, z_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 2] = Z_INITIAL_POS + random.uniform(
+            0, z_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 3] = INITIAL_QUAT[0] + random.uniform(
+            -quat_offset, quat_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 4] = INITIAL_QUAT[1] + random.uniform(
+            -quat_offset, quat_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 5] = INITIAL_QUAT[2] + random.uniform(
+            -quat_offset, quat_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 6] = INITIAL_QUAT[3] + random.uniform(
+            -quat_offset, quat_offset
+        )
 
     def _randomize_control_inputs(self):
         # initialize random control inputs
@@ -630,7 +647,8 @@ class CPUEnv(gym.Env):
 if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
-        reward_fn=controlInputRewardFn,
+        # reward_fn=controlInputRewardFn,
+        reward_fn=standupReward,
         randomization_factor=0,
         enable_rendering=True,
     )
