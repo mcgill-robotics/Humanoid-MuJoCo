@@ -52,15 +52,21 @@ class CPUEnv(gym.Env):
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
+        if self.reward_fn == standupReward:
+            self.IS_STANDUP = True
+        else:
+            self.IS_STANDUP = False
+        if self.IS_STANDUP:
+            _MAX_SIM_TIME = MAX_SIM_TIME_STANDUP
+        else:
+            _MAX_SIM_TIME = MAX_SIM_TIME
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
-            else MAX_SIM_TIME
+            else _MAX_SIM_TIME
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
-        if self.reward_fn == standupReward:
-            self.max_simulation_time = STANDUP_MAX_SIM_TIME
 
         self.reward_override = reward_override
 
@@ -254,27 +260,33 @@ class CPUEnv(gym.Env):
         quat_offset = QUAT_INITIAL_OFFSET_MIN + self.randomization_factor * (
             QUAT_INITIAL_OFFSET_MAX - QUAT_INITIAL_OFFSET_MIN
         )
+        if self.IS_STANDUP:
+            _Z_POS = Z_INITIAL_POS_STANDUP
+            _INITIAL_QUAT = INITIAL_QUAT_STANDUP
+        else:
+            _Z_POS = Z_INITIAL_POS
+            _INITIAL_QUAT = INITIAL_QUAT
         self.data.qpos[self.free_joint_qpos_idx] = X_INITIAL_POS + random.uniform(
             -xy_offset, xy_offset
         )
         self.data.qpos[self.free_joint_qpos_idx + 1] = Y_INITIAL_POS + random.uniform(
             -xy_offset, xy_offset
         )
-        self.data.qpos[self.free_joint_qpos_idx + 2] = Z_INITIAL_POS + random.uniform(
+        self.data.qpos[self.free_joint_qpos_idx + 2] = _Z_POS + random.uniform(
             0, z_offset
         )
-        self.data.qpos[self.free_joint_qpos_idx + 3] = INITIAL_QUAT[0] + random.uniform(
-            -quat_offset, quat_offset
-        )
-        self.data.qpos[self.free_joint_qpos_idx + 4] = INITIAL_QUAT[1] + random.uniform(
-            -quat_offset, quat_offset
-        )
-        self.data.qpos[self.free_joint_qpos_idx + 5] = INITIAL_QUAT[2] + random.uniform(
-            -quat_offset, quat_offset
-        )
-        self.data.qpos[self.free_joint_qpos_idx + 6] = INITIAL_QUAT[3] + random.uniform(
-            -quat_offset, quat_offset
-        )
+        self.data.qpos[self.free_joint_qpos_idx + 3] = _INITIAL_QUAT[
+            0
+        ] + random.uniform(-quat_offset, quat_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 4] = _INITIAL_QUAT[
+            1
+        ] + random.uniform(-quat_offset, quat_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 5] = _INITIAL_QUAT[
+            2
+        ] + random.uniform(-quat_offset, quat_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 6] = _INITIAL_QUAT[
+            3
+        ] + random.uniform(-quat_offset, quat_offset)
 
     def _randomize_control_inputs(self):
         # initialize random control inputs

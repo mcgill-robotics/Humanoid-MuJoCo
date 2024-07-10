@@ -45,15 +45,22 @@ class GPUVecEnv(VecEnv):
         self.rng_key = jax.random.PRNGKey(42)
         self.rng = jax.random.split(self.rng_key, self.num_envs)
         self.render_mode = [["human"]] * self.num_envs
+
+        if self.reward_fn == standupReward:
+            self.IS_STANDUP = True
+        else:
+            self.IS_STANDUP = False
+        if self.IS_STANDUP:
+            _MAX_SIM_TIME = MAX_SIM_TIME_STANDUP
+        else:
+            _MAX_SIM_TIME = MAX_SIM_TIME
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
-            else MAX_SIM_TIME
+            else _MAX_SIM_TIME
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
-        if self.reward_fn == standupReward:
-            self.max_simulation_time = STANDUP_MAX_SIM_TIME
         self.gravity_vector_batch = jp.array([jp.array([0, 0, -1])] * self.num_envs)
         self.initialized_model_info = False
         self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
@@ -448,18 +455,74 @@ class GPUVecEnv(VecEnv):
         z_offset = Z_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
             Z_POSITION_INITIAL_OFFSET_MAX - Z_POSITION_INITIAL_OFFSET_MIN
         )
+        quat_offset = QUAT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            QUAT_INITIAL_OFFSET_MAX - QUAT_INITIAL_OFFSET_MIN
+        )
+        if self.IS_STANDUP:
+            _Z_POS = Z_INITIAL_POS_STANDUP
+            _INITIAL_QUAT = INITIAL_QUAT_STANDUP
+        else:
+            _Z_POS = Z_INITIAL_POS
+            _INITIAL_QUAT = INITIAL_QUAT
+
+        INITIAL_OFFSETS = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx].set(
+            X_INITIAL_POS
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 1].set(
+            Y_INITIAL_POS
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 2].set(_Z_POS)
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 3].set(
+            _INITIAL_QUAT[0]
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 4].set(
+            _INITIAL_QUAT[1]
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 5].set(
+            _INITIAL_QUAT[2]
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 6].set(
+            _INITIAL_QUAT[3]
+        )
 
         pos_min_offset = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx].set(-xy_offset)
         pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 1].set(-xy_offset)
-        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 2].set(-xy_offset)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 2].set(-z_offset)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 3].set(
+            -quat_offset
+        )
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 4].set(
+            -quat_offset
+        )
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 5].set(
+            -quat_offset
+        )
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 6].set(
+            -quat_offset
+        )
 
         pos_max_offset = jp.zeros(data.qpos.shape, dtype=jp.float32)
-        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx].set(z_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx].set(xy_offset)
         pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 1].set(xy_offset)
-        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 2].set(xy_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 2].set(z_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 3].set(
+            quat_offset
+        )
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 4].set(
+            quat_offset
+        )
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 5].set(
+            quat_offset
+        )
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 6].set(
+            quat_offset
+        )
 
         return data.replace(
             qpos=data.qpos
+            + INITIAL_OFFSETS
             + jax.random.uniform(
                 self.rng_key,
                 data.qpos.shape,

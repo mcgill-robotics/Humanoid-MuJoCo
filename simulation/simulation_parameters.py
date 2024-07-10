@@ -46,21 +46,21 @@ JOINT_ACTION_NOISE_STDDEV = 0.5  # degrees
 CONTROL_FREQUENCY = 100
 TIMESTEP = 0.001
 MAX_SIM_TIME = -1  # let the simulation run indefinitely
+MAX_SIM_TIME_STANDUP = 10.0  # s
 MIN_FORCE_FOR_CONTACT = 0.0  # N
 USE_POTENTIAL_REWARDS = False
-STANDUP_MAX_SIM_TIME = 10.0  # s
 
 X_INITIAL_POS = 0.0  # m
 Y_INITIAL_POS = 0.0  # m-
-Z_INITIAL_POS = -0.275  # m (if standup, set to 0)
-Z_INITIAL_POS = -0.5  # m (if standup, set to 0)
+Z_INITIAL_POS = -0.275  # m
+Z_INITIAL_POS_STANDUP = -0.5  # m
 INITIAL_QUAT = [
     -0.70710678,
     0.0,
     0.0,
     0.70710678,
-]  # (if standup, set to [0.5, -0.5, -0.5, 0.5])
-INITIAL_QUAT = [-0.5, -0.5, 0.5, 0.5]
+]
+INITIAL_QUAT_STANDUP = [-0.5, -0.5, 0.5, 0.5]
 
 # CONTROL INPUT PARAMETERS
 CONTROL_INPUT_MAX_VELOCITY = 2  # m/s ~ 7.2 mph (4.5 km/h), can go from -2 to 2 m/s
