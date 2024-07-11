@@ -19,7 +19,7 @@ class GPUVecEnv(VecEnv):
     def __init__(
         self,
         num_envs,
-        reward_fn,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         xml_path=SIM_XML_PATH,
         randomization_factor=0,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
@@ -930,7 +930,7 @@ if __name__ == "__main__":
     sim_batch = GPUVecEnv(
         num_envs=4,
         xml_path=SIM_XML_PATH,
-        reward_fn=standupReward,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         randomization_factor=0,
         enable_rendering=True,
     )

@@ -24,7 +24,7 @@ class CPUEnv(gym.Env):
 
     def __init__(
         self,
-        reward_fn,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         xml_path=SIM_XML_PATH,
         randomization_factor=0,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
@@ -659,7 +659,7 @@ class CPUEnv(gym.Env):
 if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
-        reward_fn=standupReward,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         randomization_factor=0,
         enable_rendering=True,
     )
@@ -676,7 +676,7 @@ if __name__ == "__main__":
         action = 0 * np.ones(len(JOINT_NAMES))
 
         start_time = time.time()
-        obs, reward, isTerminal, _, _ = sim.step(action)
+        obs, reward, isTerminal, isTruncated, _ = sim.step(action)
         # print(obs)
         end_time = time.time()
         total_step_time += end_time - start_time
@@ -689,7 +689,7 @@ if __name__ == "__main__":
         # print(reward)
         sim.render("human")
 
-        if isTerminal:
+        if isTerminal or isTruncated:
             print(
                 "Cumulative Reward: ",
                 total_reward,

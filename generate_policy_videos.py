@@ -1,6 +1,6 @@
 from simulation.cpu_env import CPUEnv
 from simulation import GREEN_SCREEN_SIM_XML_PATH
-from simulation.reward_functions import *
+from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from stable_baselines3 import SAC
 import os
 import cv2
@@ -17,7 +17,7 @@ video_duration = 5  # seconds
 
 env = CPUEnv(
     xml_path=GREEN_SCREEN_SIM_XML_PATH,
-    reward_fn=standupReward,
+    reward_fn=SELECTED_REWARD_FUNCTION,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )

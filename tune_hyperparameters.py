@@ -6,7 +6,7 @@ import simulation
 # Set environment variable to disable rendering
 os.environ["RENDER_SIM"] = "False"
 
-reward_fn = "standupReward"
+reward_fn = "SELECTED_REWARD_FUNCTION"
 
 sys.argv = [
     "python",

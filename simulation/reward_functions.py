@@ -111,7 +111,7 @@ def self_collision_penalty(isSelfColliding):
     return self_collision_penalty
 
 
-def standupReward(
+def controlInputReward(
     velocity,
     target_velocity,
     torso_quat,
@@ -360,3 +360,6 @@ def standupReward(
         reward = jp.where(terminal, TERMINAL_REWARD, reward)
 
     return reward, terminal
+
+
+SELECTED_REWARD_FUNCTION = standupReward
