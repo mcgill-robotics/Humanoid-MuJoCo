@@ -13,6 +13,7 @@ from simulation import SIM_XML_PATH, reward_functions
 import gc
 import os
 import time
+from perlin_noise import PerlinNoise
 
 inverseRotateVectors = (
     lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
@@ -48,7 +49,7 @@ class CPUEnv(gym.Env):
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) + 3 + 3
+        observation_size = len(JOINT_NAMES) + 3 + 3 + 2
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
@@ -73,8 +74,6 @@ class CPUEnv(gym.Env):
     def _init_model(self):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
-        if self.enable_rendering:
-            self.renderer = mujoco.Renderer(self.model, 720, 1080)
         self.model.opt.timestep = self.timestep
         self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
         self.model.opt.iterations = 15
@@ -240,6 +239,21 @@ class CPUEnv(gym.Env):
             0
         ] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED * self.randomization_factor)
 
+    def _randomize_floor_heightmap(self):
+        noise = PerlinNoise(octaves=15)
+        xpix, ypix = 24, 24
+        height_field = np.array(
+            [[noise([i / xpix, j / ypix]) for j in range(xpix)] for i in range(ypix)]
+        )
+        height_field -= np.min(height_field)
+        height_field /= np.max(height_field)
+
+        max_floor_height = MIN_FLOOR_BUMP_HEIGHT + self.randomization_factor * (
+            MAX_FLOOR_BUMP_HEIGHT - MIN_FLOOR_BUMP_HEIGHT
+        )
+
+        self.model.hfield_data = height_field.reshape(-1) * max_floor_height
+
     def _randomize_joint_positions(self):
         # randomize joint initial states (CPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
@@ -351,6 +365,10 @@ class CPUEnv(gym.Env):
         # randomize model-dependent properties
         self._randomize_dynamics()
         self._randomize_joint_properties()
+        self._randomize_floor_heightmap()
+
+        if self.enable_rendering:
+            self.renderer = mujoco.Renderer(self.model, 720, 1080)
 
         # create data from model
         self.data = mujoco.MjData(self.model)
@@ -509,8 +527,8 @@ class CPUEnv(gym.Env):
                 local_ang_vel,  # rad/s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
-                # np.array([binary_foot_contact_state_left]),
-                # np.array([binary_foot_contact_state_right]),
+                np.array([binary_foot_contact_state_left]),
+                np.array([binary_foot_contact_state_right]),
                 # self.control_input_velocity,  # as defined in reset
                 # self.control_input_yaw,  # as defined in reset
                 # clock_phase_sin,  # as defined in paper on potential rewards
@@ -660,7 +678,7 @@ if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
         reward_fn=SELECTED_REWARD_FUNCTION,
-        randomization_factor=0,
+        randomization_factor=1,
         enable_rendering=True,
     )
     obs = sim.reset()

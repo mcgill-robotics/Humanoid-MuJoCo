@@ -13,6 +13,7 @@ from simulation.gpu_vec_env_utils import *
 from simulation import SIM_XML_PATH, reward_functions
 import time
 import cv2
+from perlin_noise import PerlinNoise
 
 
 class GPUVecEnv(VecEnv):
@@ -428,6 +429,21 @@ class GPUVecEnv(VecEnv):
             )
         return model
 
+    def _randomize_floor_heightmap(self, model):
+        noise = PerlinNoise(octaves=15)
+        xpix, ypix = 24, 24
+        height_field = np.array(
+            [[noise([i / xpix, j / ypix]) for j in range(xpix)] for i in range(ypix)]
+        )
+        height_field -= np.min(height_field)
+        height_field /= np.max(height_field)
+
+        max_floor_height = MIN_FLOOR_BUMP_HEIGHT + self.randomization_factor * (
+            MAX_FLOOR_BUMP_HEIGHT - MIN_FLOOR_BUMP_HEIGHT
+        )
+
+        model.hfield_data = height_field.reshape(-1) * max_floor_height
+
     def _randomize_joint_positions(self, data):
         # randomize joint initial states (GPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
@@ -729,6 +745,7 @@ class GPUVecEnv(VecEnv):
             # randomize model
             cpu_model = self._randomize_dynamics(cpu_model)
             cpu_model = self._randomize_joint_properties(cpu_model)
+            cpu_model = self._randomize_floor_heightmap(cpu_model)
             # convert model to GPU and make data from it
             gpu_model = mjx.put_model(cpu_model)
             cpu_data = mujoco.MjData(cpu_model)
