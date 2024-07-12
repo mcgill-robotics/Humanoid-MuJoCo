@@ -362,4 +362,4 @@ def standupReward(
     return reward, terminal
 
 
-SELECTED_REWARD_FUNCTION = standupReward
+SELECTED_REWARD_FUNCTION = controlInputReward
