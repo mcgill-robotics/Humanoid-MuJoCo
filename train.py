@@ -181,7 +181,7 @@ if CHECKPOINT is None:
         "batch_size": 128,
     }
     policy_args = {
-        "net_arch": dict(pi=[64, 64], qf=[64, 64]),
+        "net_arch": dict(pi=[64, 64, 64], qf=[64, 64, 64]),
         "activation_fn": nn.Tanh,
         "log_std_init": -1,
     }
