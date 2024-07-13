@@ -48,7 +48,7 @@ class CPUEnv(gym.Env):
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) + 3 + 3
+        observation_size = len(JOINT_NAMES) * 2 + 3 + 3
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
