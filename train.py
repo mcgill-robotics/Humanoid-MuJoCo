@@ -1,5 +1,5 @@
 import os
-from simulation.reward_functions import *
+from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from simulation.gpu_vec_env import GPUVecEnv
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
@@ -113,7 +113,7 @@ if SIMULATE_ON_GPU:
         GPUVecEnv(
             num_envs=NUM_ENVS,
             xml_path=SIM_XML_PATH,
-            reward_fn=controlInputRewardFn,
+            reward_fn=SELECTED_REWARD_FUNCTION,
             randomization_factor=RANDOMIZATION_FACTOR_INIT,
             enable_rendering=False,
         )
@@ -122,7 +122,7 @@ if SIMULATE_ON_GPU:
         GPUVecEnv(
             num_envs=N_EVAL_EPISODES,
             xml_path=SIM_XML_PATH,
-            reward_fn=controlInputRewardFn,
+            reward_fn=SELECTED_REWARD_FUNCTION,
             randomization_factor=RANDOMIZATION_FACTOR_INIT,
             use_potential_rewards=False,
             max_simulation_time_override=MAX_EVAL_SIM_TIME,
@@ -142,7 +142,7 @@ else:
             [
                 lambda: CPUEnv(
                     xml_path=SIM_XML_PATH,
-                    reward_fn=controlInputRewardFn,
+                    reward_fn=SELECTED_REWARD_FUNCTION,
                     randomization_factor=RANDOMIZATION_FACTOR_INIT,
                     enable_rendering=False,
                 )
@@ -155,7 +155,7 @@ else:
             [
                 lambda: CPUEnv(
                     xml_path=SIM_XML_PATH,
-                    reward_fn=controlInputRewardFn,
+                    reward_fn=SELECTED_REWARD_FUNCTION,
                     randomization_factor=RANDOMIZATION_FACTOR_INIT,
                     use_potential_rewards=False,
                     max_simulation_time_override=MAX_EVAL_SIM_TIME,

@@ -13,13 +13,14 @@ from simulation.gpu_vec_env_utils import *
 from simulation import SIM_XML_PATH, reward_functions
 import time
 import cv2
+from perlin_noise import PerlinNoise
 
 
 class GPUVecEnv(VecEnv):
     def __init__(
         self,
         num_envs,
-        reward_fn,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         xml_path=SIM_XML_PATH,
         randomization_factor=0,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
@@ -45,10 +46,19 @@ class GPUVecEnv(VecEnv):
         self.rng_key = jax.random.PRNGKey(42)
         self.rng = jax.random.split(self.rng_key, self.num_envs)
         self.render_mode = [["human"]] * self.num_envs
+
+        if self.reward_fn == standupReward:
+            self.IS_STANDUP = True
+        else:
+            self.IS_STANDUP = False
+        if self.IS_STANDUP:
+            _MAX_SIM_TIME = MAX_SIM_TIME_STANDUP
+        else:
+            _MAX_SIM_TIME = MAX_SIM_TIME
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
-            else MAX_SIM_TIME
+            else _MAX_SIM_TIME
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
@@ -185,6 +195,9 @@ class GPUVecEnv(VecEnv):
         # load model from XML
         model = self._make_model()
         # save joint addresses
+        self.free_joint_qpos_idx = self.model.jnt_qposadr[
+            self.model.joint(FREE_JOINT_NAME).id
+        ]
         self.joint_qpos_idx = []
         self.joint_dof_idx = []
         self.joint_actuator_idx = []
@@ -416,6 +429,21 @@ class GPUVecEnv(VecEnv):
             )
         return model
 
+    def _randomize_floor_heightmap(self, model):
+        noise = PerlinNoise(octaves=15)
+        xpix, ypix = 24, 24
+        height_field = np.array(
+            [[noise([i / xpix, j / ypix]) for j in range(xpix)] for i in range(ypix)]
+        )
+        height_field -= np.min(height_field)
+        height_field /= np.max(height_field)
+
+        max_floor_height = MIN_FLOOR_BUMP_HEIGHT + self.randomization_factor * (
+            MAX_FLOOR_BUMP_HEIGHT - MIN_FLOOR_BUMP_HEIGHT
+        )
+
+        model.hfield_data = height_field.reshape(-1) * max_floor_height
+
     def _randomize_joint_positions(self, data):
         # randomize joint initial states (GPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
@@ -432,6 +460,90 @@ class GPUVecEnv(VecEnv):
                 data.qpos.shape,
                 minval=-joint_pos_range,
                 maxval=joint_pos_range,
+            )
+        )
+
+    def _randomize_starting_position(self, data):
+        # randomize initial position (GPU)
+        xy_offset = XY_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            XY_POSITION_INITIAL_OFFSET_MAX - XY_POSITION_INITIAL_OFFSET_MIN
+        )
+        z_offset = Z_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            Z_POSITION_INITIAL_OFFSET_MAX - Z_POSITION_INITIAL_OFFSET_MIN
+        )
+        quat_offset = QUAT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            QUAT_INITIAL_OFFSET_MAX - QUAT_INITIAL_OFFSET_MIN
+        )
+        if self.IS_STANDUP:
+            _Z_POS = Z_INITIAL_POS_STANDUP
+            _INITIAL_QUAT = INITIAL_QUAT_STANDUP
+        else:
+            _Z_POS = Z_INITIAL_POS
+            _INITIAL_QUAT = INITIAL_QUAT
+
+        INITIAL_OFFSETS = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx].set(
+            X_INITIAL_POS
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 1].set(
+            Y_INITIAL_POS
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 2].set(_Z_POS)
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 3].set(
+            _INITIAL_QUAT[0]
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 4].set(
+            _INITIAL_QUAT[1]
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 5].set(
+            _INITIAL_QUAT[2]
+        )
+        INITIAL_OFFSETS = INITIAL_OFFSETS.at[self.free_joint_qpos_idx + 6].set(
+            _INITIAL_QUAT[3]
+        )
+
+        pos_min_offset = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx].set(-xy_offset)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 1].set(-xy_offset)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 2].set(-z_offset)
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 3].set(
+            -quat_offset
+        )
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 4].set(
+            -quat_offset
+        )
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 5].set(
+            -quat_offset
+        )
+        pos_min_offset = pos_min_offset.at[self.free_joint_qpos_idx + 6].set(
+            -quat_offset
+        )
+
+        pos_max_offset = jp.zeros(data.qpos.shape, dtype=jp.float32)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx].set(xy_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 1].set(xy_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 2].set(z_offset)
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 3].set(
+            quat_offset
+        )
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 4].set(
+            quat_offset
+        )
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 5].set(
+            quat_offset
+        )
+        pos_max_offset = pos_max_offset.at[self.free_joint_qpos_idx + 6].set(
+            quat_offset
+        )
+
+        return data.replace(
+            qpos=data.qpos
+            + INITIAL_OFFSETS
+            + jax.random.uniform(
+                self.rng_key,
+                data.qpos.shape,
+                minval=pos_min_offset,
+                maxval=pos_max_offset,
             )
         )
 
@@ -633,6 +745,7 @@ class GPUVecEnv(VecEnv):
             # randomize model
             cpu_model = self._randomize_dynamics(cpu_model)
             cpu_model = self._randomize_joint_properties(cpu_model)
+            cpu_model = self._randomize_floor_heightmap(cpu_model)
             # convert model to GPU and make data from it
             gpu_model = mjx.put_model(cpu_model)
             cpu_data = mujoco.MjData(cpu_model)
@@ -640,6 +753,7 @@ class GPUVecEnv(VecEnv):
             gpu_data = mjx.put_data(cpu_model, cpu_data)
             # randomize GPU data
             gpu_data = self._randomize_joint_positions(gpu_data)
+            gpu_data = self._randomize_starting_position(gpu_data)
 
             # insert data and model into batches
             self._replace_model_index(i, gpu_model)
@@ -833,7 +947,7 @@ if __name__ == "__main__":
     sim_batch = GPUVecEnv(
         num_envs=4,
         xml_path=SIM_XML_PATH,
-        reward_fn=controlInputRewardFn,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         randomization_factor=0,
         enable_rendering=True,
     )

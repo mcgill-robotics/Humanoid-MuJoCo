@@ -13,6 +13,7 @@ from simulation import SIM_XML_PATH, reward_functions
 import gc
 import os
 import time
+from perlin_noise import PerlinNoise
 
 inverseRotateVectors = (
     lambda q, v: Rotation.from_quat([q[1], q[2], q[3], q[0]]).inv().apply(v)
@@ -24,7 +25,7 @@ class CPUEnv(gym.Env):
 
     def __init__(
         self,
-        reward_fn,
+        reward_fn=SELECTED_REWARD_FUNCTION,
         xml_path=SIM_XML_PATH,
         randomization_factor=0,
         use_potential_rewards=USE_POTENTIAL_REWARDS,
@@ -52,10 +53,18 @@ class CPUEnv(gym.Env):
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
+        if self.reward_fn == standupReward:
+            self.IS_STANDUP = True
+        else:
+            self.IS_STANDUP = False
+        if self.IS_STANDUP:
+            _MAX_SIM_TIME = MAX_SIM_TIME_STANDUP
+        else:
+            _MAX_SIM_TIME = MAX_SIM_TIME
         self.max_simulation_time = (
             max_simulation_time_override
             if max_simulation_time_override is not None
-            else MAX_SIM_TIME
+            else _MAX_SIM_TIME
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
@@ -65,8 +74,6 @@ class CPUEnv(gym.Env):
     def _init_model(self):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
-        if self.enable_rendering:
-            self.renderer = mujoco.Renderer(self.model, 720, 1080)
         self.model.opt.timestep = self.timestep
         self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
         self.model.opt.iterations = 15
@@ -87,6 +94,9 @@ class CPUEnv(gym.Env):
         ### SAVE MODEL IDs
         # save torso body index
         self.torso_idx = self.model.body(TORSO_BODY_NAME).id
+        self.free_joint_qpos_idx = self.model.jnt_qposadr[
+            self.model.joint(FREE_JOINT_NAME).id
+        ]
         # save joint addresses
         self.joint_qpos_idx = []
         self.joint_dof_idx = []
@@ -229,6 +239,21 @@ class CPUEnv(gym.Env):
             0
         ] += random.uniform(0, MAX_EXTERNAL_MASS_ADDED * self.randomization_factor)
 
+    def _randomize_floor_heightmap(self):
+        noise = PerlinNoise(octaves=15)
+        xpix, ypix = 24, 24
+        height_field = np.array(
+            [[noise([i / xpix, j / ypix]) for j in range(xpix)] for i in range(ypix)]
+        )
+        height_field -= np.min(height_field)
+        height_field /= np.max(height_field)
+
+        max_floor_height = MIN_FLOOR_BUMP_HEIGHT + self.randomization_factor * (
+            MAX_FLOOR_BUMP_HEIGHT - MIN_FLOOR_BUMP_HEIGHT
+        )
+
+        self.model.hfield_data = height_field.reshape(-1) * max_floor_height
+
     def _randomize_joint_positions(self):
         # randomize joint initial states (CPU)
         joint_pos_range = JOINT_INITIAL_OFFSET_MIN + self.randomization_factor * (
@@ -237,6 +262,45 @@ class CPUEnv(gym.Env):
         for i in self.joint_qpos_idx:
             random_val = random.uniform(-joint_pos_range, joint_pos_range)
             self.data.qpos[i] = self.data.qpos[i] + random_val
+
+    def _randomize_starting_position(self):
+        # randomize initial position of the robot
+        xy_offset = XY_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            XY_POSITION_INITIAL_OFFSET_MAX - XY_POSITION_INITIAL_OFFSET_MIN
+        )
+        z_offset = Z_POSITION_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            Z_POSITION_INITIAL_OFFSET_MAX - Z_POSITION_INITIAL_OFFSET_MIN
+        )
+        quat_offset = QUAT_INITIAL_OFFSET_MIN + self.randomization_factor * (
+            QUAT_INITIAL_OFFSET_MAX - QUAT_INITIAL_OFFSET_MIN
+        )
+        if self.IS_STANDUP:
+            _Z_POS = Z_INITIAL_POS_STANDUP
+            _INITIAL_QUAT = INITIAL_QUAT_STANDUP
+        else:
+            _Z_POS = Z_INITIAL_POS
+            _INITIAL_QUAT = INITIAL_QUAT
+        self.data.qpos[self.free_joint_qpos_idx] = X_INITIAL_POS + random.uniform(
+            -xy_offset, xy_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 1] = Y_INITIAL_POS + random.uniform(
+            -xy_offset, xy_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 2] = _Z_POS + random.uniform(
+            0, z_offset
+        )
+        self.data.qpos[self.free_joint_qpos_idx + 3] = _INITIAL_QUAT[
+            0
+        ] + random.uniform(-quat_offset, quat_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 4] = _INITIAL_QUAT[
+            1
+        ] + random.uniform(-quat_offset, quat_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 5] = _INITIAL_QUAT[
+            2
+        ] + random.uniform(-quat_offset, quat_offset)
+        self.data.qpos[self.free_joint_qpos_idx + 6] = _INITIAL_QUAT[
+            3
+        ] + random.uniform(-quat_offset, quat_offset)
 
     def _randomize_control_inputs(self):
         # initialize random control inputs
@@ -301,6 +365,10 @@ class CPUEnv(gym.Env):
         # randomize model-dependent properties
         self._randomize_dynamics()
         self._randomize_joint_properties()
+        self._randomize_floor_heightmap()
+
+        if self.enable_rendering:
+            self.renderer = mujoco.Renderer(self.model, 720, 1080)
 
         # create data from model
         self.data = mujoco.MjData(self.model)
@@ -309,6 +377,7 @@ class CPUEnv(gym.Env):
         # call self.data-dependent randomizations
         self._randomize_delays()
         self._randomize_joint_positions()
+        self._randomize_starting_position()
 
         # initialize environment trackers
         self._init_sim_trackers()
@@ -608,8 +677,8 @@ class CPUEnv(gym.Env):
 if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
-        reward_fn=controlInputRewardFn,
-        randomization_factor=0,
+        reward_fn=SELECTED_REWARD_FUNCTION,
+        randomization_factor=1,
         enable_rendering=True,
     )
     obs = sim.reset()
@@ -623,25 +692,9 @@ if __name__ == "__main__":
     while True:
         # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = 0 * np.ones(len(JOINT_NAMES))
-        action = np.array(
-            [
-                9.43151516e-01,
-                8.00408257e-04,
-                0.00000000e00,
-                -6.55152978e-01,
-                1.38922797e-03,
-                -7.70483568e-01,
-                1.13423665e-04,
-                -2.01752387e-01,
-                4.41015964e-01,
-                3.57747396e-02,
-                5.38301086e-01,
-                -4.85399034e-04,
-            ]
-        )
 
         start_time = time.time()
-        obs, reward, isTerminal, _, _ = sim.step(action)
+        obs, reward, isTerminal, isTruncated, _ = sim.step(action)
         # print(obs)
         end_time = time.time()
         total_step_time += end_time - start_time
@@ -654,7 +707,7 @@ if __name__ == "__main__":
         # print(reward)
         sim.render("human")
 
-        if isTerminal:
+        if isTerminal or isTruncated:
             print(
                 "Cumulative Reward: ",
                 total_reward,

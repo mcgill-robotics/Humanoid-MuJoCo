@@ -1,7 +1,7 @@
 import jax
 from jax import numpy as jp
 from .simulation_parameters import *
-from simulation.reward_functions import *
+from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from jax.scipy.spatial.transform import Rotation
 import numpy as np
 

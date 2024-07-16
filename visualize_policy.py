@@ -1,6 +1,6 @@
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
-from simulation.reward_functions import *
+from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from stable_baselines3 import SAC
 
 
@@ -11,13 +11,13 @@ CKPT = "data\SAC_CPU/ckpt_7200000_steps.zip"
 # env = GPUVecEnv(
 #     num_envs=1,
 #     xml_path=SIM_XML_PATH,
-#     reward_fn=controlInputRewardFn,
+#     reward_fn=SELECTED_REWARD_FUNCTION,
 #     randomization_factor=RANDOMIZATION_FACTOR,
 #     enable_rendering=True,
 # )
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
-    reward_fn=controlInputRewardFn,
+    reward_fn=SELECTED_REWARD_FUNCTION,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )
