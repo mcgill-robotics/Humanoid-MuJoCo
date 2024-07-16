@@ -104,7 +104,7 @@ class GPUVecEnv(VecEnv):
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
         # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) + 3 + 3
+        observation_size = len(JOINT_NAMES) * 2 + 3 + 3
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
@@ -894,7 +894,7 @@ class GPUVecEnv(VecEnv):
         delayed_observations = jp.hstack(
             (
                 joint_angles,  # rad
-                # joint_velocities,  # rad / s
+                joint_velocities,  # rad / s
                 local_ang_vel,  # rad / s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
