@@ -198,6 +198,13 @@ class CPUEnv(gym.Env):
                 * self.randomization_factor
             )
         for joint in JOINT_NAMES:
+            kp = (
+                JOINT_P_GAIN
+                + random.uniform(-JOINT_P_GAIN_MAX_CHANGE, JOINT_P_GAIN_MAX_CHANGE)
+                * self.randomization_factor
+            )
+            self.model.actuator(joint).gainprm[0] = kp
+            self.model.actuator(joint).biasprm[1] = -kp
             self.model.actuator(joint).forcerange[0] += (
                 random.uniform(
                     -JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE
