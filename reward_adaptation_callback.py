@@ -56,7 +56,7 @@ class RewardAdaptationCallback(BaseCallback):
         continue_training = True
         if self.n_calls % self.eval_freq == 0:
             if (
-                self.eval_cb.logger.name_to_value["eval/success_rate"]
+                float(self.eval_cb.logger.name_to_value["eval/success_rate"])
                 > self.success_threshold
             ):
                 if self.current_randomization_factor == 1:
