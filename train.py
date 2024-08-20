@@ -34,13 +34,13 @@ argparser.add_argument(
 argparser.add_argument(
     "--eval-freq",
     type=int,
-    default=10_000,
+    default=25_000,
     help="Frequency of evaluations in timesteps",
 )
 argparser.add_argument(
     "--checkpoint-freq",
     type=int,
-    default=100_000,
+    default=1_000_000,
     help="Frequency of checkpoint saving, in timesteps",
 )
 argparser.add_argument(
