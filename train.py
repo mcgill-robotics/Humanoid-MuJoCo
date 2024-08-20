@@ -10,7 +10,7 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
     CheckpointCallback,
 )
-from reward_adaptation_callback import RewardAdaptationCallback
+from randomization_adaptation_callback import RewardAdaptationCallback
 from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecCheckNan
 import argparse
 
@@ -181,7 +181,7 @@ if CHECKPOINT is None:
         "batch_size": 128,
     }
     policy_args = {
-        "net_arch": dict(pi=[64, 64], qf=[64, 64]),
+        "net_arch": dict(pi=[128, 128, 128], qf=[128, 128, 128]),
         "activation_fn": nn.Tanh,
         "log_std_init": -1,
     }
@@ -223,19 +223,17 @@ eval_callback = EvalCallback(
 
 reward_adaptation_callback = RewardAdaptationCallback(
     envs=[env, eval_env],
-    eval_freq=EVAL_FREQ,
     eval_cb=eval_callback,
-    success_threshold=TARGET_SUCCESS_RATE,
+    success_reward_threshold=TARGET_SUCCESS_RATE * 1000,
     max_evals_at_max_reward=MAX_EVALS_AT_MAX_REWARD,
     initial_randomization_factor=RANDOMIZATION_FACTOR_INIT,
     randomization_increment=RANDOMIZATION_ADAPTATION_INCREMENT,
-    verbose=0,
     log_dir=log_dir,
 )
 
 model.learn(
     total_timesteps=TOTAL_TIMESTEPS,
-    callback=[checkpoint_callback, eval_callback, reward_adaptation_callback],
+    callback=[eval_callback, reward_adaptation_callback, checkpoint_callback],
     log_interval=1,
     reset_num_timesteps=False,
     progress_bar=True,

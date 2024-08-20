@@ -5,20 +5,18 @@ class RewardAdaptationCallback(BaseCallback):
     def __init__(
         self,
         envs,
-        eval_freq,
         eval_cb,
-        success_threshold,
+        success_reward_threshold,
         max_evals_at_max_reward,
         initial_randomization_factor,
         randomization_increment,
-        verbose,
         log_dir,
     ):
-        super().__init__(verbose)
+        super().__init__(0)
         self.envs = envs
-        self.eval_freq = eval_freq
         self.eval_cb = eval_cb
-        self.success_threshold = success_threshold
+        self.eval_freq = eval_cb.eval_freq
+        self.success_reward_threshold = success_reward_threshold
         self.max_evals_at_max_reward = max_evals_at_max_reward
         self.initial_randomization_factor = initial_randomization_factor
         self.current_randomization_factor = initial_randomization_factor
@@ -55,10 +53,7 @@ class RewardAdaptationCallback(BaseCallback):
     def _on_step(self):
         continue_training = True
         if self.n_calls % self.eval_freq == 0:
-            if (
-                float(self.eval_cb.logger.name_to_value["eval/success_rate"])
-                > self.success_threshold
-            ):
+            if float(self.eval_cb.last_mean_reward) > self.success_reward_threshold:
                 if self.current_randomization_factor == 1:
                     self.current_evals_at_max_reward += 1
                 self._update_randomization_factor(
@@ -69,8 +64,9 @@ class RewardAdaptationCallback(BaseCallback):
                     self.current_randomization_factor - self.randomization_increment
                 )
 
-            self._log_randomization_factor()
             if self.current_evals_at_max_reward >= self.max_evals_at_max_reward:
                 continue_training = False
+
+            self._log_randomization_factor()
 
         return continue_training
