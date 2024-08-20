@@ -36,13 +36,14 @@ class RewardAdaptationCallback(BaseCallback):
         if self.current_randomization_factor == new_randomization_factor:
             return
         print(
-            "{} randomization factor to",
-            (
-                "Increasing"
-                if new_randomization_factor > self.current_randomization_factor
-                else "Decreasing"
-            ),
-            new_randomization_factor,
+            "{} randomization factor to {}".format(
+                (
+                    "Increasing"
+                    if new_randomization_factor > self.current_randomization_factor
+                    else "Decreasing"
+                ),
+                new_randomization_factor,
+            )
         )
         self.current_randomization_factor = new_randomization_factor
         self.current_evals_at_max_reward = 0

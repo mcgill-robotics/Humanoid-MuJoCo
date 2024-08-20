@@ -23,7 +23,7 @@ argparser.add_argument(
     "--n-envs", type=int, default=32, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
-    "--cpu", action="store_true", help="Pass this flag to run on CPU"
+    "--gpu", action="store_true", help="Pass this flag to run on GPU"
 )
 argparser.add_argument(
     "--n-eval-episodes",
@@ -52,7 +52,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--name",
     type=str,
-    default=None,
+    default="SAC",
     help="Subfolder path to save training results in",
 )
 argparser.add_argument(
@@ -85,7 +85,7 @@ print(args)
 ##########################
 
 NUM_ENVS = args.n_envs
-SIMULATE_ON_GPU = not args.cpu
+SIMULATE_ON_GPU = args.gpu
 N_EVAL_EPISODES = args.n_eval_episodes
 TOTAL_TIMESTEPS = args.n_steps
 RANDOMIZATION_FACTOR_INIT = args.rand_init
