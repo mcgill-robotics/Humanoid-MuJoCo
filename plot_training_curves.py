@@ -1,89 +1,84 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-eval_files = ["data\SAC_CPU\evaluations.npz"]
+eval_file_dirs = ["data/SAC_CPU/"]
 
 #####################
 
 timesteps = []
 rewards = []
 ep_lengths = []
+randomization_factors = []
 
-for i in range(len(eval_files)):
-    evaluations = np.load(eval_files[i])
+for i in range(len(eval_file_dirs)):
+    evaluations = np.load(eval_file_dirs[i] + "evaluations.npz")
 
     timesteps.extend(evaluations["timesteps"])
     rewards.extend(np.mean(evaluations["results"], axis=1))
     ep_lengths.extend(np.mean(evaluations["ep_lengths"], axis=1))
     num_episodes_averaged = evaluations["results"].shape[1]
 
+    with open(eval_file_dirs[i] + "randomization_factors.csv", "r") as f:
+        randomization_factors.extend([float(line) for line in f.readlines()])
 
 #### PLOT REWARDS
 
-window_size = 100
-running_avgs = []
-for i in range(len(rewards)):
-    running_avg = 0
-    n = 0
-    for i in range(i, max(-1, i - window_size), -1):
-        n += 1
-        running_avg += rewards[i]
-    running_avg = running_avg / n
-    running_avgs.append(running_avg)
-
 if len(rewards) > 1:
-    # Plot the curve
-    plt.plot(timesteps, rewards, label="Reward", color="blue")
-    # plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+    fig, ax1 = plt.subplots()
 
-    # Add labels and title
-    plt.xlabel("Steps")
-    plt.ylabel("Reward")
+    ax1.plot(timesteps, rewards, color="blue")
+    ax1.set_xlabel("Steps")
+    ax1.set_ylabel("Reward", color="blue")
+    ax1.tick_params(axis="y", labelcolor="blue")
+
+    ax2 = ax1.twinx()
+    ax2.plot(timesteps, randomization_factors, color="red")
+    ax2.set_ylabel("Randomization Factor", color="red")
+    ax2.tick_params(axis="y", labelcolor="red")
+
+    ax1.set_ylim([min(rewards), max(rewards)])
+    ax2.set_ylim([0, 1])
+
+    # Add title and legend
     plt.title(
         "Evaluation Reward for Standing Behavior (avg. over {} episodes)".format(
             num_episodes_averaged
         )
     )
+    fig.tight_layout()  # To ensure no label overlap
 
-    # Show grid
+    # Show grid and plot
     plt.grid(True)
-
-    # Show the plot
-    plt.legend()
     plt.show()
 print("Rewards: {}".format(rewards))
 #### PLOT EPISODE LENGTHS
 
-window_size = 100
-running_avgs = []
-for i in range(len(ep_lengths)):
-    running_avg = 0
-    n = 0
-    for i in range(i, max(-1, i - window_size), -1):
-        n += 1
-        running_avg += ep_lengths[i]
-    running_avg = running_avg / n
-    running_avgs.append(running_avg)
-
 if len(ep_lengths) > 1:
-    # Plot the curve
-    plt.plot(timesteps, ep_lengths, label="Episode Length", color="blue")
-    # plt.plot(timesteps, running_avgs, label="Running Average", color="red")
+    fig, ax1 = plt.subplots()
 
-    # Add labels and title
-    plt.xlabel("Steps")
-    plt.ylabel("Steps before termination")
+    ax1.plot(timesteps, ep_lengths, color="blue")
+    ax1.set_xlabel("Steps")
+    ax1.set_ylabel("Episode Length", color="blue")
+    ax1.tick_params(axis="y", labelcolor="blue")
+
+    ax2 = ax1.twinx()
+    ax2.plot(timesteps, randomization_factors, color="red")
+    ax2.set_ylabel("Randomization Factor", color="red")
+    ax2.tick_params(axis="y", labelcolor="red")
+
+    ax1.set_ylim([0, 1000])
+    ax2.set_ylim([0, 1])
+
+    # Add title and legend
     plt.title(
         "Evaluation Episode Lengths for Standing Behavior (avg. over {} episodes per evaluation)".format(
             num_episodes_averaged
         )
     )
+    fig.tight_layout()  # To ensure no label overlap
 
-    # Show grid
+    # Show grid and plot
     plt.grid(True)
-
-    # Show the plot
-    plt.legend()
     plt.show()
 
 print("Episode Lengths: {}".format(ep_lengths))
