@@ -10,6 +10,7 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
     CheckpointCallback,
 )
+from simulation.simulation_parameters import *
 from randomization_adaptation_callback import RewardAdaptationCallback
 from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecCheckNan
 import argparse
@@ -34,13 +35,13 @@ argparser.add_argument(
 argparser.add_argument(
     "--eval-freq",
     type=int,
-    default=25_000,
+    default=25_000 * (CONTROL_FREQUENCY / 100),
     help="Frequency of evaluations in timesteps",
 )
 argparser.add_argument(
     "--checkpoint-freq",
     type=int,
-    default=1_000_000,
+    default=1_000_000 * (CONTROL_FREQUENCY / 100),
     help="Frequency of checkpoint saving, in timesteps",
 )
 argparser.add_argument(
@@ -58,7 +59,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--n-steps",
     type=int,
-    default=50_000_000,
+    default=50_000_000 * (CONTROL_FREQUENCY / 100),
     help="Total timesteps to train policy for, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
@@ -159,7 +160,7 @@ else:
                     randomization_factor=RANDOMIZATION_FACTOR_INIT,
                     use_potential_rewards=False,
                     max_simulation_time_override=MAX_EVAL_SIM_TIME,
-                    reward_override=1,
+                    reward_override=1.0 / CONTROL_FREQUENCY,
                     enable_rendering=False,
                 )
             ]
@@ -225,7 +226,7 @@ eval_callback = EvalCallback(
 reward_adaptation_callback = RewardAdaptationCallback(
     envs=[env, eval_env],
     eval_cb=eval_callback,
-    success_reward_threshold=TARGET_SUCCESS_RATE * 100,
+    success_reward_threshold=TARGET_SUCCESS_RATE * MAX_EVAL_SIM_TIME,
     max_evals_at_max_reward=MAX_EVALS_AT_MAX_REWARD,
     initial_randomization_factor=RANDOMIZATION_FACTOR_INIT,
     randomization_increment=RANDOMIZATION_ADAPTATION_INCREMENT,
