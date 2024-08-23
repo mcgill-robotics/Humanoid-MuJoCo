@@ -5,8 +5,8 @@ from stable_baselines3 import SAC
 
 
 MODEL_TYPE = SAC
-RANDOMIZATION_FACTOR = 0.1
-CKPT = "data\SAC_CPU/ckpt_18600000_steps.zip"
+RANDOMIZATION_FACTOR = 0
+CKPT = "data/SAC/ckpt_200000_steps.zip"
 
 # env = GPUVecEnv(
 #     num_envs=1,
@@ -47,6 +47,7 @@ while True:
                 total_reward += reward
                 # print(reward)
             env.render("human")
+            # done = False
     except KeyboardInterrupt:
         print(
             " >>> Episode Length {}, Total Reward {}".format(

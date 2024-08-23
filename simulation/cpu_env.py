@@ -674,6 +674,7 @@ class CPUEnv(gym.Env):
                 self.data, camera="track", scene_option=self.scene_option
             )
             frame = self.renderer.render()
+            time.sleep(1 / CONTROL_FREQUENCY)
             if mode == "human":
                 cv2.imshow("CPU Sim View", frame)
                 cv2.waitKey(1)

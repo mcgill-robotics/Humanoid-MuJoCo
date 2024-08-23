@@ -66,7 +66,7 @@ if len(ep_lengths) > 1:
     ax2.set_ylabel("Randomization Factor", color="red")
     ax2.tick_params(axis="y", labelcolor="red")
 
-    ax1.set_ylim([0, 1000])
+    ax1.set_ylim([0, 10])
     ax2.set_ylim([0, 1])
 
     # Add title and legend
