@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-eval_file_dirs = ["data/SAC_CPU/"]
+eval_file_dirs = ["data/SAC/"]
 
 #####################
 

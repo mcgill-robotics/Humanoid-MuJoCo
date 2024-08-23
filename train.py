@@ -159,6 +159,7 @@ else:
                     randomization_factor=RANDOMIZATION_FACTOR_INIT,
                     use_potential_rewards=False,
                     max_simulation_time_override=MAX_EVAL_SIM_TIME,
+                    reward_override=1,
                     enable_rendering=False,
                 )
             ]
@@ -224,7 +225,7 @@ eval_callback = EvalCallback(
 reward_adaptation_callback = RewardAdaptationCallback(
     envs=[env, eval_env],
     eval_cb=eval_callback,
-    success_reward_threshold=TARGET_SUCCESS_RATE * 1000,
+    success_reward_threshold=TARGET_SUCCESS_RATE * 100,
     max_evals_at_max_reward=MAX_EVALS_AT_MAX_REWARD,
     initial_randomization_factor=RANDOMIZATION_FACTOR_INIT,
     randomization_increment=RANDOMIZATION_ADAPTATION_INCREMENT,
