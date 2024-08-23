@@ -35,13 +35,13 @@ argparser.add_argument(
 argparser.add_argument(
     "--eval-freq",
     type=int,
-    default=25_000 * (CONTROL_FREQUENCY // 100),
+    default=int(25_000 * (CONTROL_FREQUENCY / 100)),
     help="Frequency of evaluations in timesteps",
 )
 argparser.add_argument(
     "--checkpoint-freq",
     type=int,
-    default=1_000_000 * (CONTROL_FREQUENCY // 100),
+    default=int(1_000_000 * (CONTROL_FREQUENCY / 100)),
     help="Frequency of checkpoint saving, in timesteps",
 )
 argparser.add_argument(
@@ -59,7 +59,7 @@ argparser.add_argument(
 argparser.add_argument(
     "--n-steps",
     type=int,
-    default=50_000_000 * (CONTROL_FREQUENCY // 100),
+    default=int(50_000_000 * (CONTROL_FREQUENCY / 100)),
     help="Total timesteps to train policy for, per randomization factor (can do less if reward threshold is reached early)",
 )
 argparser.add_argument(
