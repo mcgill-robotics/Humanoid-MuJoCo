@@ -57,9 +57,9 @@ print("Rewards: {}".format(rewards))
 if len(ep_lengths) > 1:
     fig, ax1 = plt.subplots()
 
-    ax1.plot(timesteps, ep_lengths, color="blue")
+    ax1.plot(timesteps, np.array(ep_lengths) / CONTROL_FREQUENCY, color="blue")
     ax1.set_xlabel("Steps")
-    ax1.set_ylabel("Episode Length", color="blue")
+    ax1.set_ylabel("Episode Length (seconds)", color="blue")
     ax1.tick_params(axis="y", labelcolor="blue")
 
     ax2 = ax1.twinx()
@@ -67,7 +67,7 @@ if len(ep_lengths) > 1:
     ax2.set_ylabel("Randomization Factor", color="red")
     ax2.tick_params(axis="y", labelcolor="red")
 
-    ax1.set_ylim([0, 10 * CONTROL_FREQUENCY])
+    ax1.set_ylim([0, 10])
     ax2.set_ylim([0, 1])
 
     # Add title and legend
