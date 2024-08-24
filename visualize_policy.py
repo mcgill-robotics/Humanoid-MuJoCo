@@ -6,7 +6,7 @@ from stable_baselines3 import SAC
 
 MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0
-CKPT = "data/SAC/ckpt_200000_steps.zip"
+CKPT = "data/SAC/best_model.zip"
 
 # env = GPUVecEnv(
 #     num_envs=1,

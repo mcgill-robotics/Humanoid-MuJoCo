@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from simulation.simulation_parameters import *
 
 eval_file_dirs = ["data/SAC/"]
 
@@ -66,7 +67,7 @@ if len(ep_lengths) > 1:
     ax2.set_ylabel("Randomization Factor", color="red")
     ax2.tick_params(axis="y", labelcolor="red")
 
-    ax1.set_ylim([0, 10])
+    ax1.set_ylim([0, 10 * CONTROL_FREQUENCY])
     ax2.set_ylim([0, 1])
 
     # Add title and legend
