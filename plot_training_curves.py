@@ -37,7 +37,9 @@ if len(rewards) > 1:
     ax2.set_ylabel("Randomization Factor", color="red")
     ax2.tick_params(axis="y", labelcolor="red")
 
-    ax1.set_ylim([min(rewards), max(rewards)])
+    ax1.set_ylim(
+        [min(rewards) - 0.05 * (max(rewards) - min(rewards)), max(rewards) * 1.05]
+    )
     ax2.set_ylim([0, 1])
 
     # Add title and legend

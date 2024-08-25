@@ -686,7 +686,7 @@ if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
         reward_fn=SELECTED_REWARD_FUNCTION,
-        randomization_factor=1,
+        randomization_factor=0,
         enable_rendering=True,
     )
     obs = sim.reset()
