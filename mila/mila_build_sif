@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --job-name=humanoid
+#SBATCH --output=build_stdout.txt
+#SBATCH --error=build_stderr.txt
+#SBATCH --ntasks=1
+#SBATCH --time=01:00:00
+#SBATCH --mem=100Gb
+
+source ~/.bashrc
+module load singularity
+
+singularity pull humanoid.sif docker://mcgillrobotics/mujoco:latest

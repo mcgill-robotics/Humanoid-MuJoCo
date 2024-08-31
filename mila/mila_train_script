@@ -1,13 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=humanoid
-#SBATCH --output=std_out.txt
-#SBATCH --error=std_error.txt
+#SBATCH --output=stdout.txt
+#SBATCH --error=stderr.txt
 #SBATCH --ntasks=1
-#SBATCH --time=5-05:00:00
+#SBATCH --time=01:00:00
 #SBATCH --mem=100Gb
 
 source ~/.bashrc
 module load cuda/11.8
+module load singularity
 
 singularity exec --nv \
   --env DISPLAY=novnc:0.0,XLA_FLAGS=--xla_gpu_triton_gemm_any=true,MUJOCO_GL=egl \
