@@ -2,3 +2,5 @@ MUJOCO_LOG.TXT
 *.pyc
 simulation/*.pyc
 venv
+mila/humanoid.sif
+mila/*.txt

@@ -12,7 +12,7 @@ module load singularity
 
 singularity exec --nv \
   --env DISPLAY=novnc:0.0,XLA_FLAGS=--xla_gpu_triton_gemm_any=true,MUJOCO_GL=egl \
-  --bind ../Humanoid-MuJoCo:/root/Humanoid-MuJoCo \
-  docker://mcgillrobotics/mujoco:latest \
+  --bind ../../Humanoid-MuJoCo:/root/Humanoid-MuJoCo \
+  humanoid.sif \
   bash -c "python3 /root/Humanoid-MuJoCo/train.py"
 
