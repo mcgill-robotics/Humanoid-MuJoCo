@@ -1,16 +1,16 @@
 <mujoco model="humanoid">
   <compiler angle="radian"/>
   <asset>
-    <mesh name="torso" file="humanoid_urdf/torso.STL"/>
-    <mesh name="left_shoulder_roll_link" file="humanoid_urdf/left_shoulder_roll_link.STL"/>
-    <mesh name="left_shoulder_pitch_link" file="humanoid_urdf/left_shoulder_pitch_link.STL"/>
-    <mesh name="left_forearm_pitch_link" file="humanoid_urdf/left_forearm_pitch_link.STL"/>
-    <mesh name="left_waist_roll_link" file="humanoid_urdf/left_waist_roll_link.STL"/>
-    <mesh name="left_waist_pitch_link" file="humanoid_urdf/left_waist_pitch_link.STL"/>
-    <mesh name="left_knee_pitch_link" file="humanoid_urdf/left_knee_pitch_link.STL"/>
-    <mesh name="right_waist_roll_link" file="humanoid_urdf/right_waist_roll_link.STL"/>
-    <mesh name="right_waist_pitch_link" file="humanoid_urdf/right_waist_pitch_link.STL"/>
-    <mesh name="right_knee_pitch_link" file="humanoid_urdf/right_knee_pitch_link.STL"/>
+    <mesh name="torso" file="humanoid_urdf/torso.stl"/>
+    <mesh name="left_shoulder_roll_link" file="humanoid_urdf/left_shoulder_roll_link.stl"/>
+    <mesh name="left_shoulder_pitch_link" file="humanoid_urdf/left_shoulder_pitch_link.stl"/>
+    <mesh name="left_forearm_pitch_link" file="humanoid_urdf/left_forearm_pitch_link.stl"/>
+    <mesh name="left_waist_roll_link" file="humanoid_urdf/left_waist_roll_link.stl"/>
+    <mesh name="left_waist_pitch_link" file="humanoid_urdf/left_waist_pitch_link.stl"/>
+    <mesh name="left_knee_pitch_link" file="humanoid_urdf/left_knee_pitch_link.stl"/>
+    <mesh name="right_waist_roll_link" file="humanoid_urdf/right_waist_roll_link.stl"/>
+    <mesh name="right_waist_pitch_link" file="humanoid_urdf/right_waist_pitch_link.stl"/>
+    <mesh name="right_knee_pitch_link" file="humanoid_urdf/right_knee_pitch_link.stl"/>
   </asset>
   <worldbody>
     <body name="humanoid_world_link" pos="0 0 -0.275" quat="-0.7 0 0 0.7">
