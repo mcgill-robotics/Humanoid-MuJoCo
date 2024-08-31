@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --job-name=humanoid
+#SBATCH --output=std_out.txt
+#SBATCH --error=std_error.txt
+#SBATCH --ntasks=1
+#SBATCH --time=5-05:00:00
+#SBATCH --mem=100Gb
+
+source ~/.bashrc
+module load cuda/11.8
+
+singularity exec --nv \
+  --env DISPLAY=novnc:0.0,XLA_FLAGS=--xla_gpu_triton_gemm_any=true,MUJOCO_GL=egl \
+  --bind ../Humanoid-MuJoCo:/root/Humanoid-MuJoCo \
+  docker://mcgillrobotics/mujoco:latest \
+  bash -c "python3 /root/Humanoid-MuJoCo/train.py"
+

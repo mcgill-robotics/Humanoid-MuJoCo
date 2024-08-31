@@ -1,0 +1,2 @@
+[=== Module cudatoolkit/11.8 loaded ===]
+/var/spool/slurmd/job5246806/slurm_script: line 12: singularity: command not found
