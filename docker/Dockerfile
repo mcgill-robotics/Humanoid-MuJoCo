@@ -21,6 +21,7 @@ RUN pip3 install nvidia-cudnn-cu11==8.9.6.50
 RUN pip3 install stable-baselines3[extra]
 RUN pip3 install tensorflow
 RUN pip3 install rl_zoo3
+RUN pip3 install perlin_noise
 
 # install dependencies for rendering with OpenCV
 RUN apt-get install -y libglfw3
