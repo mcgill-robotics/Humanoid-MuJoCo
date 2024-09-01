@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=humanoid
-#SBATCH --output=stdout.txt
-#SBATCH --error=stderr.txt
+#SBATCH --output=mila/stdout.txt
+#SBATCH --error=mila/stderr.txt
 #SBATCH --ntasks=1
 #SBATCH --time=01:00:00
 #SBATCH --mem=100Gb
@@ -10,9 +10,25 @@ source ~/.bashrc
 module load cuda/11.8
 module load singularity
 
+mkdir -p $SLURM_TMPDIR/Humanoid-MuJoCo
+cp -r ~/Humanoid-MuJoCo/* $SLURM_TMPDIR/Humanoid-MuJoCo/
+
+# start a background process which copies back the data to the home directory
+interval=120  # seconds
+
+# Start the process in the background
+(
+  while true; do
+    cp -r $SLURM_TMPDIR/Humanoid-MuJoCo/* ~/Humanoid-MuJoCo/
+    sleep "$interval"
+  done
+) &
+
 singularity exec --nv \
   --env DISPLAY=novnc:0.0,XLA_FLAGS=--xla_gpu_triton_gemm_any=true,MUJOCO_GL=egl \
-  --bind ../../Humanoid-MuJoCo:/root/Humanoid-MuJoCo \
-  humanoid.sif \
-  bash -c "python3 -m pip install perlin_noise && cd /root/Humanoid-MuJoCo && python3 train.py"
+  -B $SLURM_TMPDIR/Humanoid-MuJoCo:/root/Humanoid-MuJoCo \
+  --pwd /root/Humanoid-MuJoCo \
+  $SLURM_TMPDIR/mila/humanoid.sif \
+  bash -c "python3 -m pip install perlin_noise && python3 train.py"
 
+cp -r $SLURM_TMPDIR/Humanoid-MuJoCo/* ~/Humanoid-MuJoCo/

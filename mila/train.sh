@@ -1,3 +1,3 @@
-rm std_out.txt std_error.txt
+rm mila/stdout.txt mila/stderr.txt
 
-sbatch --gres=gpu:1 mila_train_script > sbatch_out.txt
+sbatch --gres=gpu:1 mila/mila_train_script > mila/sbatch_out.txt
