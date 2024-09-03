@@ -3,7 +3,7 @@
 #SBATCH --output=mila/out.txt
 #SBATCH --error=mila/err.txt
 #SBATCH --ntasks=1
-#SBATCH --time=2-00:00:00
+#SBATCH --time=3-00:00:00
 #SBATCH --mem=100Gb
 #SBATCH --gres=gpu:1
 

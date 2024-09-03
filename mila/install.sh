@@ -8,7 +8,7 @@ module load cuda/11.8
 python -m venv $HOME/humanoid_env
 source $HOME/humanoid_env/bin/activate
 
-pip3 install --no-cache-dir --upgrade numpy
+pip3 install --no-cache-dir --upgrade numpy==2.0.0
 pip3 install --no-cache-dir numpy-quaternion
 pip3 install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 pip3 install mujoco
