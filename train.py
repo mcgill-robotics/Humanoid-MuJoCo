@@ -12,6 +12,7 @@ from stable_baselines3.common.callbacks import (
 )
 from simulation.simulation_parameters import *
 from randomization_adaptation_callback import RewardAdaptationCallback
+from stdout_log_callback import STDOutLogCallback
 from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, VecCheckNan
 import argparse
 
@@ -233,9 +234,21 @@ reward_adaptation_callback = RewardAdaptationCallback(
     log_dir=log_dir,
 )
 
+
+progress_callback = STDOutLogCallback(
+    log_dir=log_dir,
+    num_envs=NUM_ENVS,
+    total_timesteps=TOTAL_TIMESTEPS,
+)
+
 model.learn(
     total_timesteps=TOTAL_TIMESTEPS,
-    callback=[eval_callback, reward_adaptation_callback, checkpoint_callback],
+    callback=[
+        progress_callback,
+        eval_callback,
+        reward_adaptation_callback,
+        checkpoint_callback,
+    ],
     log_interval=1,
     reset_num_timesteps=False,
     progress_bar=True,
