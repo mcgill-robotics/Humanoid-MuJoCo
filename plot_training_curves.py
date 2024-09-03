@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from simulation.simulation_parameters import *
 
-eval_file_dirs = ["data/SAC/"]
+eval_file_dirs = ["data/SAC/0_steps/"]
 
 #####################
 

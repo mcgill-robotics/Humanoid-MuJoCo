@@ -7,11 +7,11 @@ import cv2
 
 
 MODEL_TYPE = SAC
-LOG_NAME = "SAC"
+LOG_DIR = "data/SAC"
 RANDOMIZATION_FACTOR = 0
 CKPT_NAME = "best_model"
 
-eval_dir = "./data/{}/training_results_r{}/".format(LOG_NAME, RANDOMIZATION_FACTOR)
+eval_dir = "./{}/training_results_r{}/".format(LOG_DIR, RANDOMIZATION_FACTOR)
 num_videos = 9
 video_duration = 5  # seconds
 
