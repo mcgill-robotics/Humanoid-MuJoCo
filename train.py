@@ -96,13 +96,15 @@ TARGET_SUCCESS_RATE = args.target_success_rate
 RANDOMIZATION_ADAPTATION_INCREMENT = 0.01
 if args.ckpt is not None:
     CHECKPOINT = args.ckpt.lstrip().rstrip()
+    CHECKPOINT_PREFIX = "/" + os.path.splitext(os.path.basename(CHECKPOINT))[0]
 else:
     CHECKPOINT = None
+    CHECKPOINT_PREFIX = ""
 MAX_EVALS_AT_MAX_REWARD = (
     10  # after 10 successful evaluations at max randomization, end training
 )
 
-log_dir = "data/{}/".format(args.name.strip())
+log_dir = "data/{}/".format(args.name.strip()) + CHECKPOINT_PREFIX
 EVAL_FREQ = args.eval_freq // NUM_ENVS
 CHECKPOINT_FREQ = args.checkpoint_freq // NUM_ENVS
 
@@ -209,7 +211,7 @@ else:
 checkpoint_callback = CheckpointCallback(
     save_freq=CHECKPOINT_FREQ,
     save_path=log_dir,
-    name_prefix="ckpt",
+    name_prefix="",
     verbose=0,
 )
 
