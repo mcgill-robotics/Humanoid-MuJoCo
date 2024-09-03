@@ -10,25 +10,33 @@ source ~/.bashrc
 module load cuda/11.8
 module load singularity
 
-mkdir -p $SLURM_TMPDIR/Humanoid-MuJoCo
-cp -r ~/Humanoid-MuJoCo/* $SLURM_TMPDIR/Humanoid-MuJoCo/
+TMP_WORKDIR="$SLURM_TMPDIR"
+
+mkdir -p "$TMP_WORKDIR/Humanoid-MuJoCo/"
+mkdir -p "$TMP_WORKDIR/Humanoid-MuJoCo/mila"
+echo "Created temporary workspace..."
+
+cp -r  $(ls ~/Humanoid-MuJoCo/ | grep -v -e mila) "$TMP_WORKDIR/Humanoid-MuJoCo/" 2>/dev/null
+cp ~/Humanoid-MuJoCo/mila/humanoid.sif "$TMP_WORKDIR/Humanoid-MuJoCo/mila/" 2>/dev/null
+echo "Initialized temporary workspace..."
 
 # start a background process which copies back the data to the home directory
 interval=120  # seconds
-
-# Start the process in the background
 (
   while true; do
-    cp -r $SLURM_TMPDIR/Humanoid-MuJoCo/* ~/Humanoid-MuJoCo/
-    sleep "$interval"
+	cp -r $(ls $TMP_WORKDIR/Humanoid-MuJoCo) ~/Humanoid-MuJoCo/ 2>/dev/null
+    	sleep "$interval"
   done
 ) &
+echo "Started copy process in the background..."
 
-singularity exec --nv \
+ls -al /tmp/Humanoid-MuJoCo/simulation/assets/humanoid_urdf/
+head /tmp/Humanoid-MuJoCo/simulation/assets/humanoid_urdf/torso.stl
+
+cd $TMP_WORKDIR/Humanoid-MuJoCo && singularity exec --nv \
   --env DISPLAY=novnc:0.0,XLA_FLAGS=--xla_gpu_triton_gemm_any=true,MUJOCO_GL=egl \
-  -B $SLURM_TMPDIR/Humanoid-MuJoCo:/root/Humanoid-MuJoCo \
-  --pwd /root/Humanoid-MuJoCo \
-  $SLURM_TMPDIR/mila/humanoid.sif \
-  bash -c "python3 -m pip install perlin_noise && python3 train.py"
+  -H $TMP_WORKDIR:/home/mila/a/antoine.dangeard \
+  mila/humanoid.sif \
+  bash -c "cd /home/mila/a/antoine.dangeard/Humanoid-MuJoCo && head ~/Humanoid-MuJoCo/simulation/assets/humanoid_urdf/torso.stl && ls -al ~/Humanoid-MuJoCo/simulation/assets/humanoid_urdf/ && python -s -m pip install perlin_noise && python3 -s train.py"
 
-cp -r $SLURM_TMPDIR/Humanoid-MuJoCo/* ~/Humanoid-MuJoCo/
+cp -r $TMP_WORKDIR/Humanoid-MuJoCo/* ~/Humanoid-MuJoCo/ 2>/dev/null
