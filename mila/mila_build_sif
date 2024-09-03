@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=humanoid
-#SBATCH --output=build_stdout.txt
-#SBATCH --error=build_stderr.txt
+#SBATCH --output=build_out.txt
+#SBATCH --error=build_err.txt
 #SBATCH --ntasks=1
 #SBATCH --time=01:00:00
 #SBATCH --mem=100Gb
