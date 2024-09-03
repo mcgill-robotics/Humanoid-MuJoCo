@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH --job-name=humanoid
+#SBATCH --output=mila/stdout.txt
+#SBATCH --error=mila/stderr.txt
+#SBATCH --ntasks=1
+#SBATCH --time=01:00:00
+#SBATCH --mem=100Gb
+
+source ~/.bashrc
+source mila/install.sh
+
+pip install perlin_noise
+
+python train.py
