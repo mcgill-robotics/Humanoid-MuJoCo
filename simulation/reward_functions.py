@@ -169,8 +169,8 @@ def controlInputReward(
 
     ### TORSO HEIGHT REWARD
     TORSO_HEIGHT_REWARD_WEIGHT = 5
-    TARGET_Z_POS = -0.275
-    MIN_Z_POS_FOR_REWARD = -0.35
+    TARGET_Z_POS = -0.385
+    MIN_Z_POS_FOR_REWARD = -0.45
     reward += torso_height_reward(z_pos)
 
     # JOINT TORQUE REWARD
@@ -218,7 +218,7 @@ def controlInputReward(
     # CHECK TERMINATION CONDITION AND REWARD
     TERMINATE_ON_SELF_COLLISION = True
     ALLOW_EARLY_TERMINATION = True
-    MIN_Z_BEFORE_GROUNDED = -0.4
+    MIN_Z_BEFORE_GROUNDED = -0.5
     isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
     local_gravity_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     isNotUpright = jp.where(
