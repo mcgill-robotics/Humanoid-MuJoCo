@@ -12,4 +12,19 @@ source mila/install.sh
 
 pip install perlin_noise
 
-python train.py
+# Print gpu configuration for this job
+nvidia-smi
+# Verify gpu allocation (should be 1 GPU)
+echo $CUDA_VISIBLE_DEVICES
+
+mkdir -p $SLURM_TMPDIR/Humanoid-MuJoCo
+cp -rf * $SLURM_TMPDIR/Humanoid-MuJoCo/ 2> /dev/null
+
+# create background process which regularly copies back the folder
+while true; do
+    sleep 30
+    echo " > Copying data to home folder"
+    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data* /home/mila/a/antoine.dangeard/Humanoid-MuJoCo/data/ 2> /dev/null
+done &
+
+cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py
