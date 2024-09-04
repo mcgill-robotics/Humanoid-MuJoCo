@@ -13,7 +13,7 @@
     <hfield name="hfield" nrow="8" ncol="8" size="1 1 1 1"/>
   </asset>
 
-  <option iterations="1" ls_iterations="1" tolerance="1e-4" ls_tolerance="0.05"> </option>
+  <!-- <option iterations="1" ls_iterations="1" tolerance="1e-4" ls_tolerance="0.05"> </option> -->
   
   <include file="humanoid.xml"/>
 
