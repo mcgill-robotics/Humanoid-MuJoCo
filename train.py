@@ -28,6 +28,11 @@ argparser.add_argument(
     "--gpu", action="store_true", help="Pass this flag to run on GPU"
 )
 argparser.add_argument(
+    "--silent",
+    action="store_true",
+    help="Pass this flag to prevent printing logs to stdout",
+)
+argparser.add_argument(
     "--n-eval-episodes",
     type=int,
     default=10,
@@ -251,7 +256,7 @@ model.learn(
         reward_adaptation_callback,
         checkpoint_callback,
     ],
-    log_interval=1,
+    log_interval=None if args.silent else 1,
     reset_num_timesteps=False,
-    progress_bar=True,
+    progress_bar=False if args.silent else True,
 )

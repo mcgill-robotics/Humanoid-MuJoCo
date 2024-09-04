@@ -28,4 +28,4 @@ while true; do
     cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data/* /home/mila/a/antoine.dangeard/Humanoid-MuJoCo/data/ 2> /dev/null
 done &
 
-cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py
+cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py --silent
