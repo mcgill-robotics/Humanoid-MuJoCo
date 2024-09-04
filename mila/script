@@ -16,7 +16,7 @@ pip install perlin_noise
 # Print gpu configuration for this job
 nvidia-smi
 python -c "import torch; print('PyTorch: CUDA is available' if torch.cuda.is_available() else 'PyTorch: CUDA is not available')"
-python -c "import jax; print('Jax: CUDA is available' if jax.lib.xla_bridge.get_backend().platform == 'cuda' else 'Jax: CUDA is not available')"
+python -c "import jax; print('Jax: CUDA is available' if jax.default_backend() == "gpu" else 'Jax: CUDA is not available')"
 
 mkdir -p $SLURM_TMPDIR/Humanoid-MuJoCo
 cp -rf * $SLURM_TMPDIR/Humanoid-MuJoCo/ 2> /dev/null
