@@ -177,8 +177,8 @@ def controlInputReward(
 
     ### TORSO HEIGHT REWARD
     TORSO_HEIGHT_REWARD_WEIGHT = 5
-    TARGET_Z_POS = -0.385
-    MIN_Z_POS_FOR_REWARD = -0.45
+    TARGET_Z_POS = Z_INITIAL_POS
+    MIN_Z_POS_FOR_REWARD = Z_INITIAL_POS - 0.75
     reward += torso_height_reward(z_pos)
 
     # JOINT TORQUE REWARD
@@ -211,7 +211,7 @@ def controlInputReward(
     reward += symmetry_reward(latest_ctrl)
 
     # SELF COLLISION REWARD
-    SELF_COLLISION_PENALTY = -10
+    SELF_COLLISION_PENALTY = -20
     reward += self_collision_penalty(isSelfColliding)
 
     # CONSTANT REWARD OFFSET
@@ -309,7 +309,7 @@ def standupReward(
 
     ### TORSO HEIGHT REWARD
     TORSO_HEIGHT_REWARD_WEIGHT = 15
-    TARGET_Z_POS = -0.385
+    TARGET_Z_POS = Z_INITIAL_POS
     MIN_Z_POS_FOR_REWARD = -0.6
     reward += torso_height_reward(z_pos)
 
@@ -343,7 +343,7 @@ def standupReward(
     reward += symmetry_reward(latest_ctrl)
 
     # SELF COLLISION REWARD
-    SELF_COLLISION_PENALTY = -10
+    SELF_COLLISION_PENALTY = -20
     reward += self_collision_penalty(isSelfColliding)
 
     # CONSTANT REWARD OFFSET
