@@ -17,7 +17,7 @@
       <joint name="humanoid_free" type="free"/>
       <body name="humanoid" pos="0 0 0" quat="0.7 0 0 0.7" />
       <body name="torso">
-        <geom type="mesh" pos="0.1675 -0.005 0.135" rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
+        <geom type="box" pos="0.1675 -0.005 0.135" rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
       </body>
       <body name="right_shoulder_roll_link" pos="0.31335 -0.0091897 0.17689" quat="0.707105 0.707107 -0.00096831 0.000968314">
         <inertial pos="0.000605694 -0.0120164 0.0186305" quat="0.653192 0.653383 -0.270554 0.270611" mass="0.0517508" diaginertia="1.4546e-05 1.38577e-05 1.00733e-05"/>
@@ -27,12 +27,12 @@
           <inertial pos="-5.93785e-06 -0.0552442 -1.9163e-10" quat="0.707107 0.707107 0 0" mass="0.0745776" diaginertia="3.48174e-05 2.30396e-05 2.00988e-05"/>
           <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 1.5708" limited="true" name="right_shoulder_pitch" pos="0 0 0" axis="0 0 1"/>
                     <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-          <geom type="mesh" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_shoulder_pitch_link"/>
+          <geom type="box" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_shoulder_pitch_link"/>
           <body name="right_forearm_pitch_link" pos="0 -0.11049 0" quat="0.707055 -0.00862726 -0.707053 -0.00862572">
             <inertial pos="0.000238558 -0.0331073 8.27912e-05" quat="0.707052 0.70712 -0.00486423 -0.00594191" mass="0.094279" diaginertia="3.34885e-05 3.00632e-05 1.67663e-05"/>
             <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 0" limited="true" name="right_elbow" pos="0 0 0" axis="1 0 0"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-            <geom type="mesh" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_forearm_pitch_link"/>
+            <geom type="box" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_forearm_pitch_link"/>
           </body>
         </body>
       </body>
@@ -44,12 +44,12 @@
           <inertial pos="-5.93785e-06 -0.0552442 -1.9163e-10" quat="0.707107 0.707107 0 0" mass="0.0745776" diaginertia="3.48174e-05 2.30396e-05 2.00988e-05"/>
           <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 1.5708" limited="true" name="left_shoulder_pitch" pos="0 0 0" axis="0 0 1"/>
                     <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-          <geom type="mesh" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_shoulder_pitch_link"/>
+          <geom type="box" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_shoulder_pitch_link"/>
           <body name="left_forearm_pitch_link" pos="0 -0.11049 0" quat="0.707055 -0.00862726 -0.707053 -0.00862572">
             <inertial pos="0.000238558 -0.0331073 8.27912e-05" quat="0.707052 0.70712 -0.00486423 -0.00594191" mass="0.094279" diaginertia="3.34885e-05 3.00632e-05 1.67663e-05"/>
             <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 0" limited="true" name="left_elbow" pos="0 0 0" axis="1 0 0"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-            <geom type="mesh" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_forearm_pitch_link"/>
+            <geom type="box" rgba="1 1 1 1" pos="0 -0.048 0" mesh="left_forearm_pitch_link"/>
           </body>
         </body>
       </body>
@@ -57,17 +57,17 @@
         <inertial pos="0.000605143 -0.0120164 0.0186305" quat="0.653192 0.653383 -0.270554 0.270611" mass="0.0517508" diaginertia="1.4546e-05 1.38577e-05 1.00733e-05"/>
         <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 0" limited="true" name="right_hip_roll" pos="0 0 0" axis="0 0 -1"/>
                   <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-        <!-- <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="left_waist_roll_link"/> -->
+        <!-- <geom type="box" rgba="0.792157 0.819608 0.933333 1" mesh="left_waist_roll_link"/> -->
         <body name="right_waist_pitch_link" pos="0 -0.024 0.018" quat="0.707056 0.00844572 0.707056 0.00844572">
           <inertial pos="4.98631e-06 -0.0752442 -1.31697e-09" quat="0.707107 0.707107 0 0" mass="0.0888059" diaginertia="6.15393e-05 4.97615e-05 2.20093e-05"/>
           <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 1.5708" limited="true" name="right_hip_pitch" pos="0 0 0" axis="0 0 -1"/>
                     <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-          <geom type="mesh" rgba="1 1 1 1" pos="0 -0.075 0" mesh="left_waist_pitch_link"/>
+          <geom type="box" rgba="1 1 1 1" pos="0 -0.075 0" mesh="left_waist_pitch_link"/>
           <body name="right_knee_pitch_link" pos="0 -0.150488 0" quat="0 -0.0240565 0.999711 0">
             <inertial pos="0.000109197 -0.0801721 0.00013442" quat="0.499013 0.501748 -0.500969 0.498263" mass="0.167319" diaginertia="8.01423e-05 7.67196e-05 3.31839e-05"/>
             <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="0 1.5708" limited="true" name="right_knee" pos="0 0 0" axis="0 0 1"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-            <geom name="pressure_geom_L" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="left_knee_pitch_link"/>
+            <geom name="pressure_geom_L" type="box" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="left_knee_pitch_link"/>
           </body>
         </body>
       </body>
@@ -75,17 +75,17 @@
         <inertial pos="0.000605143 -0.0120164 0.0186305" quat="0.653192 0.653383 -0.270554 0.270611" mass="0.0517508" diaginertia="1.4546e-05 1.38577e-05 1.00733e-05"/>
         <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="0 1.5708" limited="true" name="left_hip_roll" pos="0 0 0" axis="0 0 -1"/>
                   <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-        <!-- <geom type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="right_waist_roll_link"/> -->
+        <!-- <geom type="box" rgba="0.792157 0.819608 0.933333 1" mesh="right_waist_roll_link"/> -->
         <body name="left_waist_pitch_link" pos="0 -0.024 0.018" quat="0.706835 0.0196184 0.706835 0.0196184">
           <inertial pos="4.98627e-06 -0.0752442 -1.53469e-09" quat="0.707107 0.707107 0 0" mass="0.088806" diaginertia="6.15393e-05 4.97615e-05 2.20093e-05"/>
           <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="-1.5708 1.5708" limited="true" name="left_hip_pitch" pos="0 0 0" axis="0 0 -1"/>
                     <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-          <geom type="mesh" rgba="1 1 1 1" pos="0 -0.075 0" mesh="right_waist_pitch_link"/>
+          <geom type="box" rgba="1 1 1 1" pos="0 -0.075 0" mesh="right_waist_pitch_link"/>
           <body name="left_knee_pitch_link" pos="0 -0.15049 0" quat="-3.26776e-08 0.00889621 0.99996 -3.67306e-06">
             <inertial pos="0.000109197 -0.0801721 0.00013442" quat="0.499013 0.501748 -0.500969 0.498263" mass="0.167319" diaginertia="8.01423e-05 7.67196e-05 3.31839e-05"/>
             <joint solreflimit="4e-3 1" solimplimit=".95 .99 1e-3" range="0 1.5708" limited="true" name="left_knee" pos="0 0 0" axis="0 0 1"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-            <geom name="pressure_geom_R" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="right_knee_pitch_link"/>
+            <geom name="pressure_geom_R" type="box" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="right_knee_pitch_link"/>
           </body>
         </body>
       </body>
