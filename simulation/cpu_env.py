@@ -86,12 +86,12 @@ class CPUEnv(gym.Env):
         self.model.opt.timestep = self.timestep
 
         # Visualization Options:
-        scene_option = mujoco.MjvOption()
-        mujoco.mjv_defaultOption(scene_option)
-        scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
-        scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
-        scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
-        scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
+        self.scene_option = mujoco.MjvOption()
+        mujoco.mjv_defaultOption(self.scene_option)
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
+        self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = False
         self.model.vis.scale.contactwidth = 0.1
         self.model.vis.scale.contactheight = 0.03
         self.model.vis.scale.forcewidth = 0.05
