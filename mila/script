@@ -3,10 +3,10 @@
 #SBATCH --output=mila/out.txt
 #SBATCH --error=mila/err.txt
 #SBATCH --ntasks=1
-#SBATCH --time=7-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --mem=100Gb
 #SBATCH --gres=gpu:1
-#SBATCH --partition=long
+#SBATCH --partition=unkillable
 
 source ~/.bashrc
 source mila/install.sh
