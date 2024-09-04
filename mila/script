@@ -3,9 +3,10 @@
 #SBATCH --output=mila/out.txt
 #SBATCH --error=mila/err.txt
 #SBATCH --ntasks=1
-#SBATCH --time=3-00:00:00
+#SBATCH --time=7-00:00:00
 #SBATCH --mem=100Gb
 #SBATCH --gres=gpu:1
+#SBATCH --partition=long
 
 source ~/.bashrc
 source mila/install.sh
@@ -14,8 +15,8 @@ pip install perlin_noise
 
 # Print gpu configuration for this job
 nvidia-smi
-# Verify gpu allocation (should be 1 GPU)
-echo $CUDA_VISIBLE_DEVICES
+python -c "import torch; print('PyTorch: CUDA is available' if torch.cuda.is_available() else 'PyTorch: CUDA is not available')"
+python -c "import jax; print('Jax: CUDA is available' if jax.lib.xla_bridge.get_backend().platform == 'cuda' else 'Jax: CUDA is not available')"
 
 mkdir -p $SLURM_TMPDIR/Humanoid-MuJoCo
 cp -rf * $SLURM_TMPDIR/Humanoid-MuJoCo/ 2> /dev/null
@@ -24,7 +25,7 @@ cp -rf * $SLURM_TMPDIR/Humanoid-MuJoCo/ 2> /dev/null
 while true; do
     sleep 30
     echo " > Copying data to home folder"
-    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data* /home/mila/a/antoine.dangeard/Humanoid-MuJoCo/data/ 2> /dev/null
+    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data/* /home/mila/a/antoine.dangeard/Humanoid-MuJoCo/data/ 2> /dev/null
 done &
 
 cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py
