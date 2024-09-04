@@ -1,4 +1,5 @@
-from jax import numpy as jp
+# from jax import numpy as jp
+import numpy as jp
 from jax.scipy.spatial.transform import Rotation
 from simulation.simulation_parameters import *
 

@@ -1,5 +1,5 @@
 import jax
-from jax import numpy as jp
+import numpy as jp
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
