@@ -571,7 +571,7 @@ class CPUEnv(gym.Env):
         joint_torques = self._get_joint_torques()
         is_self_colliding = self._check_self_collision()
 
-        reward, isTerminal = self.reward_fn(
+        reward, isTerminal, truncated = self.reward_fn(
             torso_global_velocity,
             self.control_input_velocity,
             torso_quat,
@@ -592,7 +592,7 @@ class CPUEnv(gym.Env):
             self.previous_reward = reward
             reward = _reward
 
-        return float(reward), bool(isTerminal)
+        return float(reward), bool(isTerminal), bool(truncated)
 
     def _apply_external_forces(self):
         # apply forces to the robot to destabilise it
@@ -662,11 +662,7 @@ class CPUEnv(gym.Env):
         for _ in range(self.physics_steps_per_control_step):
             mujoco.mj_step(self.model, self.data)
 
-        reward, terminated = self._get_reward()
-
-        truncated = False
-        if self.data.time >= self.max_simulation_time:
-            truncated = True
+        reward, terminated, truncated = self._get_reward()
 
         if terminated or truncated:
             info = {"is_success": truncated}
