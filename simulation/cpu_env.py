@@ -603,7 +603,7 @@ class CPUEnv(gym.Env):
         )
 
         if self.reward_override is not None:
-            return float(self.reward_override), bool(isTerminal)
+            return float(self.reward_override), bool(isTerminal), bool(truncated)
 
         if self.use_potential_rewards:
             _reward = reward - self.previous_reward
