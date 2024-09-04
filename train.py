@@ -22,7 +22,7 @@ import argparse
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
-    "--n-envs", type=int, default=256, help="Number of environments to run in parallel"
+    "--n-envs", type=int, default=32, help="Number of environments to run in parallel"
 )
 argparser.add_argument(
     "--gpu", action="store_true", help="Pass this flag to run on GPU"
