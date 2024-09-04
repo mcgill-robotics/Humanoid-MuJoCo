@@ -1,4 +1,5 @@
 from simulation.cpu_env import CPUEnv
+from simulation.gpu_vec_env import GPUVecEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from stable_baselines3 import SAC
@@ -8,19 +9,19 @@ MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0
 CKPT = "data/SAC/0_steps/_249984_steps.zip"
 
-# env = GPUVecEnv(
-#     num_envs=1,
-#     xml_path=SIM_XML_PATH,
-#     reward_fn=SELECTED_REWARD_FUNCTION,
-#     randomization_factor=RANDOMIZATION_FACTOR,
-#     enable_rendering=True,
-# )
-env = CPUEnv(
+env = GPUVecEnv(
+    num_envs=1,
     xml_path=SIM_XML_PATH,
     reward_fn=SELECTED_REWARD_FUNCTION,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )
+# env = CPUEnv(
+#     xml_path=SIM_XML_PATH,
+#     reward_fn=SELECTED_REWARD_FUNCTION,
+#     randomization_factor=RANDOMIZATION_FACTOR,
+#     enable_rendering=True,
+# )
 agent = MODEL_TYPE.load(
     path=CKPT,
     env=env,

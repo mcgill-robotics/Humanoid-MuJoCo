@@ -582,6 +582,7 @@ class CPUEnv(gym.Env):
             self.latest_action / (jp.pi / 2),
             is_self_colliding,
             self.data.time,
+            self.max_simulation_time,
         )
 
         if self.reward_override is not None:

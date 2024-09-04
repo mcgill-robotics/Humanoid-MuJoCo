@@ -62,6 +62,7 @@ class GPUVecEnv(VecEnv):
         )
         if self.max_simulation_time < 0:
             self.max_simulation_time = np.inf
+        self.max_simulation_time = jp.array([self.max_simulation_time] * self.num_envs)
         self.gravity_vector_batch = jp.array([jp.array([0, 0, -1])] * self.num_envs)
         self.initialized_model_info = False
         self.control_inputs_velocity = jp.zeros((self.num_envs, 2))
@@ -83,7 +84,7 @@ class GPUVecEnv(VecEnv):
         )
         self.reward_fn = jax.jit(
             jax.vmap(
-                lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, previous_ctrl, last_ctrl, isSelfColliding, timestep: reward_fn(
+                lambda velocity, target_velocity, torso_quat, target_yaw, z_pos, joint_torques, previous_ctrl, last_ctrl, isSelfColliding, timestep, max_sim_time: reward_fn(
                     velocity,
                     target_velocity,
                     torso_quat,
@@ -94,6 +95,7 @@ class GPUVecEnv(VecEnv):
                     last_ctrl,
                     isSelfColliding,
                     timestep,
+                    max_sim_time,
                 )
             )
         )
@@ -777,7 +779,7 @@ class GPUVecEnv(VecEnv):
             self.non_robot_geom_ids, self.data_batch
         )
 
-        rewards, areTerminal = self.reward_fn(
+        rewards, areTerminal, areTruncated = self.reward_fn(
             torso_global_velocity,
             self.control_inputs_velocity,
             torso_quat,
@@ -788,6 +790,7 @@ class GPUVecEnv(VecEnv):
             self.last_actions / (jp.pi / 2),
             is_self_colliding,
             self.data_batch.time,
+            self.max_simulation_time,
         )
 
         if self.reward_override is not None:
@@ -800,7 +803,7 @@ class GPUVecEnv(VecEnv):
             self.previous_rewards = rewards
             rewards = _rewards
 
-        return np.array(rewards), np.array(areTerminal)
+        return np.array(rewards), np.array(areTerminal), np.array(areTruncated)
 
     def _get_obs(self, idx=None):
 
@@ -925,9 +928,8 @@ class GPUVecEnv(VecEnv):
         self.data_batch = self.jax_step(self.model_batch, self.data_batch)
 
         obs = self._get_obs()
-        reward, terminal = self._get_rewards()
+        reward, terminal, truncated = self._get_rewards()
 
-        truncated = self.data_batch.time >= self.max_simulation_time
         done = np.logical_or(truncated, terminal)
 
         info = [{}] * self.num_envs

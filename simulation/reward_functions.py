@@ -245,9 +245,7 @@ def controlInputReward(
     if OVERRIDE_TERMINAL_REWARD:
         reward = jp.where(terminal, TERMINAL_REWARD, reward)
 
-    truncated = False
-    if timestep >= max_simulation_time:
-        truncated = True
+    truncated = jp.where(timestep >= max_simulation_time, True, False)
 
     return reward, terminal, truncated
 
@@ -376,12 +374,11 @@ def standupReward(
     truncated = False
     local_gravity_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     isUpright = jp.max(jp.abs(local_gravity_vector[0:2])) < 0.7
-    if z_pos >= TARGET_Z_POS and isUpright:
-        truncated = True
 
-    terminal = False
-    if timestep >= max_simulation_time:
-        terminal = True
+    truncated = jp.where(z_pos >= TARGET_Z_POS, True, False)
+    truncated = jp.where(isUpright, truncated, False)
+
+    terminal = jp.where(timestep >= max_simulation_time, True, terminal)
 
     return reward, terminal, truncated
 
