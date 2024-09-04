@@ -407,8 +407,8 @@ class CPUEnv(gym.Env):
         # clean up any unreferenced variables
         gc.collect()
 
-        self.step()
-        if self._check_collision():
+        _, _, terminated, truncated, _ = self.step()
+        if self._check_collision() or terminated or truncated:
             # print("COLLISION: Re-generating a starting state")
             return self.reset()
 
@@ -719,7 +719,7 @@ if __name__ == "__main__":
 
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        # action = 0 * np.ones(len(JOINT_NAMES))
+        action = 0 * np.ones(len(JOINT_NAMES))
 
         start_time = time.time()
         obs, reward, isTerminal, isTruncated, _ = sim.step(action)

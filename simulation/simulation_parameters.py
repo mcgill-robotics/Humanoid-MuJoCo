@@ -49,7 +49,7 @@ MAX_FLOOR_BUMP_HEIGHT = 0.1
 
 # SIMULATION PARAMETERS
 CONTROL_FREQUENCY = 50  # Hz
-TIMESTEP = 0.001
+TIMESTEP = 0.002
 MAX_SIM_TIME = -1  # let the simulation run indefinitely
 MAX_SIM_TIME_STANDUP = 10.0  # s
 MIN_FORCE_FOR_CONTACT = 0.0  # N
@@ -72,9 +72,6 @@ CONTROL_INPUT_MAX_VELOCITY = 2  # m/s ~ 7.2 mph (4.5 km/h), can go from -2 to 2 
 CONTROL_INPUT_MAX_YAW = 3.14159  # radians, can go from -180 to 180 degrees
 USE_CONTROL_INPUTS = False  # if false, all zero control inputs
 RANDOMIZATION_FACTOR_AFFECTS_CONTROL_INPUT = False
-
-# RESET PARAMETERS
-GRACE_PERIOD_AFTER_RESET = 0.5  # s
 
 
 #####################
