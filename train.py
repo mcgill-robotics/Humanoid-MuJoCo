@@ -1,6 +1,5 @@
 import os
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
-from simulation.gpu_vec_env import GPUVecEnv
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 import numpy as np
@@ -23,9 +22,6 @@ import argparse
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
     "--n-envs", type=int, default=32, help="Number of environments to run in parallel"
-)
-argparser.add_argument(
-    "--gpu", action="store_true", help="Pass this flag to run on GPU"
 )
 argparser.add_argument(
     "--silent",
@@ -92,9 +88,9 @@ print(args)
 ##########################
 
 NUM_ENVS = args.n_envs
-SIMULATE_ON_GPU = args.gpu
 N_EVAL_EPISODES = args.n_eval_episodes
 TOTAL_TIMESTEPS = args.n_steps
+PROGRESS_LOG_FREQ = 5
 RANDOMIZATION_FACTOR_INIT = args.rand_init
 MAX_EVAL_SIM_TIME = args.max_eval_time
 TARGET_SUCCESS_RATE = args.target_success_rate
@@ -117,64 +113,35 @@ CHECKPOINT_FREQ = args.checkpoint_freq // NUM_ENVS
 ##  ENVIRONMENT  SETUP  ##
 ##########################
 
-if SIMULATE_ON_GPU:
-    env = VecMonitor(
-        GPUVecEnv(
-            num_envs=NUM_ENVS,
-            xml_path=SIM_XML_PATH,
-            reward_fn=SELECTED_REWARD_FUNCTION,
-            randomization_factor=RANDOMIZATION_FACTOR_INIT,
-            enable_rendering=False,
-        )
+env = VecMonitor(
+    DummyVecEnv(
+        [
+            lambda: CPUEnv(
+                xml_path=SIM_XML_PATH,
+                reward_fn=SELECTED_REWARD_FUNCTION,
+                randomization_factor=RANDOMIZATION_FACTOR_INIT,
+                enable_rendering=False,
+            )
+        ]
+        * NUM_ENVS
     )
-    eval_env = VecMonitor(
-        GPUVecEnv(
-            num_envs=N_EVAL_EPISODES,
-            xml_path=SIM_XML_PATH,
-            reward_fn=SELECTED_REWARD_FUNCTION,
-            randomization_factor=RANDOMIZATION_FACTOR_INIT,
-            use_potential_rewards=False,
-            max_simulation_time_override=MAX_EVAL_SIM_TIME,
-            enable_rendering=False,
-        )
+)
+eval_env = VecMonitor(
+    DummyVecEnv(
+        [
+            lambda: CPUEnv(
+                xml_path=SIM_XML_PATH,
+                reward_fn=SELECTED_REWARD_FUNCTION,
+                randomization_factor=RANDOMIZATION_FACTOR_INIT,
+                use_potential_rewards=False,
+                max_simulation_time_override=MAX_EVAL_SIM_TIME,
+                reward_override=1.0 / CONTROL_FREQUENCY,
+                enable_rendering=False,
+            )
+        ]
+        * N_EVAL_EPISODES
     )
-
-    print("\nInitializing environments...      ", end="")
-    env.reset()
-    env.step(None)
-    eval_env.reset()
-    eval_env.step(None)
-    print("Done")
-else:
-    env = VecMonitor(
-        DummyVecEnv(
-            [
-                lambda: CPUEnv(
-                    xml_path=SIM_XML_PATH,
-                    reward_fn=SELECTED_REWARD_FUNCTION,
-                    randomization_factor=RANDOMIZATION_FACTOR_INIT,
-                    enable_rendering=False,
-                )
-            ]
-            * NUM_ENVS
-        )
-    )
-    eval_env = VecMonitor(
-        DummyVecEnv(
-            [
-                lambda: CPUEnv(
-                    xml_path=SIM_XML_PATH,
-                    reward_fn=SELECTED_REWARD_FUNCTION,
-                    randomization_factor=RANDOMIZATION_FACTOR_INIT,
-                    use_potential_rewards=False,
-                    max_simulation_time_override=MAX_EVAL_SIM_TIME,
-                    reward_override=1.0 / CONTROL_FREQUENCY,
-                    enable_rendering=False,
-                )
-            ]
-            * N_EVAL_EPISODES
-        )
-    )
+)
 
 
 env = VecCheckNan(env, raise_exception=True)
@@ -246,6 +213,7 @@ progress_callback = STDOutLogCallback(
     log_dir=log_dir,
     num_envs=NUM_ENVS,
     total_timesteps=TOTAL_TIMESTEPS,
+    log_freq=PROGRESS_LOG_FREQ,
 )
 
 model.learn(

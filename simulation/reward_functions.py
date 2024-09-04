@@ -29,10 +29,9 @@ def horizontal_velocity_penalty(velocity, target_velocity):
     return hvelocity_reward
 
 
-def target_orientation_reward(torso_quat_obj, target_yaw):
-    fwd_rot_vector = torso_quat_obj.inv().apply(jp.array([1, 0, 0]))
+def target_orientation_reward(torso_quat_obj_inv, target_yaw, down_rot_vector):
+    fwd_rot_vector = torso_quat_obj_inv.apply(jp.array([1, 0, 0]))
     target_fwd_rot_vector = jp.array([jp.cos(target_yaw)[0], jp.sin(target_yaw)[0], 0])
-    down_rot_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
     target_down_rot_vector = jp.array([0, 0, -1])
     upright_reward = UPRIGHT_REWARD_WEIGHT * scaled_exp(
         (sqr(jp.linalg.norm(down_rot_vector - target_down_rot_vector)))
@@ -112,12 +111,6 @@ def symmetry_reward(ctrl):
     return symmetry_reward
 
 
-def self_collision_penalty(isSelfColliding):
-    self_collision_penalty = jp.where(isSelfColliding, SELF_COLLISION_PENALTY, 0)
-    # print("self_collision_penalty", self_collision_penalty)
-    return self_collision_penalty
-
-
 def controlInputReward(
     velocity,
     target_velocity,
@@ -129,6 +122,7 @@ def controlInputReward(
     latest_ctrl,
     isSelfColliding,
     timestep,
+    max_simulation_time,
 ):
     # ALL IN NWU
     # velocity in m/s (x/y/z)
@@ -165,10 +159,13 @@ def controlInputReward(
     # TARGET ORIENTATION REWARD
     YAW_REWARD_WEIGHT = 0
     UPRIGHT_REWARD_WEIGHT = 10
-    torso_quat_obj = Rotation.from_quat(
+    torso_quat_obj_inv = Rotation.from_quat(
         [torso_quat[1], torso_quat[2], torso_quat[3], torso_quat[0]]
+    ).inv()
+    local_gravity_vector = torso_quat_obj_inv.apply(jp.array([0, 0, -1]))
+    reward += target_orientation_reward(
+        torso_quat_obj_inv, target_yaw, local_gravity_vector
     )
-    reward += target_orientation_reward(torso_quat_obj, target_yaw)
 
     ### VERTICAL VELOCITY REWARD
     VERTICAL_VELOCITY_PENALTY_WEIGHT = 5
@@ -176,8 +173,8 @@ def controlInputReward(
 
     ### TORSO HEIGHT REWARD
     TORSO_HEIGHT_REWARD_WEIGHT = 5
-    TARGET_Z_POS = -0.385
-    MIN_Z_POS_FOR_REWARD = -0.45
+    TARGET_Z_POS = Z_INITIAL_POS
+    MIN_Z_POS_FOR_REWARD = Z_INITIAL_POS - 0.75
     reward += torso_height_reward(z_pos)
 
     # JOINT TORQUE REWARD
@@ -210,8 +207,9 @@ def controlInputReward(
     reward += symmetry_reward(latest_ctrl)
 
     # SELF COLLISION REWARD
-    SELF_COLLISION_PENALTY = -10
-    reward += self_collision_penalty(isSelfColliding)
+    SELF_COLLISION_PENALTY = -20
+    if isSelfColliding:
+        reward += SELF_COLLISION_PENALTY
 
     # CONSTANT REWARD OFFSET
     CONSTANT_REWARD_OFFSET = 0.0
@@ -219,32 +217,29 @@ def controlInputReward(
 
     # FORCE REWARD TO BE POSITIVE IF DESIRED
     ALLOW_NEGATIVE_REWARDS = True
-    if not ALLOW_NEGATIVE_REWARDS:
-        reward = jp.where(reward < 0, 0, reward)
+    if not ALLOW_NEGATIVE_REWARDS and reward < 0:
+        reward = 0
 
     # CHECK TERMINATION CONDITION AND REWARD
-    TERMINATE_ON_SELF_COLLISION = True
+    TERMINATE_ON_SELF_COLLISION = False
     ALLOW_EARLY_TERMINATION = True
     MIN_Z_BEFORE_GROUNDED = -0.5
-    isTouchingGround = jp.where(z_pos > MIN_Z_BEFORE_GROUNDED, False, True)
-    local_gravity_vector = torso_quat_obj.inv().apply(jp.array([0, 0, -1]))
-    isNotUpright = jp.where(
-        jp.max(jp.abs(local_gravity_vector[0:2])) < 0.7, isTouchingGround, True
+    isTouchingGround = z_pos < MIN_Z_BEFORE_GROUNDED
+    isUpright = jp.max(jp.abs(local_gravity_vector[0:2])) < 0.7
+    terminal = ALLOW_EARLY_TERMINATION and (
+        (not isUpright)
+        or isTouchingGround
+        or (TERMINATE_ON_SELF_COLLISION and isSelfColliding)
     )
-    terminal = jp.where(isNotUpright, ALLOW_EARLY_TERMINATION, False)
-    if TERMINATE_ON_SELF_COLLISION:
-        terminal = jp.where(isSelfColliding, ALLOW_EARLY_TERMINATION, terminal)
-
-    # DO NOT TERMINATE IF WITHIN GRACE PERIOD
-    terminal = jp.where(timestep < GRACE_PERIOD_AFTER_RESET, False, terminal)
-
     # OVERRIDE TERMINAL REWARD IF DESIRED
     OVERRIDE_TERMINAL_REWARD = True
     TERMINAL_REWARD = -100.0
-    if OVERRIDE_TERMINAL_REWARD:
-        reward = jp.where(terminal, TERMINAL_REWARD, reward)
+    if OVERRIDE_TERMINAL_REWARD and terminal:
+        reward = TERMINAL_REWARD
 
-    return reward, terminal
+    truncated = timestep >= max_simulation_time
+
+    return reward, terminal, truncated
 
 
 def standupReward(
@@ -258,6 +253,7 @@ def standupReward(
     latest_ctrl,
     isSelfColliding,
     timestep,
+    max_simulation_time,
 ):
     # ALL IN NWU
     # velocity in m/s (x/y/z)
@@ -288,24 +284,27 @@ def standupReward(
     reward = 0
 
     ### HORIZONTAL VELOCITY REWARD
-    HORIZONTAL_VELOCITY_PENALTY_WEIGHT = 15
+    HORIZONTAL_VELOCITY_PENALTY_WEIGHT = 5
     reward += horizontal_velocity_penalty(velocity, target_velocity)
 
     # TARGET ORIENTATION REWARD
     YAW_REWARD_WEIGHT = 0
     UPRIGHT_REWARD_WEIGHT = 10
-    torso_quat_obj = Rotation.from_quat(
+    torso_quat_obj_inv = Rotation.from_quat(
         [torso_quat[1], torso_quat[2], torso_quat[3], torso_quat[0]]
+    ).inv()
+    local_gravity_vector = torso_quat_obj_inv.apply(jp.array([0, 0, -1]))
+    reward += target_orientation_reward(
+        torso_quat_obj_inv, target_yaw, local_gravity_vector
     )
-    reward += target_orientation_reward(torso_quat_obj, target_yaw)
 
     ### VERTICAL VELOCITY REWARD
-    VERTICAL_VELOCITY_PENALTY_WEIGHT = 5
+    VERTICAL_VELOCITY_PENALTY_WEIGHT = 0
     reward += vertical_velocity_penalty(velocity)
 
     ### TORSO HEIGHT REWARD
-    TORSO_HEIGHT_REWARD_WEIGHT = 5
-    TARGET_Z_POS = -0.275
+    TORSO_HEIGHT_REWARD_WEIGHT = 15
+    TARGET_Z_POS = Z_INITIAL_POS
     MIN_Z_POS_FOR_REWARD = -0.6
     reward += torso_height_reward(z_pos)
 
@@ -339,8 +338,9 @@ def standupReward(
     reward += symmetry_reward(latest_ctrl)
 
     # SELF COLLISION REWARD
-    SELF_COLLISION_PENALTY = -10
-    reward += self_collision_penalty(isSelfColliding)
+    SELF_COLLISION_PENALTY = -20
+    if isSelfColliding:
+        reward += SELF_COLLISION_PENALTY
 
     # CONSTANT REWARD OFFSET
     CONSTANT_REWARD_OFFSET = 0.0
@@ -348,25 +348,29 @@ def standupReward(
 
     # FORCE REWARD TO BE POSITIVE IF DESIRED
     ALLOW_NEGATIVE_REWARDS = True
-    if not ALLOW_NEGATIVE_REWARDS:
-        reward = jp.where(reward < 0, 0, reward)
+    if not ALLOW_NEGATIVE_REWARDS and reward < 0:
+        reward = 0
 
     # CHECK TERMINATION CONDITION AND REWARD
-    TERMINATE_ON_SELF_COLLISION = True
+    TERMINATE_ON_SELF_COLLISION = False
     terminal = False
-    if TERMINATE_ON_SELF_COLLISION:
-        terminal = jp.where(isSelfColliding, True, terminal)
-
-    # DO NOT TERMINATE IF WITHIN GRACE PERIOD
-    terminal = jp.where(timestep < GRACE_PERIOD_AFTER_RESET, False, terminal)
+    if timestep >= max_simulation_time or (
+        TERMINATE_ON_SELF_COLLISION and isSelfColliding
+    ):
+        terminal = True
 
     # OVERRIDE TERMINAL REWARD IF DESIRED
     OVERRIDE_TERMINAL_REWARD = True
     TERMINAL_REWARD = -100.0
-    if OVERRIDE_TERMINAL_REWARD:
-        reward = jp.where(terminal, TERMINAL_REWARD, reward)
+    if OVERRIDE_TERMINAL_REWARD and terminal:
+        reward = TERMINAL_REWARD
 
-    return reward, terminal
+    # check if successful
+    isUpright = jp.max(jp.abs(local_gravity_vector[0:2])) < 0.7
+    truncated = z_pos >= TARGET_Z_POS and isUpright
+
+    return reward, terminal, truncated
 
 
+SELECTED_REWARD_FUNCTION = standupReward
 SELECTED_REWARD_FUNCTION = controlInputReward

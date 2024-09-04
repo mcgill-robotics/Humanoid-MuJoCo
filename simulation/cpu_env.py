@@ -78,13 +78,12 @@ class CPUEnv(gym.Env):
 
         self.reward_override = reward_override
 
-    def _init_model(self):
+        self._init_models()
+
+    def _init_models(self):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
         self.model.opt.timestep = self.timestep
-        self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-        self.model.opt.iterations = 15
-        self.model.opt.ls_iterations = 15
 
         # Visualization Options:
         self.scene_option = mujoco.MjvOption()
@@ -97,6 +96,9 @@ class CPUEnv(gym.Env):
         self.model.vis.scale.contactheight = 0.03
         self.model.vis.scale.forcewidth = 0.05
         self.model.vis.map.force = 0.3
+
+        # LOAD BASE MODEL
+        self.base_model = mujoco.MjModel.from_xml_path(self.xml_path)
 
         ### SAVE MODEL IDs
         # save torso body index
@@ -118,10 +120,10 @@ class CPUEnv(gym.Env):
         self.joint_dof_idx = jp.array(self.joint_dof_idx)
         self.joint_actuator_idx = jp.array(self.joint_actuator_idx)
         # get pressure sensor geometries
-        self.pressure_sensor_ids = [
-            self.model.geom(pressure_sensor_geom).id
-            for pressure_sensor_geom in PRESSURE_GEOM_NAMES
-        ]
+        # self.pressure_sensor_ids = [
+        #     self.model.geom(pressure_sensor_geom).id
+        #     for pressure_sensor_geom in PRESSURE_GEOM_NAMES
+        # ]
         self.non_robot_geom_ids = []
         for geom in NON_ROBOT_GEOMS:
             try:
@@ -186,21 +188,25 @@ class CPUEnv(gym.Env):
     def _randomize_joint_properties(self):
         # randomize joint properties
         for joint in JOINT_NAMES:
-            self.model.joint(joint).armature[0] += (
+            self.model.joint(joint).armature[0] = self.base_model.joint(joint).armature[
+                0
+            ] + (
                 random.uniform(0, JOINT_ARMATURE_MAX_CHANGE) * self.randomization_factor
             )
-            self.model.joint(joint).stiffness[0] += (
+            self.model.joint(joint).stiffness[0] = self.base_model.joint(
+                joint
+            ).stiffness[0] + (
                 random.uniform(0, JOINT_STIFFNESS_MAX_CHANGE)
                 * self.randomization_factor
             )
-            self.model.joint(joint).margin[0] += (
-                random.uniform(0, JOINT_MARGIN_MAX_CHANGE) * self.randomization_factor
-            )
-            self.model.joint(joint).range[0] += (
+            self.model.joint(joint).margin[0] = self.base_model.joint(joint).margin[
+                0
+            ] + (random.uniform(0, JOINT_MARGIN_MAX_CHANGE) * self.randomization_factor)
+            self.model.joint(joint).range[0] = self.base_model.joint(joint).range[0] + (
                 random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)
                 * self.randomization_factor
             )
-            self.model.joint(joint).range[1] += (
+            self.model.joint(joint).range[1] = self.base_model.joint(joint).range[1] + (
                 random.uniform(-JOINT_RANGE_MAX_CHANGE, JOINT_RANGE_MAX_CHANGE)
                 * self.randomization_factor
             )
@@ -212,13 +218,17 @@ class CPUEnv(gym.Env):
             )
             self.model.actuator(joint).gainprm[0] = kp
             self.model.actuator(joint).biasprm[1] = -kp
-            self.model.actuator(joint).forcerange[0] += (
+            self.model.actuator(joint).forcerange[0] = self.base_model.actuator(
+                joint
+            ).forcerange[0] + (
                 random.uniform(
                     -JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE
                 )
                 * self.randomization_factor
             )
-            self.model.actuator(joint).forcerange[1] += (
+            self.model.actuator(joint).forcerange[1] = self.base_model.actuator(
+                joint
+            ).forcerange[1] + (
                 random.uniform(
                     -JOINT_FORCE_LIMIT_MAX_CHANGE, JOINT_FORCE_LIMIT_MAX_CHANGE
                 )
@@ -236,13 +246,13 @@ class CPUEnv(gym.Env):
                 )
                 * self.randomization_factor
             )
-            for coef in self.model.geom("floor").friction
+            for coef in self.base_model.geom("floor").friction
         ]
         # vary the mass of all limbs randomly
         for i in range(self.model.nbody - 1):
             self.model.body(i + 1).mass[0] = max(
                 0.00001,
-                self.model.body(i + 1).mass[0]
+                self.base_model.body(i + 1).mass[0]
                 + random.uniform(
                     -MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
                     MAX_MASS_CHANGE_PER_LIMB * self.randomization_factor,
@@ -255,7 +265,7 @@ class CPUEnv(gym.Env):
 
     def _randomize_floor_heightmap(self):
         noise = PerlinNoise(octaves=15)
-        xpix, ypix = 24, 24
+        xpix, ypix = 8, 8
         height_field = np.array(
             [[noise([i / xpix, j / ypix]) for j in range(xpix)] for i in range(ypix)]
         )
@@ -353,7 +363,7 @@ class CPUEnv(gym.Env):
     def _init_sim_trackers(self):
         self.previous_action = self.data.ctrl
         self.latest_action = self.data.ctrl
-        self.previous_reward, _ = self._get_reward()
+        self.previous_reward, _, _ = self._get_reward()
         self.next_force_start_time = 0
         self.next_force_direction = jp.zeros((2))
         self.next_force_magnitude = 0
@@ -373,8 +383,6 @@ class CPUEnv(gym.Env):
             self.rng_key = jax.random.PRNGKey(random.randint(0, 100))
 
         self._randomize_control_inputs()
-
-        self._init_model()
 
         # randomize model-dependent properties
         self._randomize_dynamics()
@@ -398,6 +406,11 @@ class CPUEnv(gym.Env):
 
         # clean up any unreferenced variables
         gc.collect()
+
+        _, _, terminated, truncated, _ = self.step()
+        if self._check_collision() or terminated or truncated:
+            # print("COLLISION: Re-generating a starting state")
+            return self.reset()
 
         return self._get_obs(), {}
 
@@ -480,15 +493,15 @@ class CPUEnv(gym.Env):
         )
 
         # local velocity
-        local_vel_noise = (
-            self.randomization_factor
-            * VELOCIMETER_NOISE_STDDEV
-            * jax.random.normal(key=self.rng_key, shape=(3,))
-        )
-        torso_local_velocity = (
-            inverseRotateVectors(torso_quat, self._get_torso_velocity())
-            + local_vel_noise
-        )
+        # local_vel_noise = (
+        #     self.randomization_factor
+        #     * VELOCIMETER_NOISE_STDDEV
+        #     * jax.random.normal(key=self.rng_key, shape=(3,))
+        # )
+        # torso_local_velocity = (
+        #     inverseRotateVectors(torso_quat, self._get_torso_velocity())
+        #     + local_vel_noise
+        # )
 
         # gravity direction (local)
         quaternion_noise = (
@@ -502,36 +515,36 @@ class CPUEnv(gym.Env):
         )
 
         # foot contact states
-        binary_foot_contact_state_left, binary_foot_contact_state_right = (
-            self._get_contact_sensor_data()
-        )
+        # binary_foot_contact_state_left, binary_foot_contact_state_right = (
+        #     self._get_contact_sensor_data()
+        # )
 
         # cycle observations through observation buffers
         self.joint_angles_buffer.append(joint_angles)
         self.joint_velocities_buffer.append(joint_velocities)
         self.local_ang_vel_buffer.append(local_ang_vel)
-        self.torso_local_velocity_buffer.append(torso_local_velocity)
+        # self.torso_local_velocity_buffer.append(torso_local_velocity)
         self.local_gravity_vector_buffer.append(local_gravity_vector)
-        self.contact_sensor_buffer.append(
-            (binary_foot_contact_state_left, binary_foot_contact_state_right)
-        )
+        # self.contact_sensor_buffer.append(
+        #     (binary_foot_contact_state_left, binary_foot_contact_state_right)
+        # )
         # get oldest (delayed) observations
         joint_angles = self.joint_angles_buffer.pop(0)
         joint_velocities = self.joint_velocities_buffer.pop(0)
         local_ang_vel = self.local_ang_vel_buffer.pop(0)
-        torso_local_velocity = self.torso_local_velocity_buffer.pop(0)
+        # torso_local_velocity = self.torso_local_velocity_buffer.pop(0)
         local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
-        binary_foot_contact_state_left, binary_foot_contact_state_right = (
-            self.contact_sensor_buffer.pop(0)
-        )
+        # binary_foot_contact_state_left, binary_foot_contact_state_right = (
+        #     self.contact_sensor_buffer.pop(0)
+        # )
 
         # calculate clock phase observations (no delay on these)
-        clock_phase_sin = jp.array([jp.sin(self.data.time)])
-        clock_phase_cos = jp.array([jp.cos(self.data.time)])
-        clock_phase_complex = (
-            (clock_phase_sin)
-            / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))
-        ) + 0.5
+        # clock_phase_sin = jp.array([jp.sin(self.data.time)])
+        # clock_phase_cos = jp.array([jp.cos(self.data.time)])
+        # clock_phase_complex = (
+        #     (clock_phase_sin)
+        #     / (2 * jp.sqrt((clock_phase_sin * clock_phase_sin) + 0.04))
+        # ) + 0.5
 
         # concatenate all observations into a single array
         delayed_observations = jp.concatenate(
@@ -553,6 +566,9 @@ class CPUEnv(gym.Env):
 
         return np.array(delayed_observations, dtype=np.float64)
 
+    def _check_collision(self):
+        return len(self.data.contact.geom1) > 0
+
     def _check_self_collision(self):
         self_collision = False
         for i in range(len(self.data.contact.geom1)):
@@ -571,7 +587,7 @@ class CPUEnv(gym.Env):
         joint_torques = self._get_joint_torques()
         is_self_colliding = self._check_self_collision()
 
-        reward, isTerminal = self.reward_fn(
+        reward, isTerminal, truncated = self.reward_fn(
             torso_global_velocity,
             self.control_input_velocity,
             torso_quat,
@@ -582,6 +598,7 @@ class CPUEnv(gym.Env):
             self.latest_action / (jp.pi / 2),
             is_self_colliding,
             self.data.time,
+            self.max_simulation_time,
         )
 
         if self.reward_override is not None:
@@ -592,7 +609,7 @@ class CPUEnv(gym.Env):
             self.previous_reward = reward
             reward = _reward
 
-        return float(reward), bool(isTerminal)
+        return float(reward), bool(isTerminal), bool(truncated)
 
     def _apply_external_forces(self):
         # apply forces to the robot to destabilise it
@@ -662,11 +679,7 @@ class CPUEnv(gym.Env):
         for _ in range(self.physics_steps_per_control_step):
             mujoco.mj_step(self.model, self.data)
 
-        reward, terminated = self._get_reward()
-
-        truncated = False
-        if self.data.time >= self.max_simulation_time:
-            truncated = True
+        reward, terminated, truncated = self._get_reward()
 
         if terminated or truncated:
             info = {"is_success": truncated}
@@ -693,7 +706,7 @@ if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
         reward_fn=SELECTED_REWARD_FUNCTION,
-        randomization_factor=0,
+        randomization_factor=1,
         enable_rendering=True,
     )
     obs = sim.reset()
@@ -705,7 +718,7 @@ if __name__ == "__main__":
     n_steps = 0
 
     while True:
-        # action = np.random.uniform(-1, 1, len(JOINT_NAMES))
+        action = np.random.uniform(-1, 1, len(JOINT_NAMES))
         action = 0 * np.ones(len(JOINT_NAMES))
 
         start_time = time.time()

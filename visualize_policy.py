@@ -2,25 +2,27 @@ from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from stable_baselines3 import SAC
+import jax
+
+if jax.default_backend() != "gpu":
+    print(" >> Using CPU backend for NumPy.")
+    import numpy as jp
+else:
+    print(" >> Using GPU backend for NumPy.")
+    from jax import numpy as jp
 
 
 MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0
-CKPT = "data/SAC/0_steps/best_model.zip"
+CKPT = "data/SAC/0_steps/_249984_steps.zip"
 
-# env = GPUVecEnv(
-#     num_envs=1,
-#     xml_path=SIM_XML_PATH,
-#     reward_fn=SELECTED_REWARD_FUNCTION,
-#     randomization_factor=RANDOMIZATION_FACTOR,
-#     enable_rendering=True,
-# )
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
     reward_fn=SELECTED_REWARD_FUNCTION,
     randomization_factor=RANDOMIZATION_FACTOR,
     enable_rendering=True,
 )
+
 agent = MODEL_TYPE.load(
     path=CKPT,
     env=env,
@@ -37,11 +39,11 @@ while True:
     try:
         while not done:
             action, _ = agent.predict(obs, deterministic=True)
-            # print(action)
+            print(action)
             try:
                 obs, reward, done, _, _ = env.step(action)
             except:
-                obs, reward, done, _ = env.step(action, reset_if_terminal=False)
+                obs, reward, done, _ = env.step(action[0], reset_if_terminal=False)
             if not done:
                 episode_length += 1
                 total_reward += reward
