@@ -84,9 +84,6 @@ class CPUEnv(gym.Env):
         # load model from XML
         self.model = mujoco.MjModel.from_xml_path(self.xml_path)
         self.model.opt.timestep = self.timestep
-        self.model.opt.solver = mujoco.mjtSolver.mjSOL_NEWTON
-        self.model.opt.iterations = 1
-        self.model.opt.ls_iterations = 1
 
         # Visualization Options:
         self.scene_option = mujoco.MjvOption()

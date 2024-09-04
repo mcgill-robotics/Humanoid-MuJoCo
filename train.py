@@ -90,6 +90,7 @@ print(args)
 NUM_ENVS = args.n_envs
 N_EVAL_EPISODES = args.n_eval_episodes
 TOTAL_TIMESTEPS = args.n_steps
+PROGRESS_LOG_FREQ = 5
 RANDOMIZATION_FACTOR_INIT = args.rand_init
 MAX_EVAL_SIM_TIME = args.max_eval_time
 TARGET_SUCCESS_RATE = args.target_success_rate
@@ -212,6 +213,7 @@ progress_callback = STDOutLogCallback(
     log_dir=log_dir,
     num_envs=NUM_ENVS,
     total_timesteps=TOTAL_TIMESTEPS,
+    log_freq=PROGRESS_LOG_FREQ,
 )
 
 model.learn(
