@@ -43,7 +43,7 @@ if __name__ == "__main__":
     total_step_calls = 0
 
     for i in range(args.n_iters // NUM_ENVS):
-        print("{:.3f}%".format(100 * i / 1000), end="\r")
+        print("{:.3f}%".format(100 * i / args.n_iters), end="\r")
         action = np.random.uniform(-1, 1, (NUM_ENVS, len(JOINT_NAMES)))
 
         start_time = time.time()
