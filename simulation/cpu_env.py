@@ -1,5 +1,12 @@
 import jax
-import numpy as jp
+
+if jax.default_backend() != "gpu":
+    print(" >> Using CPU backend for NumPy.")
+    import numpy as jp
+else:
+    print(" >> Using GPU backend for NumPy.")
+    from jax import numpy as jp
+
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
