@@ -11,7 +11,9 @@
 source ~/.bashrc
 source mila/install.sh
 
-pip install perlin_noise
+if [ -z "$1" ]; then
+    TEMPDIR_PREFIX="/tmp"
+fi
 
 # Print gpu configuration for this job
 nvidia-smi
@@ -21,11 +23,13 @@ python -c "import jax; print('Jax: CUDA is available' if jax.default_backend() =
 mkdir -p $SLURM_TMPDIR/Humanoid-MuJoCo
 cp -rf * $SLURM_TMPDIR/Humanoid-MuJoCo/ 2> /dev/null
 
+CURRENT_DIR=$(pwd)
+
 # create background process which regularly copies back the folder
 while true; do
     sleep 30
     echo " > Copying data to home folder"
-    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data/* /home/mila/a/antoine.dangeard/Humanoid-MuJoCo/data/ 2> /dev/null
+    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data/* $CURRENT_DIR/data/ 2> /dev/null
 done &
 
 cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py --silent
