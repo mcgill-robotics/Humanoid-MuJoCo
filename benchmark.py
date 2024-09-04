@@ -15,6 +15,12 @@ if __name__ == "__main__":
         default=1,
         help="Number of environments to run in parallel",
     )
+    argparser.add_argument(
+        "--n-iters",
+        type=int,
+        default=1000,
+        help="Number of steps to run",
+    )
     args = argparser.parse_args()
     print(args)
 
@@ -35,7 +41,7 @@ if __name__ == "__main__":
     total_step_time = 0
     total_step_calls = 0
 
-    for i in range(1000 // NUM_ENVS):
+    for i in range(args.n_iters // NUM_ENVS):
         print("{:.3f}%".format(100 * i / 1000), end="\r")
         action = np.random.uniform(-1, 1, (NUM_ENVS, len(JOINT_NAMES)))
 
