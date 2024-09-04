@@ -25,7 +25,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--n-envs",
         type=int,
-        default=32,
+        default=256,
         help="Number of environments to run in parallel",
     )
     argparser.add_argument(
@@ -117,22 +117,25 @@ if __name__ == "__main__":
     ##########################
     ##  ENVIRONMENT  SETUP  ##
     ##########################
-
-    env = DummyVecEnv(
-        [
-            lambda: CPUEnv(
+    cpu_envs = []
+    for _ in range(NUM_ENVS):
+        cpu_envs.append(
+            CPUEnv(
                 xml_path=SIM_XML_PATH,
                 reward_fn=SELECTED_REWARD_FUNCTION,
                 randomization_factor=RANDOMIZATION_FACTOR_INIT,
                 enable_rendering=False,
             )
-        ]
-        * NUM_ENVS
+        )
+
+    env = DummyVecEnv(
+        [cpu_envs.pop] * NUM_ENVS,
     )
 
-    eval_env = DummyVecEnv(
-        [
-            lambda: CPUEnv(
+    eval_envs = []
+    for _ in range(NUM_ENVS):
+        eval_envs.append(
+            CPUEnv(
                 xml_path=SIM_XML_PATH,
                 reward_fn=SELECTED_REWARD_FUNCTION,
                 randomization_factor=RANDOMIZATION_FACTOR_INIT,
@@ -141,9 +144,8 @@ if __name__ == "__main__":
                 reward_override=1.0 / CONTROL_FREQUENCY,
                 enable_rendering=False,
             )
-        ]
-        * N_EVAL_EPISODES
-    )
+        )
+    eval_env = DummyVecEnv([eval_envs.pop] * N_EVAL_EPISODES)
 
     ##########################
     ## MODEL INITIALIZATION ##

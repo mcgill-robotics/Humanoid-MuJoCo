@@ -32,13 +32,4 @@ while true; do
     cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data/* $CURRENT_DIR/data/ 2> /dev/null
 done &
 
-cd $SLURM_TMPDIR/Humanoid-MuJoCo
-python benchmark.py --n-envs 1 > $CURRENT_DIR/benchmark_1.txt
-python benchmark.py --n-envs 2 > $CURRENT_DIR/benchmark_2.txt
-python benchmark.py --n-envs 4 > $CURRENT_DIR/benchmark_4.txt
-python benchmark.py --n-envs 8 > $CURRENT_DIR/benchmark_8.txt
-python benchmark.py --n-envs 16 > $CURRENT_DIR/benchmark_16.txt
-python benchmark.py --n-envs 32 > $CURRENT_DIR/benchmark_32.txt
-python benchmark.py --n-envs 64 > $CURRENT_DIR/benchmark_64.txt
-python benchmark.py --n-envs 128 > $CURRENT_DIR/benchmark_128.txt
-python benchmark.py --n-envs 256 > $CURRENT_DIR/benchmark_256.txt
+cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py --silent

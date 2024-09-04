@@ -25,16 +25,17 @@ if __name__ == "__main__":
     print(args)
 
     NUM_ENVS = args.n_envs
+    cpu_envs = [
+        CPUEnv(
+            xml_path=SIM_XML_PATH,
+            reward_fn=SELECTED_REWARD_FUNCTION,
+            randomization_factor=1,
+            enable_rendering=False,
+        )
+        for _ in range(NUM_ENVS)
+    ]
     sim = DummyVecEnv(
-        [
-            lambda: CPUEnv(
-                xml_path=SIM_XML_PATH,
-                reward_fn=SELECTED_REWARD_FUNCTION,
-                randomization_factor=1,
-                enable_rendering=False,
-            )
-        ]
-        * NUM_ENVS,
+        [cpu_envs.pop] * NUM_ENVS,
     )
     obs = sim.reset()
 
