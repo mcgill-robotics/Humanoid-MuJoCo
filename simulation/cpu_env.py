@@ -1,11 +1,13 @@
 import jax
 
-if jax.default_backend() != "gpu":
-    print(" >> Using CPU backend for NumPy.")
-    import numpy as jp
-else:
-    print(" >> Using GPU backend for NumPy.")
-    from jax import numpy as jp
+import numpy as jp
+
+# if jax.default_backend() != "gpu":
+#     print(" >> Using CPU backend for NumPy.")
+#     import numpy as jp
+# else:
+#     print(" >> Using GPU backend for NumPy.")
+#     from jax import numpy as jp
 
 import gymnasium as gym
 import numpy as np
@@ -18,7 +20,6 @@ from simulation.simulation_parameters import *
 from jax.scipy.spatial.transform import Rotation
 from simulation import SIM_XML_PATH, reward_functions
 import gc
-import os
 import time
 from perlin_noise import PerlinNoise
 

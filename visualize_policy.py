@@ -2,15 +2,6 @@ from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from stable_baselines3 import SAC
-import jax
-
-if jax.default_backend() != "gpu":
-    print(" >> Using CPU backend for NumPy.")
-    import numpy as jp
-else:
-    print(" >> Using GPU backend for NumPy.")
-    from jax import numpy as jp
-
 
 MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0
