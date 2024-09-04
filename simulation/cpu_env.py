@@ -353,7 +353,7 @@ class CPUEnv(gym.Env):
     def _init_sim_trackers(self):
         self.previous_action = self.data.ctrl
         self.latest_action = self.data.ctrl
-        self.previous_reward, _ = self._get_reward()
+        self.previous_reward, _, _ = self._get_reward()
         self.next_force_start_time = 0
         self.next_force_direction = jp.zeros((2))
         self.next_force_magnitude = 0
