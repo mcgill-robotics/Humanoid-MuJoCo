@@ -36,12 +36,8 @@ cd $SLURM_TMPDIR/Humanoid-MuJoCo
 python benchmark.py --n-envs 1 > $CURRENT_DIR/benchmark_1.txt
 python benchmark.py --n-envs 4 > $CURRENT_DIR/benchmark_4.txt
 python benchmark.py --n-envs 8 > $CURRENT_DIR/benchmark_8.txt
-python benchmark.py --n-envs 1 --start-method spawn > $CURRENT_DIR/benchmark_1_spawn.txt
-python benchmark.py --n-envs 4 --start-method spawn > $CURRENT_DIR/benchmark_4_spawn.txt
-python benchmark.py --n-envs 8 --start-method spawn > $CURRENT_DIR/benchmark_8_spawn.txt
-
+python benchmark.py --n-envs 16 > $CURRENT_DIR/benchmark_16.txt
 python benchmark.py --n-envs 32 > $CURRENT_DIR/benchmark_32.txt
-python benchmark.py --n-envs 32 --start-method spawn > $CURRENT_DIR/benchmark_32_spawn.txt
-
 python benchmark.py --n-envs 64 > $CURRENT_DIR/benchmark_64.txt
-python benchmark.py --n-envs 64 --start-method spawn > $CURRENT_DIR/benchmark_64_spawn.txt
+python benchmark.py --n-envs 128 > $CURRENT_DIR/benchmark_128.txt
+python benchmark.py --n-envs 256 > $CURRENT_DIR/benchmark_256.txt

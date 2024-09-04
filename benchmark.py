@@ -2,7 +2,7 @@ from simulation.simulation_parameters import *
 from simulation.cpu_env import CPUEnv
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from simulation import SIM_XML_PATH
-from stable_baselines3.common.vec_env import VecMonitor, DummyVecEnv, SubprocVecEnv
+from stable_baselines3.common.vec_env import DummyVecEnv
 import numpy as np
 import time
 import argparse
@@ -12,20 +12,14 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--n-envs",
         type=int,
-        default=32,
+        default=1,
         help="Number of environments to run in parallel",
-    )
-    argparser.add_argument(
-        "--start-method",
-        type=str,
-        default="forkserver",
-        help="Start method for multiprocessing",
     )
     args = argparser.parse_args()
     print(args)
 
     NUM_ENVS = args.n_envs
-    sim = SubprocVecEnv(
+    sim = DummyVecEnv(
         [
             lambda: CPUEnv(
                 xml_path=SIM_XML_PATH,
@@ -35,7 +29,6 @@ if __name__ == "__main__":
             )
         ]
         * NUM_ENVS,
-        start_method=args.start_method,
     )
     obs = sim.reset()
 

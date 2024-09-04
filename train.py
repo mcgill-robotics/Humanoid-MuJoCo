@@ -145,9 +145,6 @@ if __name__ == "__main__":
         * N_EVAL_EPISODES
     )
 
-    env = VecCheckNan(env, raise_exception=True)
-    eval_env = VecCheckNan(eval_env, raise_exception=True)
-
     ##########################
     ## MODEL INITIALIZATION ##
     ##########################
