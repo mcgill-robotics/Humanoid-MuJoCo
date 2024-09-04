@@ -1,11 +1,13 @@
-import jax
+# import jax
 
-if jax.default_backend() != "gpu":
-    print(" >> Using CPU backend for NumPy.")
-    import numpy as jp
-else:
-    print(" >> Using GPU backend for NumPy.")
-    from jax import numpy as jp
+import numpy as jp
+
+# if jax.default_backend() != "gpu":
+#     print(" >> Using CPU backend for NumPy.")
+#     import numpy as jp
+# else:
+#     print(" >> Using GPU backend for NumPy.")
+#     from jax import numpy as jp
 from jax.scipy.spatial.transform import Rotation
 from simulation.simulation_parameters import *
 
