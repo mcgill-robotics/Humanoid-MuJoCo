@@ -17,7 +17,7 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "--start-method",
-        type=int,
+        type=str,
         default="forkserver",
         help="Start method for multiprocessing",
     )
