@@ -188,7 +188,7 @@ print("\nBeginning training.\n")
 
 if CHECKPOINT is None:
     additional_kwargs = {
-        "batch_size": 128,
+        "batch_size": NUM_ENVS * 4,
     }
     policy_args = {
         "net_arch": dict(pi=[128, 128, 128], qf=[128, 128, 128]),
