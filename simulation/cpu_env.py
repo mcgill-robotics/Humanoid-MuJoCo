@@ -707,7 +707,7 @@ if __name__ == "__main__":
     sim = CPUEnv(
         xml_path=SIM_XML_PATH,
         reward_fn=SELECTED_REWARD_FUNCTION,
-        randomization_factor=1,
+        randomization_factor=0,
         enable_rendering=True,
     )
     obs = sim.reset()
@@ -720,7 +720,7 @@ if __name__ == "__main__":
 
     while True:
         action = np.random.uniform(-1, 1, len(JOINT_NAMES))
-        action = 0 * np.ones(len(JOINT_NAMES))
+        # action = 0 * np.ones(len(JOINT_NAMES))
 
         start_time = time.time()
         obs, reward, isTerminal, isTruncated, _ = sim.step(action)
