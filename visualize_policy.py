@@ -5,7 +5,7 @@ from stable_baselines3 import SAC
 
 MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0
-CKPT = "data/SAC/0_steps/_249984_steps.zip"
+CKPT = "data/SAC/0_steps/_499968_steps.zip"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
@@ -30,7 +30,7 @@ while True:
     try:
         while not done:
             action, _ = agent.predict(obs, deterministic=True)
-            print(action)
+            # print(action)
             try:
                 obs, reward, done, _, _ = env.step(action)
             except:
