@@ -1,11 +1,11 @@
 from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
-from stable_baselines3 import SAC
+from stable_baselines3 import PPO
 
-MODEL_TYPE = SAC
+MODEL_TYPE = PPO
 RANDOMIZATION_FACTOR = 0
-CKPT = "data/SAC/0_steps/_999936_steps.zip"
+CKPT = "data/PPO/0_steps/_999936_steps.zip"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
