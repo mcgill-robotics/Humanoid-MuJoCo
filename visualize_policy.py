@@ -5,7 +5,7 @@ from stable_baselines3 import SAC
 
 MODEL_TYPE = SAC
 RANDOMIZATION_FACTOR = 0
-CKPT = "data/SAC/0_steps/_499968_steps.zip"
+CKPT = "data/SAC/0_steps/_999936_steps.zip"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
