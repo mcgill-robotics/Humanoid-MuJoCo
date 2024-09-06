@@ -4,7 +4,7 @@ from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 import numpy as np
 from torch import nn
-from stable_baselines3 import SAC
+from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     CheckpointCallback,
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--n-envs",
         type=int,
-        default=256,
+        default=2,
         help="Number of environments to run in parallel",
     )
     argparser.add_argument(
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--name",
         type=str,
-        default="SAC",
+        default="PPO",
         help="Subfolder path to save training results in",
     )
     argparser.add_argument(
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     )
 
     eval_envs = []
-    for _ in range(NUM_ENVS):
+    for _ in range(N_EVAL_EPISODES):
         eval_envs.append(
             CPUEnv(
                 xml_path=SIM_XML_PATH,
@@ -163,7 +163,7 @@ if __name__ == "__main__":
             "log_std_init": -1,
         }
 
-        model = SAC(
+        model = PPO(
             policy="MlpPolicy",
             env=env,
             verbose=0,
@@ -171,7 +171,7 @@ if __name__ == "__main__":
             **additional_kwargs,
         )
     else:
-        model = SAC.load(
+        model = PPO.load(
             path=CHECKPOINT,
             env=env,
         )
