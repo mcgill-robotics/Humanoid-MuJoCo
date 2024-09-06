@@ -25,7 +25,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--n-envs",
         type=int,
-        default=2,
+        default=256,
         help="Number of environments to run in parallel",
     )
     argparser.add_argument(
@@ -111,6 +111,9 @@ if __name__ == "__main__":
     )
 
     log_dir = "data/{}/".format(args.name.strip()) + LOG_DIR_SUFFIX
+    # make dir if it doesnt exist
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     EVAL_FREQ = args.eval_freq // NUM_ENVS
     CHECKPOINT_FREQ = args.checkpoint_freq // NUM_ENVS
 
