@@ -133,7 +133,7 @@ if __name__ == "__main__":
     )
 
     eval_envs = []
-    for _ in range(NUM_ENVS):
+    for _ in range(N_EVAL_EPISODES):
         eval_envs.append(
             CPUEnv(
                 xml_path=SIM_XML_PATH,
