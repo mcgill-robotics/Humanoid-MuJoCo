@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     if CHECKPOINT is None:
         additional_kwargs = {
-            "batch_size": NUM_ENVS * 4,
+            "batch_size": 64,
         }
         policy_args = {
             "net_arch": dict(pi=[128, 128, 128], qf=[128, 128, 128]),

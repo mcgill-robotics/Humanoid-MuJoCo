@@ -5,7 +5,7 @@ from stable_baselines3 import PPO
 
 MODEL_TYPE = PPO
 RANDOMIZATION_FACTOR = 0
-CKPT = "data/PPO/0_steps/_999936_steps.zip"
+CKPT = "data/PPO/0_steps/_4999680_steps.zip"
 
 env = CPUEnv(
     xml_path=SIM_XML_PATH,
