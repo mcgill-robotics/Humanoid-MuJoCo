@@ -31,6 +31,7 @@ RUN apt-get install nvidia-cuda-toolkit; exit 0
 RUN apt --fix-broken install; exit 0
 
 RUN pip3 install --upgrade "jax[cuda12]"
+RUN pip3 install pin
 
 RUN apt-get autoremove -y
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*

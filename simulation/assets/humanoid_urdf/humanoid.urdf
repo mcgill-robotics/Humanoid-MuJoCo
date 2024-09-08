@@ -86,7 +86,7 @@
   </link>
   <joint
     name="left_shoulder_roll_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0.31335 -0.0091897 0.17689"
       rpy="1.5708 -0.0027388 0" />
@@ -139,7 +139,7 @@
   </link>
   <joint
     name="left_shoulder_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.024 0.018"
       rpy="1.5708 -1.5122 -1.5708" />
@@ -192,7 +192,7 @@
   </link>
   <joint
     name="left_forearm_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.11049 0"
       rpy="2.4953 -1.5708 -2.5197" />
@@ -245,7 +245,7 @@
   </link>
   <joint
     name="right_shoulder_roll_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0.057897 -0.0091897 0.17689"
       rpy="1.5708 -0.019749 0" />
@@ -298,7 +298,7 @@
   </link>
   <joint
     name="right_shoulder_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.024 0.018"
       rpy="-1.5708 0.016927 -1.5708" />
@@ -351,7 +351,7 @@
   </link>
   <joint
     name="right_forearm_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0.11049 0 0"
       rpy="3.1416 0 -1.5811" />
@@ -404,7 +404,7 @@
   </link>
   <joint
     name="left_waist_roll_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0.22812 -0.0082528 0.025136"
       rpy="1.5708 -0.027515 0" />
@@ -457,7 +457,7 @@
   </link>
   <joint
     name="left_waist_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.02400000035807 0.0180000000000001"
       rpy="1.5707963267949 1.5469076633424 1.57079632679489" />
@@ -510,7 +510,7 @@
   </link>
   <joint
     name="left_knee_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.150488463407201 0"
       rpy="-3.14159265358979 0 -3.09347494487016" />
@@ -563,7 +563,7 @@
   </link>
   <joint
     name="right_waist_roll_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0.14312 -0.0082528 0.025136"
       rpy="1.5708 0.0071787 0" />
@@ -616,7 +616,7 @@
   </link>
   <joint
     name="right_waist_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.024 0.018"
       rpy="1.5708 1.5153 1.5708" />
@@ -669,7 +669,7 @@
   </link>
   <joint
     name="right_knee_pitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 -0.15049 0"
       rpy="3.1416 0 3.1238" />
