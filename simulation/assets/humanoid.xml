@@ -13,7 +13,7 @@
     <mesh name="right_knee_pitch_link" file="humanoid_urdf/right_knee_pitch_link.stl"/>
   </asset>
   <worldbody>
-    <body name="humanoid_world_link" pos="0 0 -0.385" quat="-0.7 0 0 0.7">
+    <body name="humanoid_world_link" pos="0 0 -0.375" quat="-0.7 0 0 0.7">
       <joint name="humanoid_free" type="free"/>
       <body name="humanoid" pos="0 0 0" quat="0.7 0 0 0.7" />
       <body name="torso">

@@ -19,7 +19,7 @@
   <!-- Floor link -->
   <link name="floor">
     <visual>
-      <origin xyz="0 0 -0.7" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <box size="100 100 0.1"/> <!-- A large flat box representing the floor -->
       </geometry>
@@ -28,7 +28,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 -0.7" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <box size="100 100 0.01"/>
       </geometry>
@@ -39,7 +39,7 @@
   <joint name="fixed_floor" type="fixed">
     <parent link="world"/>
     <child link="floor"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Slightly below z=0 -->
+    <origin xyz="0 0 -0.375" rpy="0 0 0"/> <!-- Slightly below z=0 -->
   </joint>
 
    <link name="humanoid_world_link">
