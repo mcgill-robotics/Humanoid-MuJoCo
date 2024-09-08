@@ -511,6 +511,7 @@ class CPUEnv(gym.Env):
             * jax.random.normal(key=self.rng_key, shape=(4,))
         )
         noisy_torso_quat = torso_quat + quaternion_noise
+        self.torso_quat = noisy_torso_quat
         local_gravity_vector = inverseRotateVectors(
             noisy_torso_quat, jp.array([0, 0, -1])
         )
