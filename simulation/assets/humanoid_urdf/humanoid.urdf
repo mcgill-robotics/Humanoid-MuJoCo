@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/torso.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/torso.stl" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/torso.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/torso.stl" />
       </geometry>
     </collision>
   </link>
@@ -66,7 +66,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_shoulder_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_roll_link.stl" />
       </geometry>
       <material
         name="">
@@ -80,13 +80,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_shoulder_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_roll_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="left_shoulder_roll_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0.31335 -0.0091897 0.17689"
       rpy="1.5708 -0.0027388 0" />
@@ -119,7 +119,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_shoulder_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -133,13 +133,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_shoulder_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="left_shoulder_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.024 0.018"
       rpy="1.5708 -1.5122 -1.5708" />
@@ -172,7 +172,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_forearm_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_forearm_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -186,13 +186,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_forearm_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_forearm_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="left_forearm_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.11049 0"
       rpy="2.4953 -1.5708 -2.5197" />
@@ -225,7 +225,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_shoulder_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_roll_link.stl" />
       </geometry>
       <material
         name="">
@@ -239,13 +239,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_shoulder_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_roll_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="right_shoulder_roll_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0.057897 -0.0091897 0.17689"
       rpy="1.5708 -0.019749 0" />
@@ -278,7 +278,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_shoulder_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -292,13 +292,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_shoulder_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="right_shoulder_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.024 0.018"
       rpy="-1.5708 0.016927 -1.5708" />
@@ -331,7 +331,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_forearm_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_forearm_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -345,13 +345,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_forearm_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_forearm_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="right_forearm_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0.11049 0 0"
       rpy="3.1416 0 -1.5811" />
@@ -384,7 +384,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_waist_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_waist_roll_link.stl" />
       </geometry>
       <material
         name="">
@@ -398,13 +398,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_waist_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_waist_roll_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="left_waist_roll_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0.22812 -0.0082528 0.025136"
       rpy="1.5708 -0.027515 0" />
@@ -437,7 +437,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_waist_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_waist_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -451,13 +451,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_waist_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_waist_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="left_waist_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.02400000035807 0.0180000000000001"
       rpy="1.5707963267949 1.5469076633424 1.57079632679489" />
@@ -490,7 +490,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_knee_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_knee_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -504,13 +504,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/left_knee_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_knee_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="left_knee_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.150488463407201 0"
       rpy="-3.14159265358979 0 -3.09347494487016" />
@@ -543,7 +543,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_waist_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_waist_roll_link.stl" />
       </geometry>
       <material
         name="">
@@ -557,13 +557,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_waist_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_waist_roll_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="right_waist_roll_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0.14312 -0.0082528 0.025136"
       rpy="1.5708 0.0071787 0" />
@@ -596,7 +596,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_waist_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_waist_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -610,13 +610,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_waist_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_waist_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="right_waist_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.024 0.018"
       rpy="1.5708 1.5153 1.5708" />
@@ -649,7 +649,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_knee_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_knee_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -663,13 +663,13 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://new_humanoid1/meshes/right_knee_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_knee_pitch_link.stl" />
       </geometry>
     </collision>
   </link>
   <joint
     name="right_knee_pitch_joint"
-    type="revolute">
+    type="continuous">
     <origin
       xyz="0 -0.15049 0"
       rpy="3.1416 0 3.1238" />

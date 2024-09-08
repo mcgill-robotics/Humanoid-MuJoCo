@@ -14,7 +14,7 @@
   </asset>
   <worldbody>
     <body name="humanoid_world_link" pos="0 0 -0.385" quat="-0.7 0 0 0.7">
-      <!-- <joint name="humanoid_free" type="free"/> -->
+      <joint name="humanoid_free" type="free"/>
       <body name="humanoid" pos="0 0 0" quat="0.7 0 0 0.7" />
       <body name="torso">
         <geom type="mesh" pos="0.1675 -0.005 0.135" rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>

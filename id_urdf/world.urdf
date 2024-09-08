@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot name="converted_robot">
+<robot name="new_humanoid1">
    <link name="world">
       <inertial>
          <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
@@ -64,7 +64,7 @@
       <visual name="torso">
          <origin xyz="0.1848149436815727 -0.003939209452785282 0.1110067214511154" rpy="-0.0008201436182088129 -0.12382311655719636 1.5628008270149865"/>
          <geometry>
-            <mesh filename="converted_torso.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_torso.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -121,7 +121,7 @@
       <visual name="left_shoulder_pitch_link">
          <origin xyz="6.170213679797289e-06 -0.04811005516614877 0.0004259767121680248" rpy="1.5723736055119883 0.0004308432514816829 -0.0030158063311287453"/>
          <geometry>
-            <mesh filename="converted_left_shoulder_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_left_shoulder_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -154,7 +154,7 @@
       <visual name="left_forearm_pitch_link">
          <origin xyz="-0.0015062228052955852 -0.032047491907380175 -0.00014188468516069193" rpy="1.5654157737443342 -0.0070283882358512795 0.03136689956316363"/>
          <geometry>
-            <mesh filename="converted_left_forearm_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_left_forearm_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -213,7 +213,7 @@
       <visual name="left_shoulder_pitch_link">
          <origin xyz="6.170213679797289e-06 -0.04811005516614877 0.0004259767121680248" rpy="1.5723736055119883 0.0004308432514816829 -0.0030158063311287453"/>
          <geometry>
-            <mesh filename="converted_left_shoulder_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_left_shoulder_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -246,7 +246,7 @@
       <visual name="left_forearm_pitch_link">
          <origin xyz="-0.0015062228052955852 -0.032047491907380175 -0.00014188468516069193" rpy="1.5654157737443342 -0.0070283882358512795 0.03136689956316363"/>
          <geometry>
-            <mesh filename="converted_left_forearm_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_left_forearm_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -305,7 +305,7 @@
       <visual name="left_waist_pitch_link">
          <origin xyz="3.4735342078596717e-05 -0.07509646779447576 0.000293067029352159" rpy="1.5755494080362866 0.018640632383124967 0.003988221086784871"/>
          <geometry>
-            <mesh filename="converted_left_waist_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_left_waist_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -338,7 +338,7 @@
       <visual name="left_knee_pitch_link">
          <origin xyz="2.4942481063558257e-05 -0.06642470209627441 -0.0008937530860745312" rpy="-1.4965830467200827 -1.338702254587331 3.0687391559110737"/>
          <geometry>
-            <mesh filename="converted_left_knee_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_left_knee_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -397,7 +397,7 @@
       <visual name="right_waist_pitch_link">
          <origin xyz="6.343753114682828e-05 -0.07464215283845539 -0.00022095380771330498" rpy="1.580042344948899 0.0008422375586811803 -0.0003055465525159118"/>
          <geometry>
-            <mesh filename="converted_right_waist_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_right_waist_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
@@ -430,7 +430,7 @@
       <visual name="right_knee_pitch_link">
          <origin xyz="2.4948693932594023e-05 -0.06642495789247539 -0.0008938463733803115" rpy="-1.4965465703885203 -1.3388865249809943 3.068699887912389"/>
          <geometry>
-            <mesh filename="converted_right_knee_pitch_link.stl"/>
+            <mesh filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/id_urdf/converted_right_knee_pitch_link.stl"/>
          </geometry>
          <material name="white"/>
       </visual>
