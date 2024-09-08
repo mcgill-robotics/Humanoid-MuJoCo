@@ -4,7 +4,7 @@ from simulation.cpu_env import CPUEnv
 from simulation import SIM_XML_PATH
 from simulation.reward_functions import SELECTED_REWARD_FUNCTION
 from simulation.simulation_parameters import CONTROL_FREQUENCY, JOINT_NAMES
-import time
+from scipy.optimize import minimize
 
 # GLOBAL VARIABLES
 PLANNING_HORIZON = 50  # steps
@@ -12,6 +12,7 @@ DT = 1 / CONTROL_FREQUENCY
 VISUALIZE_URDF = True
 INVERTED_JOINTS = ["left_knee"]
 PRINT_JOINT_INFO = True
+JOINT_VELOCITY_LIMIT = 10
 
 # Load the robot model
 robot = pin.RobotWrapper.BuildFromURDF("id_urdf/humanoid.urdf")
@@ -95,15 +96,17 @@ def optimal_control(q, v, target_torso_trajectory):
     """
     q: current joint configuration of the robot
     v: current velocities of the robot
-    target_torso_trajectory: desired trajectory of the torso of the robot of shape [HORIZON, 7] where the second axis represents position (3) and quaternion (4)
+    target_torso_trajectory: desired trajectory of the torso of the robot of shape [HORIZON, 7]
+                              where the second axis represents position (3) and quaternion (4)
+    robot: Pinocchio robot model
     """
-    # TODO - calculate optimal joint velocities for the next HORIZON steps such that:
-    # Constraints:
-    # the joint velocities are within the joint limits
-    # Objective:
-    # the torso of the robot ollows the desired trajectory target_torso_trajectory as closely as possible
-    pass
-
+    # compute joint velocities that minimize deviation from the target torso trajectory over the next HORIZON steps
+    # use pinocchio to calculate forward/inverse dynamics
+    # constrain joint velocities to be within -JOINT_VELOCITY_LIMIT and JOINT_VELOCITY_LIMIT
+    # minimize control effort
+    # keep the implementation simple
+    # global variables available:
+        # robot, DT, PLANNING_HORIZON, JOINT_VELOCITY_LIMIT
 
 def compute_optimal_joint_targets(
     joint_positions, joint_velocities, torso_ang_vel, torso_orientation
@@ -130,9 +133,9 @@ def compute_optimal_joint_targets(
         q[JOINT_NAMES_URDF_Q.index(joint)] = joint_positions[JOINT_NAMES.index(joint)]
         v[JOINT_NAMES_URDF_V.index(joint)] = joint_velocities[JOINT_NAMES.index(joint)]
     q[2] -= get_dist_from_ground(q)
-    TORSO_TARGET_TRAJECTORY = [
+    TORSO_TARGET_TRAJECTORY = np.array([
         np.concatenate([q[0:2], np.zeros(1), np.array([0, 0, 0, 1])])
-    ] * PLANNING_HORIZON
+    ] * PLANNING_HORIZON)
 
     if VISUALIZE_URDF:
         robot.display(q)
@@ -161,7 +164,7 @@ if __name__ == "__main__":
     while True:
         done = False
         obs, _ = env.reset()
-        while env.data.time < 200:
+        while env.data.time < 2:
             joint_positions = obs[:12]  # rad
             joint_velocities = obs[12:24]  # rad / s
             torso_ang_vel = obs[
@@ -174,6 +177,5 @@ if __name__ == "__main__":
                 torso_ang_vel,
                 env.torso_quat,
             )
-            joint_position_targets = np.ones(12)
             obs, reward, done, _, _ = env.step(joint_position_targets)
             env.render("human")
