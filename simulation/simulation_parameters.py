@@ -113,6 +113,20 @@ PRESSURE_GEOM_NAMES = [
     # "pressure_geom_RRF",
     # "pressure_geom_RLF",
 ]
-TORSO_BODY_NAME = "humanoid"
+JOINT_LIMITS = {
+    "right_shoulder_pitch": [-1.5708, -1.5708],
+    "right_shoulder_roll": [-1.5708, 0],
+    "right_elbow": [-1.5708, 0],
+    "left_shoulder_pitch": [-1.5708, -1.5708],
+    "left_shoulder_roll": [0, -1.5708],
+    "left_elbow": [-1.5708, 0],
+    "left_hip_roll": [-1.5708, -1.5708],
+    "left_hip_pitch": [-1.5708, -1.5708],
+    "left_knee": [0, -1.5708],
+    "right_hip_roll": [-1.5708, -1.5708],
+    "right_hip_pitch": [-1.5708, -1.5708],
+    "right_knee": [0, -1.5708],
+}
+TORSO_BODY_NAME = "humanoid_world_link"
 FREE_JOINT_NAME = "humanoid_free"
 NON_ROBOT_GEOMS = ["floor", "X_axis_ref", "Y_axis_ref", "Z_axis_ref"]

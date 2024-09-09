@@ -225,7 +225,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_roll_link.stl" />
       </geometry>
       <material
         name="">
@@ -239,7 +239,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_roll_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_roll_link.stl" />
       </geometry>
     </collision>
   </link>
@@ -278,7 +278,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_roll_link.stl" />
       </geometry>
       <material
         name="">
@@ -292,7 +292,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_shoulder_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_shoulder_roll_link.stl" />
       </geometry>
     </collision>
   </link>
@@ -331,7 +331,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_forearm_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_forearm_pitch_link.stl" />
       </geometry>
       <material
         name="">
@@ -345,7 +345,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/right_forearm_pitch_link.stl" />
+          filename="/root/Humanoid-MuJoCo-Inverse-Dynamics/simulation/assets/humanoid_urdf/left_forearm_pitch_link.stl" />
       </geometry>
     </collision>
   </link>

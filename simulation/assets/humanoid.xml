@@ -15,9 +15,8 @@
   <worldbody>
     <body name="humanoid_world_link" pos="0 0 -0.375" quat="-0.7 0 0 0.7">
       <joint name="humanoid_free" type="free"/>
-      <body name="humanoid" pos="0 0 0" quat="0.7 0 0 0.7" />
-      <body name="torso">
-        <geom type="mesh" pos="0.1675 -0.005 0.135" rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
+      <body name="torso" pos="0.1675 -0.005 0.135">
+        <geom type="mesh"  rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
       </body>
       <body name="right_shoulder_roll_link" pos="0.31335 -0.0091897 0.17689" quat="0.707105 0.707107 -0.00096831 0.000968314">
         <inertial pos="0.000605694 -0.0120164 0.0186305" quat="0.653192 0.653383 -0.270554 0.270611" mass="0.0517508" diaginertia="1.4546e-05 1.38577e-05 1.00733e-05"/>
@@ -94,17 +93,17 @@
 
   
   <actuator>
-    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="right_shoulder_roll" joint="right_shoulder_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="left_shoulder_roll" joint="left_shoulder_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="left_knee" joint="left_knee" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="right_hip_roll" joint="right_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="right_hip_pitch" joint="right_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
-    <position name="right_knee" joint="right_knee" forcelimited="true" forcerange="-1.5 1.5" kv="0.05"/>
+    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="right_shoulder_roll" joint="right_shoulder_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="right_elbow" joint="right_elbow" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="left_shoulder_roll" joint="left_shoulder_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="left_elbow" joint="left_elbow" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="left_hip_roll" joint="left_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="left_hip_pitch" joint="left_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="left_knee" joint="left_knee" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="right_hip_roll" joint="right_hip_roll" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="right_hip_pitch" joint="right_hip_pitch" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
+    <position name="right_knee" joint="right_knee" forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2"/>
   </actuator>
 </mujoco>

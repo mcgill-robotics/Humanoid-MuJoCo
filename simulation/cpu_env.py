@@ -665,8 +665,8 @@ class CPUEnv(gym.Env):
         self.action_buffer.append(action)
         action_to_take = self.action_buffer.pop(0)
         # actions should be inputted to the environment in the -1 to 1 range, and they are mapped here to -pi/2 and pi/2 accordingly
-        action_to_take = jp.clip(jp.array(action_to_take), -1, 1)
-        action_to_take = action_to_take * (jp.pi / 2)
+        # action_to_take = jp.clip(jp.array(action_to_take), -1, 1)
+        # action_to_take = action_to_take * (jp.pi / 2)
         self.data.ctrl = action_to_take[self.joint_actuator_idx]
         self.previous_action = self.latest_action
         self.latest_action = action_to_take
