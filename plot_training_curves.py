@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from simulation.simulation_parameters import *
 
-eval_file_dirs = ["data/PPO/0_steps/"]
+eval_file_dirs = ["data/PPO/0_steps/", "data/PPO/_4999680_steps/"]
 
 #####################
 
