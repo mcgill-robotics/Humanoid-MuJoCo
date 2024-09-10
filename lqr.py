@@ -139,8 +139,8 @@ def render():
 if __name__ == "__main__":
     # Cost coefficients.
     BALANCE_COST = 1000  # Balancing.
-    STABLE_JOINT_COST = 3  # Joints required for balancing.
-    OTHER_JOINT_COST = 0.3  # Other joints.
+    STABLE_JOINT_COST = 1  # Joints required for balancing.
+    OTHER_JOINT_COST = 0.1  # Other joints.
     NUM_TRIALS = 1000
     RENDER = True
     MAX_SIM_TIME = 10.0  # s
