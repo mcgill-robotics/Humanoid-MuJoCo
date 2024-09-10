@@ -55,16 +55,11 @@ def render():
 
 def torques_to_positions(init_qpos, init_qvel, torques):
     mujoco.mj_resetDataKeyframe(mj_model, mj_data, 1)
+    mj_data.qacc = 0
     mj_data.qpos = init_qpos
     mj_data.qvel = init_qvel
-    mj_data.qfrc_applied[6:] = torques
-    print(torques)
-    print(ctrl0)
-    for _ in range(PHYSICS_STEPS_PER_CONTROL_STEP):
-        mujoco.mj_step(mj_model, mj_data)
-    mujoco.mj_forward(mj_model, mj_data)
-    print(init_qvel - mj_data.qvel)
-    print(init_qpos - mj_data.qpos)
+    mj_data.qfrc_actuator[6:] = torques
+    mujoco.mj_step(mj_model, mj_data)
     return mj_data.qpos[JOINT_QPOS_IDX]
 
 
