@@ -92,9 +92,8 @@
     </body>
   </worldbody>
 
-  
   <actuator>
-    <position name="right_shoulder_pitch" joint="right_shoulder_pitch"/>
+    <!-- <position name="right_shoulder_pitch" joint="right_shoulder_pitch"/>
     <position name="right_shoulder_roll" joint="right_shoulder_roll"/>
     <position name="right_elbow" joint="right_elbow"/>
     <position name="left_shoulder_pitch" joint="left_shoulder_pitch"/>
@@ -105,7 +104,18 @@
     <position name="left_knee" joint="left_knee"/>
     <position name="right_hip_roll" joint="right_hip_roll"/>
     <position name="right_hip_pitch" joint="right_hip_pitch"/>
-    <position name="right_knee" joint="right_knee"/>
+    <position name="right_knee" joint="right_knee"/> -->
+    <motor name="right_shoulder_pitch" joint="right_shoulder_pitch"  />
+    <motor name="right_shoulder_roll" joint="right_shoulder_roll"  />
+    <motor name="right_elbow" joint="right_elbow"  />
+    <motor name="left_shoulder_pitch" joint="left_shoulder_pitch" />
+    <motor name="left_shoulder_roll" joint="left_shoulder_roll"  />
+    <motor name="left_elbow" joint="left_elbow"  />
+    <motor name="left_hip_roll" joint="left_hip_roll"  />
+    <motor name="left_hip_pitch" joint="left_hip_pitch"  />
+    <motor name="left_knee" joint="left_knee"  />
+    <motor name="right_hip_roll" joint="right_hip_roll" />
+    <motor name="right_hip_pitch" joint="right_hip_pitch"  />
+    <motor name="right_knee" joint="right_knee"  />
   </actuator>
-
 </mujoco>
