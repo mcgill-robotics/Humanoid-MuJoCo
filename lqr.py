@@ -36,6 +36,9 @@ def find_ideal_distance_to_ground():
 
 # side effect: resets data
 def calculate_q_matrix(model, data, qpos0):
+    BALANCE_COST = 1000  # Balancing.
+    STABLE_JOINT_COST = 1.0  # Joints that should remain stable
+    OTHER_JOINT_COST = 0.1  # Other joints.
     # Get the Jacobian for the root body (torso) CoM.
     mujoco.mj_resetData(model, data)
     data.qpos = qpos0
@@ -82,17 +85,16 @@ def calculate_q_matrix(model, data, qpos0):
         + (BALANCE_COST / 2) * Qbalance_left
         + Qjoint
     )
-    # No explicit penalty for velocitileft_knee_pitch_linkes.
-    Q = np.block(
-        [[Qpos, np.zeros((model.nv, model.nv))], [np.zeros((model.nv, 2 * model.nv))]]
-    )
+    # penalty for velocity
+    Qvel = np.zeros((model.nv, model.nv))
+    Q = np.block([[Qpos, Qvel], [np.zeros((model.nv, 2 * model.nv))]])
     return Q
 
 
 def control(model, data, Q, qpos0, ctrl0):
     A = np.zeros((2 * model.nv, 2 * model.nv))
     B = np.zeros((2 * model.nv, model.nu))
-    epsilon = 1e-6
+    epsilon = 1e-8
     flg_centered = True
     # global A, B, K
     mujoco.mjd_transitionFD(model, data, epsilon, flg_centered, A, B, None, None)
@@ -121,26 +123,15 @@ def calculate_initial_conditions(model, data):
     return qpos0, ctrl0
 
 
-def torques_to_positions(torques):
-    data.qacc = 0
-    data.qfrc_actuator[6:] = torques
-    mujoco.mj_step(model, data)
-    return data.qpos[JOINT_QPOS_IDX]
-
-
 def render():
     renderer.update_scene(data, camera="track", scene_option=scene_option)
     frame = renderer.render()
-    # time.sleep(1 / CONTROL_FREQUENCY)
     cv2.imshow("CPU Sim View", frame)
     cv2.waitKey(1)
 
 
 if __name__ == "__main__":
     # Cost coefficients.
-    BALANCE_COST = 1000  # Balancing.
-    STABLE_JOINT_COST = 1  # Joints required for balancing.
-    OTHER_JOINT_COST = 0.1  # Other joints.
     NUM_TRIALS = 1000
     RENDER = True
     MAX_SIM_TIME = 10.0  # s
@@ -176,7 +167,7 @@ if __name__ == "__main__":
                 desired_torques = control(model, data, Q, qpos0, ctrl0)
                 comp_time = time.time() - start_comp_time
                 print("Computation HZ: ", 1.0 / comp_time, end="\r")
-            except:
+            except Exception:
                 print(".                                            ")
                 desired_torques = ctrl0
             data.ctrl = desired_torques

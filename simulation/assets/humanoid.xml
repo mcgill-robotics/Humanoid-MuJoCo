@@ -67,7 +67,7 @@
             <inertial pos="0.000109197 -0.0801721 0.00013442" quat="0.499013 0.501748 -0.500969 0.498263" mass="0.167319" diaginertia="8.01423e-05 7.67196e-05 3.31839e-05"/>
             <joint range="0 1.5708" name="right_knee" pos="0 0 0" axis="0 0 1"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-            <geom name="pressure_geom_L" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="left_knee_pitch_link"/>
+            <geom name="pressure_geom_L" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="left_knee_pitch_link" friction="1.5"/>
           </body>
         </body>
       </body>
@@ -85,7 +85,7 @@
             <inertial pos="0.000109197 -0.0801721 0.00013442" quat="0.499013 0.501748 -0.500969 0.498263" mass="0.167319" diaginertia="8.01423e-05 7.67196e-05 3.31839e-05"/>
             <joint range="0 1.5708" name="left_knee" pos="0 0 0" axis="0 0 1"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
-            <geom name="pressure_geom_R" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="right_knee_pitch_link"/>
+            <geom name="pressure_geom_R" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="right_knee_pitch_link" friction="1.5"/>
           </body>
         </body>
       </body>
@@ -93,18 +93,6 @@
   </worldbody>
 
   <actuator>
-    <!-- <position name="right_shoulder_pitch" joint="right_shoulder_pitch"/>
-    <position name="right_shoulder_roll" joint="right_shoulder_roll"/>
-    <position name="right_elbow" joint="right_elbow"/>
-    <position name="left_shoulder_pitch" joint="left_shoulder_pitch"/>
-    <position name="left_shoulder_roll" joint="left_shoulder_roll"/>
-    <position name="left_elbow" joint="left_elbow"/>
-    <position name="left_hip_roll" joint="left_hip_roll"/>
-    <position name="left_hip_pitch" joint="left_hip_pitch"/>
-    <position name="left_knee" joint="left_knee"/>
-    <position name="right_hip_roll" joint="right_hip_roll"/>
-    <position name="right_hip_pitch" joint="right_hip_pitch"/>
-    <position name="right_knee" joint="right_knee"/> -->
     <motor name="right_shoulder_pitch" joint="right_shoulder_pitch"  />
     <motor name="right_shoulder_roll" joint="right_shoulder_roll"  />
     <motor name="right_elbow" joint="right_elbow"  />
