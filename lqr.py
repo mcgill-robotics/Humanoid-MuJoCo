@@ -34,74 +34,17 @@ def find_ideal_distance_to_ground():
     return best_offset
 
 
-def control(model, data, Q, qpos0, ctrl0):
-    A = np.zeros((2 * model.nv, 2 * model.nv))
-    B = np.zeros((2 * model.nv, model.nu))
-    epsilon = 1e-6
-    flg_centered = True
-    # global A, B, K
-    mujoco.mjd_transitionFD(model, data, epsilon, flg_centered, A, B, None, None)
-    # Solve discrete Riccati equation.
-    P = scipy.linalg.solve_discrete_are(A, B, Q, np.eye(nu))
-    # Compute the feedback gain matrix K.
-    K = np.linalg.inv(np.eye(nu) + B.T @ P @ B) @ B.T @ P @ A
-    # Allocate position difference dq.
-    dq = np.zeros(model.nv)
-    # Get state difference dx.
-    mujoco.mj_differentiatePos(model, dq, 1, qpos0, data.qpos)
-    dx = np.hstack((dq, data.qvel)).T
-    # LQR control law.
-    return ctrl0 - K @ dx
-
-
-if __name__ == "__main__":
-    model = mujoco.MjModel.from_xml_path(SIM_XML_PATH)
-    model.opt.timestep = 0.001
-    data = mujoco.MjData(model)
-    renderer = mujoco.Renderer(model, 720, 1080)
-    JOINT_QPOS_IDX = []
-    JOINT_DOF_IDX = []
-    for joint in JOINT_NAMES:
-        JOINT_DOF_IDX.append(model.jnt_dofadr[model.joint(joint).id])
-        JOINT_QPOS_IDX.append(model.jnt_qposadr[model.joint(joint).id])
-
-    def render():
-        renderer.update_scene(data, camera="track", scene_option=scene_option)
-        frame = renderer.render()
-        # time.sleep(1 / CONTROL_FREQUENCY)
-        cv2.imshow("CPU Sim View", frame)
-        cv2.waitKey(1)
-
-    def torques_to_positions(init_qpos, init_qvel, torques):
-        data.qacc = 0
-        data.qfrc_actuator[6:] = torques
-        mujoco.mj_step(model, data)
-        return data.qpos[JOINT_QPOS_IDX]
-
-    # CALCULATE CTRL0
-    mujoco.mj_resetDataKeyframe(model, data, 1)
-    mujoco.mj_forward(model, data)
-    data.qacc = 0
-    # data.qpos[2] += find_ideal_distance_to_ground()
-    qpos0 = data.qpos.copy()
-    mujoco.mj_inverse(model, data)
-    qfrc0 = data.qfrc_inverse.copy()
-    ctrl0 = np.atleast_2d(qfrc0) @ np.linalg.pinv(data.actuator_moment)
-    ctrl0 = ctrl0.flatten()
-
-    nu = model.nu  # Alias for the number of actuators.
-    nv = model.nv  # Shortcut for the number of DoFs.
-
-    # CALCULATE Q MATRIX
+# side effect: resets data
+def calculate_q_matrix(model, data, qpos0):
     # Get the Jacobian for the root body (torso) CoM.
     mujoco.mj_resetData(model, data)
     data.qpos = qpos0
     mujoco.mj_forward(model, data)
-    jac_com = np.zeros((3, nv))
+    jac_com = np.zeros((3, model.nv))
     mujoco.mj_jacSubtreeCom(model, data, jac_com, model.body("humanoid_world_link").id)
 
     # Get the Jacobian for the left foot.
-    jac_left_foot = np.zeros((3, nv))
+    jac_left_foot = np.zeros((3, model.nv))
     mujoco.mj_jacBodyCom(
         model, data, jac_left_foot, None, model.body("left_knee_pitch_link").id
     )
@@ -109,7 +52,7 @@ if __name__ == "__main__":
     Qbalance_left = jac_diff_left.T @ jac_diff_left
 
     # Get the Jacobian for the right foot.
-    jac_right_foot = np.zeros((3, nv))
+    jac_right_foot = np.zeros((3, model.nv))
     mujoco.mj_jacBodyCom(
         model, data, jac_right_foot, None, model.body("right_knee_pitch_link").id
     )
@@ -120,22 +63,18 @@ if __name__ == "__main__":
     joint_names = [model.joint(i).name for i in range(model.njnt)]
     # Get indices into relevant sets of joints.
     root_dofs = range(6)
-    body_dofs = range(6, nv)
-    leg_dofs = [
+    body_dofs = range(6, model.nv)
+    stable_dofs = [
         model.joint(name).dofadr[0]
         for name in joint_names
         if ("hip" in name or "knee" in name)
     ]
-    other_dofs = np.setdiff1d(body_dofs, leg_dofs)
-    # Cost coefficients.
-    BALANCE_COST = 1000  # Balancing.
-    LEG_JOINT_COST = 3  # Joints required for balancing.
-    OTHER_JOINT_COST = 0.3  # Other joints.
+    other_dofs = np.setdiff1d(body_dofs, stable_dofs)
 
     # Construct the Qjoint matrix.
-    Qjoint = np.eye(nv)
+    Qjoint = np.eye(model.nv)
     Qjoint[root_dofs, root_dofs] *= 0  # Don't penalize free joint directly.
-    Qjoint[leg_dofs, leg_dofs] *= LEG_JOINT_COST
+    Qjoint[stable_dofs, stable_dofs] *= STABLE_JOINT_COST
     Qjoint[other_dofs, other_dofs] *= OTHER_JOINT_COST
     # Construct the Q matrix for position DoFs.
     Qpos = (
@@ -144,12 +83,85 @@ if __name__ == "__main__":
         + Qjoint
     )
     # No explicit penalty for velocitileft_knee_pitch_linkes.
-    Q = np.block([[Qpos, np.zeros((nv, nv))], [np.zeros((nv, 2 * nv))]])
+    Q = np.block(
+        [[Qpos, np.zeros((model.nv, model.nv))], [np.zeros((model.nv, 2 * model.nv))]]
+    )
+    return Q
 
-    # SIMULATE THE CONTROLLER
-    # Constants
+
+def control(model, data, Q, qpos0, ctrl0):
+    A = np.zeros((2 * model.nv, 2 * model.nv))
+    B = np.zeros((2 * model.nv, model.nu))
+    epsilon = 1e-6
+    flg_centered = True
+    # global A, B, K
+    mujoco.mjd_transitionFD(model, data, epsilon, flg_centered, A, B, None, None)
+    # Solve discrete Riccati equation.
+    P = scipy.linalg.solve_discrete_are(A, B, Q, np.eye(model.nu))
+    # Compute the feedback gain matrix K.
+    K = np.linalg.inv(np.eye(model.nu) + B.T @ P @ B) @ B.T @ P @ A
+    # Allocate position difference dq.
+    dq = np.zeros(model.nv)
+    # Get state difference dx.
+    mujoco.mj_differentiatePos(model, dq, 1, qpos0, data.qpos)
+    dx = np.hstack((dq, data.qvel)).T
+    # LQR control law.
+    return ctrl0 - K @ dx
+
+
+def calculate_initial_conditions(model, data):
+    mujoco.mj_resetDataKeyframe(model, data, 1)
+    mujoco.mj_forward(model, data)
+    data.qacc = 0
+    qpos0 = data.qpos.copy()
+    mujoco.mj_inverse(model, data)
+    qfrc0 = data.qfrc_inverse.copy()
+    ctrl0 = np.atleast_2d(qfrc0) @ np.linalg.pinv(data.actuator_moment)
+    ctrl0 = ctrl0.flatten()
+    return qpos0, ctrl0
+
+
+def torques_to_positions(torques):
+    data.qacc = 0
+    data.qfrc_actuator[6:] = torques
+    mujoco.mj_step(model, data)
+    return data.qpos[JOINT_QPOS_IDX]
+
+
+def render():
+    renderer.update_scene(data, camera="track", scene_option=scene_option)
+    frame = renderer.render()
+    # time.sleep(1 / CONTROL_FREQUENCY)
+    cv2.imshow("CPU Sim View", frame)
+    cv2.waitKey(1)
+
+
+if __name__ == "__main__":
+    # Cost coefficients.
+    BALANCE_COST = 1000  # Balancing.
+    STABLE_JOINT_COST = 3  # Joints required for balancing.
+    OTHER_JOINT_COST = 0.3  # Other joints.
     NUM_TRIALS = 1000
     RENDER = True
+    MAX_SIM_TIME = 10.0  # s
+
+    model = mujoco.MjModel.from_xml_path(SIM_XML_PATH)
+    model.opt.timestep = 0.001
+    data = mujoco.MjData(model)
+    renderer = mujoco.Renderer(model, 720, 1080)
+    JOINT_QPOS_IDX = []
+    JOINT_DOF_IDX = []
+    for joint in JOINT_NAMES:
+        JOINT_DOF_IDX.append(model.jnt_dofadr[model.joint(joint).id])
+        JOINT_QPOS_IDX.append(model.jnt_qposadr[model.joint(joint).id])
+
+    # CALCULATE CTRL0
+    qpos0, ctrl0 = calculate_initial_conditions(model, data)
+
+    # CALCULATE Q MATRIX
+    Q = calculate_q_matrix(model, data, qpos0)
+
+    # SIMULATE THE CONTROLLER
     # Initialize score to 0
     score = 0
     for N in range(NUM_TRIALS):
@@ -157,7 +169,7 @@ if __name__ == "__main__":
         # Set the initial state and control.
         mujoco.mj_resetData(model, data)
         data.qpos = qpos0
-        while data.time < 10:
+        while data.time < MAX_SIM_TIME:
             score += 1
             try:
                 start_comp_time = time.time()
