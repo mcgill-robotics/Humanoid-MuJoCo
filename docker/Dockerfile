@@ -31,7 +31,15 @@ RUN apt-get install nvidia-cuda-toolkit; exit 0
 RUN apt --fix-broken install; exit 0
 
 RUN pip3 install --upgrade "jax[cuda12]"
-RUN pip3 install pin
+RUN apt-get update && apt-get install -y cmake libgl1-mesa-dev libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev ninja-build zlib1g-dev clang-12
+RUN git clone https://github.com/google-deepmind/mujoco_mpc && \
+    cd mujoco_mpc && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja -DCMAKE_C_COMPILER:STRING=clang-12 -DCMAKE_CXX_COMPILER:STRING=clang++-12 -DMJPC_BUILD_GRPC_SERVICE:BOOL=ON && \
+    cmake --build . --config=Release && \
+    cd python && \
+    python setup.py install
 
 RUN apt-get autoremove -y
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
