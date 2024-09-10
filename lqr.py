@@ -18,6 +18,11 @@ if __name__ == "__main__":
     model = mujoco.MjModel.from_xml_path(SIM_XML_PATH)
     data = mujoco.MjData(model)
     renderer = mujoco.Renderer(model, 720, 1080)
+    JOINT_QPOS_IDX = []
+    JOINT_DOF_IDX = []
+    for joint in JOINT_NAMES:
+        JOINT_DOF_IDX.append(model.jnt_dofadr[model.joint(joint).id])
+        JOINT_QPOS_IDX.append(model.jnt_qposadr[model.joint(joint).id])
 
     def render():
         renderer.update_scene(data, camera="track", scene_option=scene_option)
@@ -25,6 +30,24 @@ if __name__ == "__main__":
         # time.sleep(1 / CONTROL_FREQUENCY)
         cv2.imshow("CPU Sim View", frame)
         cv2.waitKey(1)
+
+    def torques_to_positions(init_qpos, init_qvel, torques):
+        # mujoco.mj_resetDataKeyframe(model, data, 1)
+        data.qpos = init_qpos
+        data.qvel = init_qvel
+        data.qfrc_applied[6:] = torques
+        data.qfrc_actuator[6:] = torques
+        for _ in range(10):
+            mujoco.mj_step(model, data)
+            mujoco.mj_forward(model, data)
+            mujoco.mj_inverse(model, data)
+        print(torques)
+        print(data.qfrc_actuator)
+        print(data.actuator_force)
+        print(data.qfrc_applied)
+        print(data.qfrc_inverse)
+        print(init_qpos - data.qpos)
+        return data.qpos[JOINT_QPOS_IDX]
 
     # CALCULATE CTRL0
     mujoco.mj_resetDataKeyframe(model, data, 1)
@@ -118,13 +141,13 @@ if __name__ == "__main__":
                     INIT_A_B = True
                 # Get state difference dx.
                 mujoco.mj_differentiatePos(model, dq, 1, qpos0, data.qpos)
-                print(dq.shape)
                 dx = np.hstack((dq, data.qvel)).T
-                print(dx.shape)
                 # LQR control law.
-                data.ctrl = ctrl0 - K @ dx
-            except:
-                print(".", end="")
+                desired_torques = ctrl0 - K @ dx
+                positions = torques_to_positions(data.qpos, data.qvel, desired_torques)
+                data.ctrl = positions
+            except Exception as e:
+                print(e)
                 pass
 
             mujoco.mj_step(model, data)

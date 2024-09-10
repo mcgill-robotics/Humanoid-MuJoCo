@@ -16,6 +16,7 @@
     <body name="humanoid_world_link" pos="0 0 -0.375" quat="-0.7 0 0 0.7">
       <joint name="humanoid_free" type="free"/>
       <body name="torso" pos="0.1675 -0.005 0.135">
+         <inertial pos="0 0 0" mass="3.4308131130467148" euler="-0.0008201436182088129 -0.12382311655719636 1.5628008270149865" diaginertia="0.010527741038321506 0.009364184382386672 0.004851735924892816"/>
         <geom type="mesh"  rgba="0.898039 0.898039 0.898039 1" mesh="torso"/>
       </body>
       <body name="right_shoulder_roll_link" pos="0.31335 -0.0091897 0.17689" quat="0.707105 0.707107 -0.00096831 0.000968314">
