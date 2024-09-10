@@ -12,9 +12,13 @@
     <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="32" height="512"/>
     <hfield name="hfield" nrow="8" ncol="8" size="1 1 1 1"/>
   </asset>
-
-  <!-- <option iterations="1" ls_iterations="1" tolerance="1e-4" ls_tolerance="0.05"> </option> -->
   
+  <default>
+    <geom type="mesh" condim="1" friction=".7" solimp=".9 .99 .003" solref=".015 1" group="1"/>
+    <position forcelimited="true" forcerange="-1.5 1.5" kv="0.05" kp="2" />
+    <joint type="hinge" damping=".2" stiffness="1" armature=".01" solimplimit=".95 .99 1e-3" limited="true" solreflimit="4e-3 1"/>
+  </default>
+
   <include file="humanoid.xml"/>
 
   <contact>
@@ -49,7 +53,7 @@
     <geom name="Y_axis_ref" type="cylinder" rgba="0 1 0 0.5" size="0.025" fromto="-1 0 -.5 -1 0.5 -.5" contype="0" conaffinity="0"/>
     <geom name="Z_axis_ref" type="cylinder" rgba="1 0 0 0.5" size="0.025" fromto="-1 0 -.5 -1 0 0" contype="0" conaffinity="0"/>
 
-    <geom name="floor" pos="0 0 -0.7" type="hfield" hfield="hfield" material="grid" condim="3"/>
+    <geom name="floor" pos="0 0 -0.7" type="hfield" hfield="hfield" material="grid" condim="6"/>
     <camera name="track" mode="trackcom" pos="0 -2 0.6" xyaxes="1 0 0 0 1 2" target="torso" />
     <!-- <camera name="track" mode="targetbodycom" pos="0 -0.75 0" target="humanoid_world_link" /> -->
   </worldbody>
