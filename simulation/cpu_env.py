@@ -416,10 +416,10 @@ class CPUEnv(gym.Env):
         return self._get_obs(), {}
 
     def _get_torso_velocity(self):  # NOTE: in global reference frame (NWU)
-        return self.data.cvel[self.torso_idx][3:]
+        return self.data.qvel[:3]
 
     def _get_torso_angular_velocity(self):  # NOTE: in global reference frame (NWU)
-        return self.data.cvel[self.torso_idx][:3]
+        return self.data.qvel[3:6]
 
     def _get_joint_torques(self):
         return (
@@ -488,10 +488,12 @@ class CPUEnv(gym.Env):
         )
 
         torso_quat = self._get_torso_quaternion()
-        local_ang_vel = (
-            inverseRotateVectors(torso_quat, self._get_torso_angular_velocity())
-            + ang_vel_noise
-        )
+        # local_ang_vel = (
+        #     inverseRotateVectors(torso_quat, self._get_torso_angular_velocity())
+        #     + ang_vel_noise
+        # )
+
+        local_ang_vel = self._get_torso_angular_velocity() + ang_vel_noise
 
         # local velocity
         # local_vel_noise = (
@@ -667,7 +669,7 @@ class CPUEnv(gym.Env):
         # actions should be inputted to the environment in the -1 to 1 range, and they are mapped here to -pi/2 and pi/2 accordingly
         # action_to_take = jp.clip(jp.array(action_to_take), -1, 1)
         # action_to_take = action_to_take * (jp.pi / 2)
-        self.data.ctrl = action_to_take[self.joint_actuator_idx]
+        self.data.ctrl = action_to_take
         self.previous_action = self.latest_action
         self.latest_action = action_to_take
 
