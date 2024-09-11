@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./mujoco_mpc:/mujoco_mpc
+    command: ["bash", "-c", "while true; do sleep 1000; done"]
