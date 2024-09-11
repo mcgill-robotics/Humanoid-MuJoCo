@@ -15,7 +15,7 @@
   
   <default>
     <geom type="mesh" condim="6" friction="0.6" solimp=".9 .99 .003" solref=".015 1" group="1"/>
-    <motor gear="40" forcelimited="true" forcerange="-1.5 1.5"/>
+    <motor gear="40" forcelimited="true" forcerange="-1.3 1.3"/>
     <joint type="hinge" damping=".2" stiffness="1" armature=".01" solimplimit=".95 .99 1e-3" limited="true" solreflimit="4e-3 1"/>
   </default>
 
