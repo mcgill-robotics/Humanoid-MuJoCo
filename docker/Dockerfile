@@ -37,9 +37,7 @@ RUN git clone https://github.com/google-deepmind/mujoco_mpc && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja -DCMAKE_C_COMPILER:STRING=clang-12 -DCMAKE_CXX_COMPILER:STRING=clang++-12 -DMJPC_BUILD_GRPC_SERVICE:BOOL=ON && \
-    cmake --build . --config=Release && \
-    cd python && \
-    python setup.py install
+    cmake --build . --config=Release
 
 RUN apt-get autoremove -y
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
