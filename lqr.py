@@ -112,9 +112,16 @@ def control(model, data, Q, qpos0, ctrl0):
 
 
 def calculate_initial_conditions(model, data):
+    TARGET_Z_POS = data.qpos[2] + find_ideal_distance_to_ground()
+    TARGET_QUAT = np.array([0.7, 0.0, 0.0, -0.7])
+    TARGET_JOINT_POSITIONS = np.zeros(len(JOINT_NAMES))
     mujoco.mj_resetDataKeyframe(model, data, 1)
     mujoco.mj_forward(model, data)
     data.qacc = 0
+    # update mujoco state with observations
+    data.qpos[3:7] = TARGET_QUAT
+    data.qpos[JOINT_QPOS_IDX] = TARGET_JOINT_POSITIONS
+    data.qpos[2] = TARGET_Z_POS
     qpos0 = data.qpos.copy()
     mujoco.mj_inverse(model, data)
     qfrc0 = data.qfrc_inverse.copy()
@@ -159,7 +166,6 @@ if __name__ == "__main__":
         print("Trial", N)
         # Set the initial state and control.
         mujoco.mj_resetData(model, data)
-        data.qpos = qpos0
         while data.time < MAX_SIM_TIME:
             score += 1
             try:

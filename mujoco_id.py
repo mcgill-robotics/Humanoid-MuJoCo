@@ -87,14 +87,18 @@ def calculate_q_matrix(model, data, qpos0):
 
 
 def calculate_initial_conditions(model, data):
-    TARGET_Z_POS = -0.38
-    TARGET_QUAT = np.array([1.0, 0.0, 0.0, 0.0])
-    TARGET_ANG_VEL = np.zeros(3)
+    TARGET_Z_POS = data.qpos[2] + find_ideal_distance_to_ground(
+        model, data, data.qpos[JOINT_QPOS_IDX], data.qpos[3:7]
+    )
+    TARGET_QUAT = np.array([0.924, 0.0, 0.0, -0.383])
     TARGET_JOINT_POSITIONS = np.zeros(len(JOINT_NAMES))
-    TARGET_JOINT_VELOCITIES = np.zeros(len(JOINT_NAMES))
     mujoco.mj_resetDataKeyframe(model, data, 1)
     mujoco.mj_forward(model, data)
     data.qacc = 0
+    # update mujoco state with observations
+    data.qpos[3:7] = TARGET_QUAT
+    data.qpos[JOINT_QPOS_IDX] = TARGET_JOINT_POSITIONS
+    data.qpos[2] = TARGET_Z_POS
     qpos0 = data.qpos.copy()
     mujoco.mj_inverse(model, data)
     qfrc0 = data.qfrc_inverse.copy()
@@ -172,6 +176,7 @@ def control(state, mj_model, mj_data, Q, qpos0, ctrl0):
 
 
 if __name__ == "__main__":
+    MAX_SIM_TIME = 10
     # SETUP MUJOCO DATA
     mj_model = mujoco.MjModel.from_xml_path(SIM_XML_PATH)
     renderer = mujoco.Renderer(mj_model, 720, 1080)
@@ -196,13 +201,13 @@ if __name__ == "__main__":
     # ----------- SETUP ENVIRONMENT -----------
     env = CPUEnv(
         xml_path=SIM_XML_PATH,
-        randomization_factor=0.1,
+        randomization_factor=0,
         enable_rendering=True,
     )
     done = False
     torque_ctrl = np.zeros(12)
     env.reset()
-    while env.data.time < 2:
+    while env.data.time < MAX_SIM_TIME:
         obs, _, done, _, _ = env.step(torque_ctrl)
         env.render("human")
 
