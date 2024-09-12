@@ -1,12 +1,16 @@
+version: '3.8'
 services:
-  mujoco-id:
+  humanoid-mpc:
     environment:
       - DISPLAY=novnc:0.0 
       - XLA_FLAGS=--xla_gpu_triton_gemm_any=true
       - MUJOCO_GL=egl
+    image: "mcgillrobotics/humanoid-mpc:id"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     volumes:
-      - ../.:/root/Humanoid-MuJoCo-Inverse-Dynamics
-    image: "mcgillrobotics/mujoco:id"
+      - ../.:/Humanoid-MPC
     command: bash -c "tail -f /dev/null"
     deploy:
       resources:
@@ -15,6 +19,7 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+
 
   novnc:
     image: theasp/novnc:latest
