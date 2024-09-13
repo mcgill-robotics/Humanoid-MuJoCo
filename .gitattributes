@@ -1,2 +1,3 @@
 *.pth binary
 *.pkl binary
+* text=auto eol=lf
