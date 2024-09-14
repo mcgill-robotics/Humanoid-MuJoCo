@@ -68,7 +68,7 @@
             <joint range="0 1.5708" name="right_knee" pos="0 0 0" axis="0 0 1"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
             <geom name="pressure_geom_L" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="left_knee_pitch_link" friction="0.8 0.02 0.01"/>
-            <site name="right_bottom_foot" pos="0 -0.15 0" size=".027"/>
+            <site name="right_bottom_foot" pos="0 -0.15 0" size=".027" rgba="0 0 0 0"/>
           </body>
         </body>
       </body>
@@ -87,7 +87,7 @@
             <joint range="0 1.5708" name="left_knee" pos="0 0 0" axis="0 0 1"/>
                       <!-- <geom type="sphere" rgba="1 0 0 0.5" size="0.025"/> -->
             <geom name="pressure_geom_R" type="mesh" pos="0 -0.075 0" rgba="0.792157 0.819608 0.933333 1" mesh="right_knee_pitch_link" friction="0.8 0.02 0.01"/>
-            <site name="left_bottom_foot" pos="0 -0.15 0" size=".027"/>
+            <site name="left_bottom_foot" pos="0 -0.15 0" size=".027" rgba="0 0 0 0"/>
           </body>
         </body>
       </body>
