@@ -3,3 +3,5 @@ MUJOCO_LOG.TXT
 simulation/*.pyc
 venv
 slurm/*.txt
+
+simulation.egg-info/*
