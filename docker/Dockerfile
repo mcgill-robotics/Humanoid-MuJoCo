@@ -31,7 +31,10 @@ RUN apt-get install nvidia-cuda-toolkit; exit 0
 RUN apt --fix-broken install; exit 0
 
 RUN pip3 install --upgrade "jax[cuda12]"
+RUN apt-get update && apt-get install -y cmake libgl1-mesa-dev libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev ninja-build zlib1g-dev clang-12
 
-RUN apt-get autoremove -y
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN rm -rf /root/.cache/pip
+RUN echo "alias build='bash /Humanoid-MPC/build.sh'" >> ~/.bashrc
+
+WORKDIR /Humanoid-MPC
+
+ENV PATH $PATH:/Humanoid-MPC/mujoco_mpc/build/bin/

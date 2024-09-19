@@ -1,12 +1,16 @@
+version: '3.8'
 services:
-  mujoco:
+  humanoid-mpc:
     environment:
       - DISPLAY=novnc:0.0 
       - XLA_FLAGS=--xla_gpu_triton_gemm_any=true
       - MUJOCO_GL=egl
+    image: "mcgillrobotics/humanoid-mpc:id"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     volumes:
-      - ../.:/root/Humanoid-MuJoCo
-    image: "mcgillrobotics/mujoco:latest"
+      - ../.:/Humanoid-MPC
     command: bash -c "tail -f /dev/null"
     deploy:
       resources:
@@ -16,11 +20,14 @@ services:
               count: 1
               capabilities: [gpu]
 
+
   novnc:
     image: theasp/novnc:latest
     ports:
       - "8080:8080"
     environment:
       - RUN_XTERM=no
-      - DISPLAY_WIDTH=6000
-      - DISPLAY_HEIGHT=3000 #need to adjust based off height and width of your screen, going for bigger values is typically recommended.
+      - DISPLAY_WIDTH=1920
+      - DISPLAY_HEIGHT=1080 #need to adjust based off height and width of your screen, going for bigger values is typically recommended.
+      - FRAMERATE=60
+      - ENABLE_WEBSOCKET_COMPRESSION=true

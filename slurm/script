@@ -29,7 +29,7 @@ CURRENT_DIR=$(pwd)
 while true; do
     sleep 30
     echo " > Copying data to home folder"
-    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/data/* $CURRENT_DIR/data/ 2> /dev/null
+    cp -rf $SLURM_TMPDIR/Humanoid-MuJoCo/rl/data/* $CURRENT_DIR/rl/data/ 2> /dev/null
 done &
 
-cd $SLURM_TMPDIR/Humanoid-MuJoCo && python train.py --silent
+cd $SLURM_TMPDIR/Humanoid-MuJoCo/rl && python train.py --silent

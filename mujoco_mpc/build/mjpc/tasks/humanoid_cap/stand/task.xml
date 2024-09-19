@@ -1,0 +1,36 @@
+<mujoco model="Humanoid_Cap">
+  <include file="../../common.xml"/>
+
+  <include file="../assets/world.xml" />
+  <size memory="400K"/>
+
+  <custom>
+    <numeric name="agent_planner" data="0" />
+    <numeric name="agent_horizon" data="0.35" />
+    <numeric name="agent_timestep" data="0.015" />
+    <numeric name="sampling_spline_points" data="3" />
+    <numeric name="sampling_exploration" data="0.05" />
+    <numeric name="gradient_spline_points" data="5" />
+    <numeric name="residual_Height Goal" data="1.4 0.0 1.5" />
+  </custom>
+
+  <sensor>
+    <user name="Height" dim="1" user="6 100.0 0.0 100.0 0.1" />
+    <user name="Balance" dim="1" user="6 50.0 0.0 100.0 0.1" />
+    <user name="CoM Vel." dim="2" user="0 10.0 0.0 100.0" />
+    <user name="Joint Vel." dim="12" user="0 0.01 0.0 0.1" />
+    <user name="Control" dim="12" user="3 0.025 0.0 0.1 0.3" />
+    <framepos name="trace0" objtype="body" objname="torso"/>
+    <framepos name="torso_position" objtype="body" objname="torso"/>
+    <framepos name="head_position" objtype="body" objname="torso"/>
+    <framequat name="head_orientation" objtype="body" objname="torso"/>
+    <framezaxis name="torso_zaxis" objtype="body" objname="torso"/>
+    <subtreelinvel name="torso_subtreelinvel" body="humanoid_world_link"/>
+    <subtreecom name="torso_subtreecom" body="torso"/>
+    <framexaxis name="torso_forward" objtype="body" objname="torso" />
+    <framepos name="right_bottom_foot" objtype="site" objname="right_bottom_foot"/>
+    <framepos name="left_bottom_foot" objtype="site" objname="left_bottom_foot"/>
+    <subtreelinvel name="right_bottom_foot_vel" body="right_knee_pitch_link"/>
+    <subtreelinvel name="left_bottom_foot_vel" body="left_knee_pitch_link"/>
+  </sensor>
+</mujoco>

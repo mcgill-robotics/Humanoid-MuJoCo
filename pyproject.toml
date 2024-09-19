@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simulation"
+version = "0.1.0"
+description = "Simulation package"
+
+[tool.setuptools.packages.find]
+include = ["simulation"]

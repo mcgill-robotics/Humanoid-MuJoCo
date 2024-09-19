@@ -18,14 +18,14 @@ MAX_EXTERNAL_FORCE_MAGNITUDE = 15  # N
 MIN_EXTERNAL_FORCE_INTERVAL = 1  # s
 MAX_EXTERNAL_FORCE_INTERVAL = 3  # s
 # INITIAL OFFSETS
-JOINT_INITIAL_OFFSET_MIN = 0.05  # rad
+JOINT_INITIAL_OFFSET_MIN = 0.0  # rad
 JOINT_INITIAL_OFFSET_MAX = 0.2  # rad
 # POSITIONAL INITIAL OFFSETS
 XY_POSITION_INITIAL_OFFSET_MIN = 0.0  # m
 XY_POSITION_INITIAL_OFFSET_MAX = 0.0  # m
 Z_POSITION_INITIAL_OFFSET_MIN = 0.0  # m
 Z_POSITION_INITIAL_OFFSET_MAX = 0.1  # m
-QUAT_INITIAL_OFFSET_MIN = 0.01
+QUAT_INITIAL_OFFSET_MIN = 0.0
 QUAT_INITIAL_OFFSET_MAX = 0.1
 # JOINT PROPERTIES
 JOINT_ARMATURE_MAX_CHANGE = 0.0005  # kg m2
@@ -48,7 +48,7 @@ MIN_FLOOR_BUMP_HEIGHT = 0.0
 MAX_FLOOR_BUMP_HEIGHT = 0.1
 
 # SIMULATION PARAMETERS
-CONTROL_FREQUENCY = 50  # Hz
+CONTROL_FREQUENCY = 500  # Hz
 TIMESTEP = 0.002
 MAX_SIM_TIME = -1  # let the simulation run indefinitely
 MAX_SIM_TIME_STANDUP = 10.0  # s
@@ -113,6 +113,20 @@ PRESSURE_GEOM_NAMES = [
     # "pressure_geom_RRF",
     # "pressure_geom_RLF",
 ]
-TORSO_BODY_NAME = "humanoid"
+JOINT_LIMITS = {
+    "right_shoulder_pitch": [-1.5708, -1.5708],
+    "right_shoulder_roll": [-1.5708, 0],
+    "right_elbow": [-1.5708, 0],
+    "left_shoulder_pitch": [-1.5708, -1.5708],
+    "left_shoulder_roll": [0, -1.5708],
+    "left_elbow": [-1.5708, 0],
+    "left_hip_roll": [-1.5708, -1.5708],
+    "left_hip_pitch": [-1.5708, -1.5708],
+    "left_knee": [0, -1.5708],
+    "right_hip_roll": [-1.5708, -1.5708],
+    "right_hip_pitch": [-1.5708, -1.5708],
+    "right_knee": [0, -1.5708],
+}
+TORSO_BODY_NAME = "humanoid_world_link"
 FREE_JOINT_NAME = "humanoid_free"
 NON_ROBOT_GEOMS = ["floor", "X_axis_ref", "Y_axis_ref", "Z_axis_ref"]
