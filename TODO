@@ -1,4 +1,3 @@
-- remove duplicate copies of .xml files
 - test if position control motors work
 - fix planning for standing
 - implement task with approximated state space
