@@ -1,4 +1,3 @@
-- test if position control motors work
 - fix planning for standing
 - implement task with approximated state space
 - try getting it to test the controls in the CPUEnv sim
