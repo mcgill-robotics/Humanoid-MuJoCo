@@ -1,7 +1,7 @@
 <mujoco model="Humanoid_Cap">
   <include file="../../common.xml"/>
 
-  <include file="../../../../../simulation/assets/world.xml" />
+  <include file="../../../../../../simulation/assets/world.xml" />
   <size memory="400K"/>
 
   <custom>

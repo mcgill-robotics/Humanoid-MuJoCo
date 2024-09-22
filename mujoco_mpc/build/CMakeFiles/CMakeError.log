@@ -1,11 +1,11 @@
 Performing C SOURCE FILE Test SUPPORTS_LLD failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_36033 && [1/2] Building C object CMakeFiles/cmTC_36033.dir/src.c.o
+Run Build Command(s):/usr/bin/ninja cmTC_2e686 && [1/2] Building C object CMakeFiles/cmTC_2e686.dir/src.c.o
 clang: warning: argument unused during compilation: '-fuse-ld=lld' [-Wunused-command-line-argument]
-[2/2] Linking C executable cmTC_36033
-FAILED: cmTC_36033 
-: && /usr/bin/clang-12 -fuse-ld=lld  CMakeFiles/cmTC_36033.dir/src.c.o -o cmTC_36033   && :
+[2/2] Linking C executable cmTC_2e686
+FAILED: cmTC_2e686 
+: && /usr/bin/clang-12 -fuse-ld=lld  CMakeFiles/cmTC_2e686.dir/src.c.o -o cmTC_2e686   && :
 clang: error: invalid linker name in argument '-fuse-ld=lld'
 ninja: build stopped: subcommand failed.
 
@@ -15,11 +15,11 @@ int main() {}
 Determining if the function res_servicename exists failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_3b5e8 && [1/2] Building C object CMakeFiles/cmTC_3b5e8.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_3b5e8
-FAILED: cmTC_3b5e8 
-: && /usr/bin/clang-12 -DCHECK_FUNCTION_EXISTS=res_servicename  CMakeFiles/cmTC_3b5e8.dir/CheckFunctionExists.c.o -o cmTC_3b5e8   && :
-/usr/bin/ld: CMakeFiles/cmTC_3b5e8.dir/CheckFunctionExists.c.o: in function `main':
+Run Build Command(s):/usr/bin/ninja cmTC_41567 && [1/2] Building C object CMakeFiles/cmTC_41567.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_41567
+FAILED: cmTC_41567 
+: && /usr/bin/clang-12 -DCHECK_FUNCTION_EXISTS=res_servicename  CMakeFiles/cmTC_41567.dir/CheckFunctionExists.c.o -o cmTC_41567   && :
+/usr/bin/ld: CMakeFiles/cmTC_41567.dir/CheckFunctionExists.c.o: in function `main':
 CheckFunctionExists.c:(.text+0x17): undefined reference to `res_servicename'
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ninja: build stopped: subcommand failed.
@@ -29,11 +29,11 @@ ninja: build stopped: subcommand failed.
 Determining if the function res_servicename exists in the resolv failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_834fd && [1/2] Building C object CMakeFiles/cmTC_834fd.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_834fd
-FAILED: cmTC_834fd 
-: && /usr/bin/clang-12 -DCHECK_FUNCTION_EXISTS=res_servicename  CMakeFiles/cmTC_834fd.dir/CheckFunctionExists.c.o -o cmTC_834fd  -lresolv && :
-/usr/bin/ld: CMakeFiles/cmTC_834fd.dir/CheckFunctionExists.c.o: in function `main':
+Run Build Command(s):/usr/bin/ninja cmTC_b29e4 && [1/2] Building C object CMakeFiles/cmTC_b29e4.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_b29e4
+FAILED: cmTC_b29e4 
+: && /usr/bin/clang-12 -DCHECK_FUNCTION_EXISTS=res_servicename  CMakeFiles/cmTC_b29e4.dir/CheckFunctionExists.c.o -o cmTC_b29e4  -lresolv && :
+/usr/bin/ld: CMakeFiles/cmTC_b29e4.dir/CheckFunctionExists.c.o: in function `main':
 CheckFunctionExists.c:(.text+0x17): undefined reference to `res_servicename'
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ninja: build stopped: subcommand failed.
@@ -43,9 +43,9 @@ ninja: build stopped: subcommand failed.
 Determining if files sys/sockio.h exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_eb556 && [1/2] Building C object CMakeFiles/cmTC_eb556.dir/HAVE_SYS_SOCKIO_H.c.o
-FAILED: CMakeFiles/cmTC_eb556.dir/HAVE_SYS_SOCKIO_H.c.o 
-/usr/bin/clang-12   -fPIE -MD -MT CMakeFiles/cmTC_eb556.dir/HAVE_SYS_SOCKIO_H.c.o -MF CMakeFiles/cmTC_eb556.dir/HAVE_SYS_SOCKIO_H.c.o.d -o CMakeFiles/cmTC_eb556.dir/HAVE_SYS_SOCKIO_H.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_SYS_SOCKIO_H.c
+Run Build Command(s):/usr/bin/ninja cmTC_071cb && [1/2] Building C object CMakeFiles/cmTC_071cb.dir/HAVE_SYS_SOCKIO_H.c.o
+FAILED: CMakeFiles/cmTC_071cb.dir/HAVE_SYS_SOCKIO_H.c.o 
+/usr/bin/clang-12   -fPIE -MD -MT CMakeFiles/cmTC_071cb.dir/HAVE_SYS_SOCKIO_H.c.o -MF CMakeFiles/cmTC_071cb.dir/HAVE_SYS_SOCKIO_H.c.o.d -o CMakeFiles/cmTC_071cb.dir/HAVE_SYS_SOCKIO_H.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_SYS_SOCKIO_H.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_SYS_SOCKIO_H.c:2:10: fatal error: 'sys/sockio.h' file not found
 #include <sys/sockio.h>
          ^~~~~~~~~~~~~~
@@ -63,9 +63,9 @@ int main(void){return 0;}
 Determining if files socket.h exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_31a88 && [1/2] Building C object CMakeFiles/cmTC_31a88.dir/HAVE_SOCKET_H.c.o
-FAILED: CMakeFiles/cmTC_31a88.dir/HAVE_SOCKET_H.c.o 
-/usr/bin/clang-12   -fPIE -MD -MT CMakeFiles/cmTC_31a88.dir/HAVE_SOCKET_H.c.o -MF CMakeFiles/cmTC_31a88.dir/HAVE_SOCKET_H.c.o.d -o CMakeFiles/cmTC_31a88.dir/HAVE_SOCKET_H.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_SOCKET_H.c
+Run Build Command(s):/usr/bin/ninja cmTC_12a70 && [1/2] Building C object CMakeFiles/cmTC_12a70.dir/HAVE_SOCKET_H.c.o
+FAILED: CMakeFiles/cmTC_12a70.dir/HAVE_SOCKET_H.c.o 
+/usr/bin/clang-12   -fPIE -MD -MT CMakeFiles/cmTC_12a70.dir/HAVE_SOCKET_H.c.o -MF CMakeFiles/cmTC_12a70.dir/HAVE_SOCKET_H.c.o.d -o CMakeFiles/cmTC_12a70.dir/HAVE_SOCKET_H.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_SOCKET_H.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_SOCKET_H.c:2:10: fatal error: 'socket.h' file not found
 #include <socket.h>
          ^~~~~~~~~~
@@ -83,9 +83,9 @@ int main(void){return 0;}
 Determining if files stropts.h exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_fe8e7 && [1/2] Building C object CMakeFiles/cmTC_fe8e7.dir/HAVE_STROPTS_H.c.o
-FAILED: CMakeFiles/cmTC_fe8e7.dir/HAVE_STROPTS_H.c.o 
-/usr/bin/clang-12   -fPIE -MD -MT CMakeFiles/cmTC_fe8e7.dir/HAVE_STROPTS_H.c.o -MF CMakeFiles/cmTC_fe8e7.dir/HAVE_STROPTS_H.c.o.d -o CMakeFiles/cmTC_fe8e7.dir/HAVE_STROPTS_H.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_STROPTS_H.c
+Run Build Command(s):/usr/bin/ninja cmTC_9704d && [1/2] Building C object CMakeFiles/cmTC_9704d.dir/HAVE_STROPTS_H.c.o
+FAILED: CMakeFiles/cmTC_9704d.dir/HAVE_STROPTS_H.c.o 
+/usr/bin/clang-12   -fPIE -MD -MT CMakeFiles/cmTC_9704d.dir/HAVE_STROPTS_H.c.o -MF CMakeFiles/cmTC_9704d.dir/HAVE_STROPTS_H.c.o.d -o CMakeFiles/cmTC_9704d.dir/HAVE_STROPTS_H.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_STROPTS_H.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CheckIncludeFiles/HAVE_STROPTS_H.c:2:10: fatal error: 'stropts.h' file not found
 #include <stropts.h>
          ^~~~~~~~~~~
@@ -103,9 +103,9 @@ int main(void){return 0;}
 Performing C SOURCE FILE Test HAVE_TYPE_SOCKET failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_4e195 && [1/2] Building C object CMakeFiles/cmTC_4e195.dir/src.c.o
-FAILED: CMakeFiles/cmTC_4e195.dir/src.c.o 
-/usr/bin/clang-12 -DHAVE_TYPE_SOCKET -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -std=c11 -MD -MT CMakeFiles/cmTC_4e195.dir/src.c.o -MF CMakeFiles/cmTC_4e195.dir/src.c.o.d -o CMakeFiles/cmTC_4e195.dir/src.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/src.c
+Run Build Command(s):/usr/bin/ninja cmTC_26191 && [1/2] Building C object CMakeFiles/cmTC_26191.dir/src.c.o
+FAILED: CMakeFiles/cmTC_26191.dir/src.c.o 
+/usr/bin/clang-12 -DHAVE_TYPE_SOCKET -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -std=c11 -MD -MT CMakeFiles/cmTC_26191.dir/src.c.o -MF CMakeFiles/cmTC_26191.dir/src.c.o.d -o CMakeFiles/cmTC_26191.dir/src.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/src.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/src.c:26:4: error: use of undeclared identifier 'SOCKET'
                         SOCKET var_exists;
                         ^
@@ -150,9 +150,9 @@ Source file was:
 Determining if the SO_NONBLOCK exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_eff20 && [1/2] Building C object CMakeFiles/cmTC_eff20.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_eff20.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_eff20.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_eff20.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_eff20.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_bf695 && [1/2] Building C object CMakeFiles/cmTC_bf695.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_bf695.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_bf695.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_bf695.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_bf695.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'SO_NONBLOCK'
   return ((int*)(&SO_NONBLOCK))[argc];
                   ^
@@ -196,9 +196,9 @@ int main(int argc, char** argv)
 Determining if the bitncmp exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_c7020 && [1/2] Building C object CMakeFiles/cmTC_c7020.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_c7020.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_c7020.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_c7020.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_c7020.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_b653f && [1/2] Building C object CMakeFiles/cmTC_b653f.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_b653f.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_b653f.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_b653f.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_b653f.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'bitncmp'
   return ((int*)(&bitncmp))[argc];
                   ^
@@ -242,9 +242,9 @@ int main(int argc, char** argv)
 Determining if the closesocket exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_6232b && [1/2] Building C object CMakeFiles/cmTC_6232b.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_6232b.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_6232b.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_6232b.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_6232b.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_810ce && [1/2] Building C object CMakeFiles/cmTC_810ce.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_810ce.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_810ce.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_810ce.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_810ce.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'closesocket'
   return ((int*)(&closesocket))[argc];
                   ^
@@ -288,9 +288,9 @@ int main(int argc, char** argv)
 Determining if the CloseSocket exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_7d7c0 && [1/2] Building C object CMakeFiles/cmTC_7d7c0.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_7d7c0.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_7d7c0.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_7d7c0.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_7d7c0.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_9da51 && [1/2] Building C object CMakeFiles/cmTC_9da51.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_9da51.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_9da51.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_9da51.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_9da51.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'CloseSocket'
   return ((int*)(&CloseSocket))[argc];
                   ^
@@ -334,11 +334,11 @@ int main(int argc, char** argv)
 Determining if the inet_net_pton exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_2c700 && [1/2] Building C object CMakeFiles/cmTC_2c700.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_2c700
-FAILED: cmTC_2c700 
-: && /usr/bin/clang-12  -rdynamic CMakeFiles/cmTC_2c700.dir/CheckSymbolExists.c.o -o cmTC_2c700   && :
-/usr/bin/ld: CMakeFiles/cmTC_2c700.dir/CheckSymbolExists.c.o: in function `main':
+Run Build Command(s):/usr/bin/ninja cmTC_1b92b && [1/2] Building C object CMakeFiles/cmTC_1b92b.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_1b92b
+FAILED: cmTC_1b92b 
+: && /usr/bin/clang-12  -rdynamic CMakeFiles/cmTC_1b92b.dir/CheckSymbolExists.c.o -o cmTC_1b92b   && :
+/usr/bin/ld: CMakeFiles/cmTC_1b92b.dir/CheckSymbolExists.c.o: in function `main':
 CheckSymbolExists.c:(.text+0x19): undefined reference to `inet_net_pton'
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ninja: build stopped: subcommand failed.
@@ -380,9 +380,9 @@ int main(int argc, char** argv)
 Determining if the ioctlsocket exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_96fda && [1/2] Building C object CMakeFiles/cmTC_96fda.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_96fda.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_96fda.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_96fda.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_96fda.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_728c9 && [1/2] Building C object CMakeFiles/cmTC_728c9.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_728c9.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_728c9.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_728c9.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_728c9.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'ioctlsocket'
   return ((int*)(&ioctlsocket))[argc];
                   ^
@@ -426,9 +426,9 @@ int main(int argc, char** argv)
 Determining if the IoctlSocket exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a4f8a && [1/2] Building C object CMakeFiles/cmTC_a4f8a.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_a4f8a.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_a4f8a.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_a4f8a.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_a4f8a.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_47a6a && [1/2] Building C object CMakeFiles/cmTC_47a6a.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_47a6a.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_47a6a.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_47a6a.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_47a6a.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'IoctlSocket'
   return ((int*)(&IoctlSocket))[argc];
                   ^
@@ -472,9 +472,9 @@ int main(int argc, char** argv)
 Determining if the strcmpi exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_37089 && [1/2] Building C object CMakeFiles/cmTC_37089.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_37089.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_37089.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_37089.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_37089.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_1a670 && [1/2] Building C object CMakeFiles/cmTC_1a670.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_1a670.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_1a670.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_1a670.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_1a670.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'strcmpi'; did you mean 'strcmp'?
   return ((int*)(&strcmpi))[argc];
                   ^~~~~~~
@@ -522,9 +522,9 @@ int main(int argc, char** argv)
 Determining if the stricmp exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_38862 && [1/2] Building C object CMakeFiles/cmTC_38862.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_38862.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_38862.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_38862.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_38862.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_55881 && [1/2] Building C object CMakeFiles/cmTC_55881.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_55881.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_55881.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_55881.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_55881.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'stricmp'
   return ((int*)(&stricmp))[argc];
                   ^
@@ -568,9 +568,9 @@ int main(int argc, char** argv)
 Determining if the strncmpi exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_84858 && [1/2] Building C object CMakeFiles/cmTC_84858.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_84858.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_84858.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_84858.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_84858.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_5a562 && [1/2] Building C object CMakeFiles/cmTC_5a562.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_5a562.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_5a562.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_5a562.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_5a562.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'strncmpi'; did you mean 'strncmp'?
   return ((int*)(&strncmpi))[argc];
                   ^~~~~~~~
@@ -618,9 +618,9 @@ int main(int argc, char** argv)
 Determining if the strnicmp exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_4e3bc && [1/2] Building C object CMakeFiles/cmTC_4e3bc.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_4e3bc.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_4e3bc.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_4e3bc.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_4e3bc.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_d9c68 && [1/2] Building C object CMakeFiles/cmTC_d9c68.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_d9c68.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_d9c68.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_d9c68.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_d9c68.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'strnicmp'; did you mean 'strncmp'?
   return ((int*)(&strnicmp))[argc];
                   ^~~~~~~~
@@ -668,9 +668,9 @@ int main(int argc, char** argv)
 Determining if the arc4random_buf exist failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_41c1f && [1/2] Building C object CMakeFiles/cmTC_41c1f.dir/CheckSymbolExists.c.o
-FAILED: CMakeFiles/cmTC_41c1f.dir/CheckSymbolExists.c.o 
-/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_41c1f.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_41c1f.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_41c1f.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Run Build Command(s):/usr/bin/ninja cmTC_d06ca && [1/2] Building C object CMakeFiles/cmTC_d06ca.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_d06ca.dir/CheckSymbolExists.c.o 
+/usr/bin/clang-12 -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE=600  -fPIE -MD -MT CMakeFiles/cmTC_d06ca.dir/CheckSymbolExists.c.o -MF CMakeFiles/cmTC_d06ca.dir/CheckSymbolExists.c.o.d -o CMakeFiles/cmTC_d06ca.dir/CheckSymbolExists.c.o -c /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
 /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:27:19: error: use of undeclared identifier 'arc4random_buf'
   return ((int*)(&arc4random_buf))[argc];
                   ^
@@ -714,11 +714,11 @@ int main(int argc, char** argv)
 Determining if the function __system_property_get exists failed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a2c59 && [1/2] Building C object CMakeFiles/cmTC_a2c59.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_a2c59
-FAILED: cmTC_a2c59 
-: && /usr/bin/clang-12 -DCHECK_FUNCTION_EXISTS=__system_property_get  CMakeFiles/cmTC_a2c59.dir/CheckFunctionExists.c.o -o cmTC_a2c59   && :
-/usr/bin/ld: CMakeFiles/cmTC_a2c59.dir/CheckFunctionExists.c.o: in function `main':
+Run Build Command(s):/usr/bin/ninja cmTC_7a5f0 && [1/2] Building C object CMakeFiles/cmTC_7a5f0.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_7a5f0
+FAILED: cmTC_7a5f0 
+: && /usr/bin/clang-12 -DCHECK_FUNCTION_EXISTS=__system_property_get  CMakeFiles/cmTC_7a5f0.dir/CheckFunctionExists.c.o -o cmTC_7a5f0   && :
+/usr/bin/ld: CMakeFiles/cmTC_7a5f0.dir/CheckFunctionExists.c.o: in function `main':
 CheckFunctionExists.c:(.text+0x17): undefined reference to `__system_property_get'
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ninja: build stopped: subcommand failed.

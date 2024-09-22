@@ -28,7 +28,7 @@ The CXX compiler identification is Clang, found in "/Humanoid-MPC/mujoco_mpc/bui
 Detecting C compiler ABI info compiled with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_974c6 && [1/2] Building C object CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o
+Run Build Command(s):/usr/bin/ninja cmTC_d2ac0 && [1/2] Building C object CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o
 Ubuntu clang version 12.0.1-19ubuntu3
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -39,7 +39,7 @@ Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/11
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
  (in-process)
- "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -o CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c
+ "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -o CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c
 clang -cc1 version 12.0.1 based upon LLVM 12.0.1 default target x86_64-pc-linux-gnu
 ignoring nonexistent directory "/include"
 #include "..." search starts here:
@@ -49,7 +49,7 @@ ignoring nonexistent directory "/include"
  /usr/include/x86_64-linux-gnu
  /usr/include
 End of search list.
-[2/2] Linking C executable cmTC_974c6
+[2/2] Linking C executable cmTC_d2ac0
 Ubuntu clang version 12.0.1-19ubuntu3
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -59,7 +59,7 @@ Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/11
 Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/11
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
- "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_974c6 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
+ "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_d2ac0 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
 
 
 
@@ -82,7 +82,7 @@ Parsed C implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
   ignore line: [Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command(s):/usr/bin/ninja cmTC_974c6 && [1/2] Building C object CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o]
+  ignore line: [Run Build Command(s):/usr/bin/ninja cmTC_d2ac0 && [1/2] Building C object CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o]
   ignore line: [Ubuntu clang version 12.0.1-19ubuntu3]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -95,7 +95,7 @@ Parsed C implicit link information from above output:
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
   ignore line: [ (in-process)]
-  ignore line: [ "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -o CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c]
+  ignore line: [ "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -faddrsig -o CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.22/Modules/CMakeCCompilerABI.c]
   ignore line: [clang -cc1 version 12.0.1 based upon LLVM 12.0.1 default target x86_64-pc-linux-gnu]
   ignore line: [ignoring nonexistent directory "/include"]
   ignore line: [#include "..." search starts here:]
@@ -105,7 +105,7 @@ Parsed C implicit link information from above output:
   ignore line: [ /usr/include/x86_64-linux-gnu]
   ignore line: [ /usr/include]
   ignore line: [End of search list.]
-  ignore line: [[2/2] Linking C executable cmTC_974c6]
+  ignore line: [[2/2] Linking C executable cmTC_d2ac0]
   ignore line: [Ubuntu clang version 12.0.1-19ubuntu3]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -117,7 +117,7 @@ Parsed C implicit link information from above output:
   ignore line: [@m64]
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
-  link line: [ "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_974c6 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
+  link line: [ "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_d2ac0 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
     arg [/usr/bin/ld] ==> ignore
     arg [--build-id] ==> ignore
     arg [--eh-frame-hdr] ==> ignore
@@ -126,7 +126,7 @@ Parsed C implicit link information from above output:
     arg [-dynamic-linker] ==> ignore
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_974c6] ==> ignore
+    arg [cmTC_d2ac0] ==> ignore
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o]
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o]
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o]
@@ -142,7 +142,7 @@ Parsed C implicit link information from above output:
     arg [-L/usr/lib/llvm-12/bin/../lib] ==> dir [/usr/lib/llvm-12/bin/../lib]
     arg [-L/lib] ==> dir [/lib]
     arg [-L/usr/lib] ==> dir [/usr/lib]
-    arg [CMakeFiles/cmTC_974c6.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [CMakeFiles/cmTC_d2ac0.dir/CMakeCCompilerABI.c.o] ==> ignore
     arg [-lgcc] ==> lib [gcc]
     arg [--as-needed] ==> ignore
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -180,7 +180,7 @@ Parsed C implicit link information from above output:
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_6bf72 && [1/2] Building CXX object CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o
+Run Build Command(s):/usr/bin/ninja cmTC_4b220 && [1/2] Building CXX object CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o
 Ubuntu clang version 12.0.1-19ubuntu3
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -191,7 +191,7 @@ Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/11
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
  (in-process)
- "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/backward -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -o CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp
+ "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/backward -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -o CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp
 clang -cc1 version 12.0.1 based upon LLVM 12.0.1 default target x86_64-pc-linux-gnu
 ignoring nonexistent directory "/include"
 ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11"
@@ -205,7 +205,7 @@ ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../.
  /usr/include/x86_64-linux-gnu
  /usr/include
 End of search list.
-[2/2] Linking CXX executable cmTC_6bf72
+[2/2] Linking CXX executable cmTC_4b220
 Ubuntu clang version 12.0.1-19ubuntu3
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -215,7 +215,7 @@ Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/11
 Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/11
 Candidate multilib: .;@m64
 Selected multilib: .;@m64
- "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_6bf72 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
+ "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_4b220 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
 
 
 
@@ -244,7 +244,7 @@ Parsed CXX implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
   ignore line: [Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command(s):/usr/bin/ninja cmTC_6bf72 && [1/2] Building CXX object CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [Run Build Command(s):/usr/bin/ninja cmTC_4b220 && [1/2] Building CXX object CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o]
   ignore line: [Ubuntu clang version 12.0.1-19ubuntu3]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -257,7 +257,7 @@ Parsed CXX implicit link information from above output:
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
   ignore line: [ (in-process)]
-  ignore line: [ "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/backward -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -o CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [ "/usr/lib/llvm-12/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -munwind-tables -target-cpu x86-64 -tune-cpu generic -fno-split-dwarf-inlining -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-12/lib/clang/12.0.1 -dependency-file CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/c++/11/backward -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-12/lib/clang/12.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -o CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o -x c++ /usr/share/cmake-3.22/Modules/CMakeCXXCompilerABI.cpp]
   ignore line: [clang -cc1 version 12.0.1 based upon LLVM 12.0.1 default target x86_64-pc-linux-gnu]
   ignore line: [ignoring nonexistent directory "/include"]
   ignore line: [ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../include/x86_64-linux-gnu/c++/11"]
@@ -271,7 +271,7 @@ Parsed CXX implicit link information from above output:
   ignore line: [ /usr/include/x86_64-linux-gnu]
   ignore line: [ /usr/include]
   ignore line: [End of search list.]
-  ignore line: [[2/2] Linking CXX executable cmTC_6bf72]
+  ignore line: [[2/2] Linking CXX executable cmTC_4b220]
   ignore line: [Ubuntu clang version 12.0.1-19ubuntu3]
   ignore line: [Target: x86_64-pc-linux-gnu]
   ignore line: [Thread model: posix]
@@ -283,7 +283,7 @@ Parsed CXX implicit link information from above output:
   ignore line: [@m64]
   ignore line: [Selected multilib: .]
   ignore line: [@m64]
-  link line: [ "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_6bf72 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
+  link line: [ "/usr/bin/ld" --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_4b220 /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../.. -L/usr/lib/llvm-12/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
     arg [/usr/bin/ld] ==> ignore
     arg [--build-id] ==> ignore
     arg [--eh-frame-hdr] ==> ignore
@@ -292,7 +292,7 @@ Parsed CXX implicit link information from above output:
     arg [-dynamic-linker] ==> ignore
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_6bf72] ==> ignore
+    arg [cmTC_4b220] ==> ignore
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crt1.o]
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o]
     arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o] ==> obj [/usr/bin/../lib/gcc/x86_64-linux-gnu/11/crtbegin.o]
@@ -308,7 +308,7 @@ Parsed CXX implicit link information from above output:
     arg [-L/usr/lib/llvm-12/bin/../lib] ==> dir [/usr/lib/llvm-12/bin/../lib]
     arg [-L/lib] ==> dir [/lib]
     arg [-L/usr/lib] ==> dir [/usr/lib]
-    arg [CMakeFiles/cmTC_6bf72.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [CMakeFiles/cmTC_4b220.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
     arg [-lstdc++] ==> lib [stdc++]
     arg [-lm] ==> lib [m]
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -344,8 +344,8 @@ Parsed CXX implicit link information from above output:
 Performing C SOURCE FILE Test CAN_BUILD_AVX succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_2b8e7 && [1/2] Building C object CMakeFiles/cmTC_2b8e7.dir/src.c.o
-[2/2] Linking C executable cmTC_2b8e7
+Run Build Command(s):/usr/bin/ninja cmTC_f0b98 && [1/2] Building C object CMakeFiles/cmTC_f0b98.dir/src.c.o
+[2/2] Linking C executable cmTC_f0b98
 
 
 Source file was:
@@ -359,9 +359,9 @@ Source file was:
 Performing C SOURCE FILE Test SUPPORTS_GOLD succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_beab3 && [1/2] Building C object CMakeFiles/cmTC_beab3.dir/src.c.o
+Run Build Command(s):/usr/bin/ninja cmTC_9737e && [1/2] Building C object CMakeFiles/cmTC_9737e.dir/src.c.o
 clang: warning: argument unused during compilation: '-fuse-ld=gold' [-Wunused-command-line-argument]
-[2/2] Linking C executable cmTC_beab3
+[2/2] Linking C executable cmTC_9737e
 
 
 Source file was:
@@ -369,9 +369,9 @@ int main() {}
 Performing C SOURCE FILE Test SUPPORTS_GC_SECTIONS succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_8a094 && [1/2] Building C object CMakeFiles/cmTC_8a094.dir/src.c.o
+Run Build Command(s):/usr/bin/ninja cmTC_6b357 && [1/2] Building C object CMakeFiles/cmTC_6b357.dir/src.c.o
 clang: warning: argument unused during compilation: '-fuse-ld=gold' [-Wunused-command-line-argument]
-[2/2] Linking C executable cmTC_8a094
+[2/2] Linking C executable cmTC_6b357
 
 
 Source file was:
@@ -379,16 +379,16 @@ int main() {}
 Determining if the include file pthread.h exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_d351d && [1/2] Building C object CMakeFiles/cmTC_d351d.dir/CheckIncludeFile.c.o
-[2/2] Linking C executable cmTC_d351d
+Run Build Command(s):/usr/bin/ninja cmTC_48989 && [1/2] Building C object CMakeFiles/cmTC_48989.dir/CheckIncludeFile.c.o
+[2/2] Linking C executable cmTC_48989
 
 
 
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_862b1 && [1/2] Building C object CMakeFiles/cmTC_862b1.dir/src.c.o
-[2/2] Linking C executable cmTC_862b1
+Run Build Command(s):/usr/bin/ninja cmTC_3ee4d && [1/2] Building C object CMakeFiles/cmTC_3ee4d.dir/src.c.o
+[2/2] Linking C executable cmTC_3ee4d
 
 
 Source file was:
@@ -415,48 +415,48 @@ int main(void)
 Determining if the include file sys/types.h exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f7ea2 && [1/2] Building C object CMakeFiles/cmTC_f7ea2.dir/CheckIncludeFile.c.o
-[2/2] Linking C executable cmTC_f7ea2
+Run Build Command(s):/usr/bin/ninja cmTC_fb0f0 && [1/2] Building C object CMakeFiles/cmTC_fb0f0.dir/CheckIncludeFile.c.o
+[2/2] Linking C executable cmTC_fb0f0
 
 
 
 Determining if the include file inttypes.h exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_d825e && [1/2] Building C object CMakeFiles/cmTC_d825e.dir/CheckIncludeFile.c.o
-[2/2] Linking C executable cmTC_d825e
+Run Build Command(s):/usr/bin/ninja cmTC_18c91 && [1/2] Building C object CMakeFiles/cmTC_18c91.dir/CheckIncludeFile.c.o
+[2/2] Linking C executable cmTC_18c91
 
 
 
 Determining if the include file stddef.h exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_01522 && [1/2] Building C object CMakeFiles/cmTC_01522.dir/CheckIncludeFile.c.o
-[2/2] Linking C executable cmTC_01522
+Run Build Command(s):/usr/bin/ninja cmTC_fd814 && [1/2] Building C object CMakeFiles/cmTC_fd814.dir/CheckIncludeFile.c.o
+[2/2] Linking C executable cmTC_fd814
 
 
 
 Determining if the include file stdint.h exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_bebcf && [1/2] Building C object CMakeFiles/cmTC_bebcf.dir/CheckIncludeFile.c.o
-[2/2] Linking C executable cmTC_bebcf
+Run Build Command(s):/usr/bin/ninja cmTC_5ca28 && [1/2] Building C object CMakeFiles/cmTC_5ca28.dir/CheckIncludeFile.c.o
+[2/2] Linking C executable cmTC_5ca28
 
 
 
 Determining size of off_t passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_b1885 && [1/2] Building C object CMakeFiles/cmTC_b1885.dir/SIZEOF_OFF_T.c.o
-[2/2] Linking C executable cmTC_b1885
+Run Build Command(s):/usr/bin/ninja cmTC_972d1 && [1/2] Building C object CMakeFiles/cmTC_972d1.dir/SIZEOF_OFF_T.c.o
+[2/2] Linking C executable cmTC_972d1
 
 
 
 Determining if the fseeko exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a3ea7 && [1/2] Building C object CMakeFiles/cmTC_a3ea7.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_a3ea7
+Run Build Command(s):/usr/bin/ninja cmTC_4a93a && [1/2] Building C object CMakeFiles/cmTC_4a93a.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_4a93a
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -476,8 +476,8 @@ int main(int argc, char** argv)
 Determining if the ftello exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_36965 && [1/2] Building C object CMakeFiles/cmTC_36965.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_36965
+Run Build Command(s):/usr/bin/ninja cmTC_e733f && [1/2] Building C object CMakeFiles/cmTC_e733f.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_e733f
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -497,8 +497,8 @@ int main(int argc, char** argv)
 Determining if the PRIdMAX exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_7cb89 && [1/2] Building C object CMakeFiles/cmTC_7cb89.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_7cb89
+Run Build Command(s):/usr/bin/ninja cmTC_3652f && [1/2] Building C object CMakeFiles/cmTC_3652f.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_3652f
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -518,8 +518,8 @@ int main(int argc, char** argv)
 Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_VISIBILITY succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_5fbaa && [1/2] Building CXX object CMakeFiles/cmTC_5fbaa.dir/src.cxx.o
-[2/2] Linking CXX executable cmTC_5fbaa
+Run Build Command(s):/usr/bin/ninja cmTC_bdf2e && [1/2] Building CXX object CMakeFiles/cmTC_bdf2e.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_bdf2e
 
 
 Source file was:
@@ -527,48 +527,48 @@ int main() { return 0; }
 Determining if the function XOpenDisplay exists in the /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_5905b && [1/2] Building C object CMakeFiles/cmTC_5905b.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_5905b
+Run Build Command(s):/usr/bin/ninja cmTC_f411d && [1/2] Building C object CMakeFiles/cmTC_f411d.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_f411d
 
 
 
 Determining if the function gethostbyname exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_cd4bd && [1/2] Building C object CMakeFiles/cmTC_cd4bd.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_cd4bd
+Run Build Command(s):/usr/bin/ninja cmTC_2e45e && [1/2] Building C object CMakeFiles/cmTC_2e45e.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_2e45e
 
 
 
 Determining if the function connect exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_04aa2 && [1/2] Building C object CMakeFiles/cmTC_04aa2.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_04aa2
+Run Build Command(s):/usr/bin/ninja cmTC_eaf5c && [1/2] Building C object CMakeFiles/cmTC_eaf5c.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_eaf5c
 
 
 
 Determining if the function remove exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a1175 && [1/2] Building C object CMakeFiles/cmTC_a1175.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_a1175
+Run Build Command(s):/usr/bin/ninja cmTC_133e3 && [1/2] Building C object CMakeFiles/cmTC_133e3.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_133e3
 
 
 
 Determining if the function shmat exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_45669 && [1/2] Building C object CMakeFiles/cmTC_45669.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_45669
+Run Build Command(s):/usr/bin/ninja cmTC_bb32f && [1/2] Building C object CMakeFiles/cmTC_bb32f.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_bb32f
 
 
 
 Performing C++ SOURCE FILE Test ABSL_INTERNAL_AT_LEAST_CXX17 succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_217a9 && [1/2] Building CXX object CMakeFiles/cmTC_217a9.dir/src.cxx.o
-[2/2] Linking CXX executable cmTC_217a9
+Run Build Command(s):/usr/bin/ninja cmTC_9e8f2 && [1/2] Building CXX object CMakeFiles/cmTC_9e8f2.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_9e8f2
 
 
 Source file was:
@@ -584,8 +584,8 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test HAVE_STDC_FORMAT_MACROS succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_1c3a4 && [1/2] Building CXX object CMakeFiles/cmTC_1c3a4.dir/src.cxx.o
-[2/2] Linking CXX executable cmTC_1c3a4
+Run Build Command(s):/usr/bin/ninja cmTC_b03c6 && [1/2] Building CXX object CMakeFiles/cmTC_b03c6.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_b03c6
 
 
 Source file was:
@@ -599,256 +599,256 @@ Source file was:
 Determining if the function gethostbyname exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_ebfc2 && [1/2] Building C object CMakeFiles/cmTC_ebfc2.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_ebfc2
+Run Build Command(s):/usr/bin/ninja cmTC_38877 && [1/2] Building C object CMakeFiles/cmTC_38877.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_38877
 
 
 
 Determining if the function socket exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_81750 && [1/2] Building C object CMakeFiles/cmTC_81750.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_81750
+Run Build Command(s):/usr/bin/ninja cmTC_3cf08 && [1/2] Building C object CMakeFiles/cmTC_3cf08.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_3cf08
 
 
 
 Determining if the function clock_gettime exists passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_72618 && [1/2] Building C object CMakeFiles/cmTC_72618.dir/CheckFunctionExists.c.o
-[2/2] Linking C executable cmTC_72618
+Run Build Command(s):/usr/bin/ninja cmTC_8d312 && [1/2] Building C object CMakeFiles/cmTC_8d312.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_8d312
 
 
 
 Determining if files sys/socket.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_494e4 && [1/2] Building C object CMakeFiles/cmTC_494e4.dir/HAVE_SYS_SOCKET_H.c.o
-[2/2] Linking C executable cmTC_494e4
+Run Build Command(s):/usr/bin/ninja cmTC_ce33b && [1/2] Building C object CMakeFiles/cmTC_ce33b.dir/HAVE_SYS_SOCKET_H.c.o
+[2/2] Linking C executable cmTC_ce33b
 
 
 
 Determining if files arpa/inet.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_8238f && [1/2] Building C object CMakeFiles/cmTC_8238f.dir/HAVE_ARPA_INET_H.c.o
-[2/2] Linking C executable cmTC_8238f
+Run Build Command(s):/usr/bin/ninja cmTC_4bdcf && [1/2] Building C object CMakeFiles/cmTC_4bdcf.dir/HAVE_ARPA_INET_H.c.o
+[2/2] Linking C executable cmTC_4bdcf
 
 
 
 Determining if files arpa/nameser_compat.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_c7f96 && [1/2] Building C object CMakeFiles/cmTC_c7f96.dir/HAVE_ARPA_NAMESER_COMPAT_H.c.o
-[2/2] Linking C executable cmTC_c7f96
+Run Build Command(s):/usr/bin/ninja cmTC_3cf24 && [1/2] Building C object CMakeFiles/cmTC_3cf24.dir/HAVE_ARPA_NAMESER_COMPAT_H.c.o
+[2/2] Linking C executable cmTC_3cf24
 
 
 
 Determining if files arpa/nameser.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_deaa9 && [1/2] Building C object CMakeFiles/cmTC_deaa9.dir/HAVE_ARPA_NAMESER_H.c.o
-[2/2] Linking C executable cmTC_deaa9
+Run Build Command(s):/usr/bin/ninja cmTC_48d15 && [1/2] Building C object CMakeFiles/cmTC_48d15.dir/HAVE_ARPA_NAMESER_H.c.o
+[2/2] Linking C executable cmTC_48d15
 
 
 
 Determining if files assert.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_5bc89 && [1/2] Building C object CMakeFiles/cmTC_5bc89.dir/HAVE_ASSERT_H.c.o
-[2/2] Linking C executable cmTC_5bc89
+Run Build Command(s):/usr/bin/ninja cmTC_b8781 && [1/2] Building C object CMakeFiles/cmTC_b8781.dir/HAVE_ASSERT_H.c.o
+[2/2] Linking C executable cmTC_b8781
 
 
 
 Determining if files errno.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_5a333 && [1/2] Building C object CMakeFiles/cmTC_5a333.dir/HAVE_ERRNO_H.c.o
-[2/2] Linking C executable cmTC_5a333
+Run Build Command(s):/usr/bin/ninja cmTC_af2f7 && [1/2] Building C object CMakeFiles/cmTC_af2f7.dir/HAVE_ERRNO_H.c.o
+[2/2] Linking C executable cmTC_af2f7
 
 
 
 Determining if files fcntl.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_51469 && [1/2] Building C object CMakeFiles/cmTC_51469.dir/HAVE_FCNTL_H.c.o
-[2/2] Linking C executable cmTC_51469
+Run Build Command(s):/usr/bin/ninja cmTC_7919a && [1/2] Building C object CMakeFiles/cmTC_7919a.dir/HAVE_FCNTL_H.c.o
+[2/2] Linking C executable cmTC_7919a
 
 
 
 Determining if files limits.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_733f6 && [1/2] Building C object CMakeFiles/cmTC_733f6.dir/HAVE_LIMITS_H.c.o
-[2/2] Linking C executable cmTC_733f6
+Run Build Command(s):/usr/bin/ninja cmTC_2a6e7 && [1/2] Building C object CMakeFiles/cmTC_2a6e7.dir/HAVE_LIMITS_H.c.o
+[2/2] Linking C executable cmTC_2a6e7
 
 
 
 Determining if files malloc.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_cc28a && [1/2] Building C object CMakeFiles/cmTC_cc28a.dir/HAVE_MALLOC_H.c.o
-[2/2] Linking C executable cmTC_cc28a
+Run Build Command(s):/usr/bin/ninja cmTC_014a2 && [1/2] Building C object CMakeFiles/cmTC_014a2.dir/HAVE_MALLOC_H.c.o
+[2/2] Linking C executable cmTC_014a2
 
 
 
 Determining if files memory.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_81040 && [1/2] Building C object CMakeFiles/cmTC_81040.dir/HAVE_MEMORY_H.c.o
-[2/2] Linking C executable cmTC_81040
+Run Build Command(s):/usr/bin/ninja cmTC_c161d && [1/2] Building C object CMakeFiles/cmTC_c161d.dir/HAVE_MEMORY_H.c.o
+[2/2] Linking C executable cmTC_c161d
 
 
 
 Determining if files netdb.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_5d779 && [1/2] Building C object CMakeFiles/cmTC_5d779.dir/HAVE_NETDB_H.c.o
-[2/2] Linking C executable cmTC_5d779
+Run Build Command(s):/usr/bin/ninja cmTC_e8e72 && [1/2] Building C object CMakeFiles/cmTC_e8e72.dir/HAVE_NETDB_H.c.o
+[2/2] Linking C executable cmTC_e8e72
 
 
 
 Determining if files netinet/in.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_8dc74 && [1/2] Building C object CMakeFiles/cmTC_8dc74.dir/HAVE_NETINET_IN_H.c.o
-[2/2] Linking C executable cmTC_8dc74
+Run Build Command(s):/usr/bin/ninja cmTC_2909d && [1/2] Building C object CMakeFiles/cmTC_2909d.dir/HAVE_NETINET_IN_H.c.o
+[2/2] Linking C executable cmTC_2909d
 
 
 
 Determining if files net/if.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a4658 && [1/2] Building C object CMakeFiles/cmTC_a4658.dir/HAVE_NET_IF_H.c.o
-[2/2] Linking C executable cmTC_a4658
+Run Build Command(s):/usr/bin/ninja cmTC_29233 && [1/2] Building C object CMakeFiles/cmTC_29233.dir/HAVE_NET_IF_H.c.o
+[2/2] Linking C executable cmTC_29233
 
 
 
 Determining if files signal.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_40db4 && [1/2] Building C object CMakeFiles/cmTC_40db4.dir/HAVE_SIGNAL_H.c.o
-[2/2] Linking C executable cmTC_40db4
+Run Build Command(s):/usr/bin/ninja cmTC_60501 && [1/2] Building C object CMakeFiles/cmTC_60501.dir/HAVE_SIGNAL_H.c.o
+[2/2] Linking C executable cmTC_60501
 
 
 
 Determining if files stdbool.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_26b8e && [1/2] Building C object CMakeFiles/cmTC_26b8e.dir/HAVE_STDBOOL_H.c.o
-[2/2] Linking C executable cmTC_26b8e
+Run Build Command(s):/usr/bin/ninja cmTC_6b5ab && [1/2] Building C object CMakeFiles/cmTC_6b5ab.dir/HAVE_STDBOOL_H.c.o
+[2/2] Linking C executable cmTC_6b5ab
 
 
 
 Determining if files stdlib.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_316e6 && [1/2] Building C object CMakeFiles/cmTC_316e6.dir/HAVE_STDLIB_H.c.o
-[2/2] Linking C executable cmTC_316e6
+Run Build Command(s):/usr/bin/ninja cmTC_9a2f6 && [1/2] Building C object CMakeFiles/cmTC_9a2f6.dir/HAVE_STDLIB_H.c.o
+[2/2] Linking C executable cmTC_9a2f6
 
 
 
 Determining if files strings.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_76778 && [1/2] Building C object CMakeFiles/cmTC_76778.dir/HAVE_STRINGS_H.c.o
-[2/2] Linking C executable cmTC_76778
+Run Build Command(s):/usr/bin/ninja cmTC_6b141 && [1/2] Building C object CMakeFiles/cmTC_6b141.dir/HAVE_STRINGS_H.c.o
+[2/2] Linking C executable cmTC_6b141
 
 
 
 Determining if files string.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_1a636 && [1/2] Building C object CMakeFiles/cmTC_1a636.dir/HAVE_STRING_H.c.o
-[2/2] Linking C executable cmTC_1a636
+Run Build Command(s):/usr/bin/ninja cmTC_f04ba && [1/2] Building C object CMakeFiles/cmTC_f04ba.dir/HAVE_STRING_H.c.o
+[2/2] Linking C executable cmTC_f04ba
 
 
 
 Determining if files sys/ioctl.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_3b229 && [1/2] Building C object CMakeFiles/cmTC_3b229.dir/HAVE_SYS_IOCTL_H.c.o
-[2/2] Linking C executable cmTC_3b229
+Run Build Command(s):/usr/bin/ninja cmTC_e786a && [1/2] Building C object CMakeFiles/cmTC_e786a.dir/HAVE_SYS_IOCTL_H.c.o
+[2/2] Linking C executable cmTC_e786a
 
 
 
 Determining if files sys/param.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a65a4 && [1/2] Building C object CMakeFiles/cmTC_a65a4.dir/HAVE_SYS_PARAM_H.c.o
-[2/2] Linking C executable cmTC_a65a4
+Run Build Command(s):/usr/bin/ninja cmTC_6ed40 && [1/2] Building C object CMakeFiles/cmTC_6ed40.dir/HAVE_SYS_PARAM_H.c.o
+[2/2] Linking C executable cmTC_6ed40
 
 
 
 Determining if files sys/select.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f1b1e && [1/2] Building C object CMakeFiles/cmTC_f1b1e.dir/HAVE_SYS_SELECT_H.c.o
-[2/2] Linking C executable cmTC_f1b1e
+Run Build Command(s):/usr/bin/ninja cmTC_dbf90 && [1/2] Building C object CMakeFiles/cmTC_dbf90.dir/HAVE_SYS_SELECT_H.c.o
+[2/2] Linking C executable cmTC_dbf90
 
 
 
 Determining if files sys/stat.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_ef859 && [1/2] Building C object CMakeFiles/cmTC_ef859.dir/HAVE_SYS_STAT_H.c.o
-[2/2] Linking C executable cmTC_ef859
+Run Build Command(s):/usr/bin/ninja cmTC_141c4 && [1/2] Building C object CMakeFiles/cmTC_141c4.dir/HAVE_SYS_STAT_H.c.o
+[2/2] Linking C executable cmTC_141c4
 
 
 
 Determining if files sys/time.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_86cf2 && [1/2] Building C object CMakeFiles/cmTC_86cf2.dir/HAVE_SYS_TIME_H.c.o
-[2/2] Linking C executable cmTC_86cf2
+Run Build Command(s):/usr/bin/ninja cmTC_41b5f && [1/2] Building C object CMakeFiles/cmTC_41b5f.dir/HAVE_SYS_TIME_H.c.o
+[2/2] Linking C executable cmTC_41b5f
 
 
 
 Determining if files sys/uio.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_cc7d0 && [1/2] Building C object CMakeFiles/cmTC_cc7d0.dir/HAVE_SYS_UIO_H.c.o
-[2/2] Linking C executable cmTC_cc7d0
+Run Build Command(s):/usr/bin/ninja cmTC_3e9fe && [1/2] Building C object CMakeFiles/cmTC_3e9fe.dir/HAVE_SYS_UIO_H.c.o
+[2/2] Linking C executable cmTC_3e9fe
 
 
 
 Determining if files time.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_b36f6 && [1/2] Building C object CMakeFiles/cmTC_b36f6.dir/HAVE_TIME_H.c.o
-[2/2] Linking C executable cmTC_b36f6
+Run Build Command(s):/usr/bin/ninja cmTC_df737 && [1/2] Building C object CMakeFiles/cmTC_df737.dir/HAVE_TIME_H.c.o
+[2/2] Linking C executable cmTC_df737
 
 
 
 Determining if files dlfcn.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_bc0f5 && [1/2] Building C object CMakeFiles/cmTC_bc0f5.dir/HAVE_DLFCN_H.c.o
-[2/2] Linking C executable cmTC_bc0f5
+Run Build Command(s):/usr/bin/ninja cmTC_35665 && [1/2] Building C object CMakeFiles/cmTC_35665.dir/HAVE_DLFCN_H.c.o
+[2/2] Linking C executable cmTC_35665
 
 
 
 Determining if files unistd.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a8b10 && [1/2] Building C object CMakeFiles/cmTC_a8b10.dir/HAVE_UNISTD_H.c.o
-[2/2] Linking C executable cmTC_a8b10
+Run Build Command(s):/usr/bin/ninja cmTC_62a75 && [1/2] Building C object CMakeFiles/cmTC_62a75.dir/HAVE_UNISTD_H.c.o
+[2/2] Linking C executable cmTC_62a75
 
 
 
 Determining if files sys/types.h;netinet/tcp.h exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_90bc4 && [1/2] Building C object CMakeFiles/cmTC_90bc4.dir/HAVE_NETINET_TCP_H.c.o
-[2/2] Linking C executable cmTC_90bc4
+Run Build Command(s):/usr/bin/ninja cmTC_40d1d && [1/2] Building C object CMakeFiles/cmTC_40d1d.dir/HAVE_NETINET_TCP_H.c.o
+[2/2] Linking C executable cmTC_40d1d
 
 
 
 Performing C SOURCE FILE Test HAVE_SOCKLEN_T succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_8c97c && [1/2] Building C object CMakeFiles/cmTC_8c97c.dir/src.c.o
-[2/2] Linking C executable cmTC_8c97c
+Run Build Command(s):/usr/bin/ninja cmTC_c478d && [1/2] Building C object CMakeFiles/cmTC_c478d.dir/src.c.o
+[2/2] Linking C executable cmTC_c478d
 
 
 Source file was:
@@ -885,8 +885,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_BOOL_T succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_35b28 && [1/2] Building C object CMakeFiles/cmTC_35b28.dir/src.c.o
-[2/2] Linking C executable cmTC_35b28
+Run Build Command(s):/usr/bin/ninja cmTC_c75b7 && [1/2] Building C object CMakeFiles/cmTC_c75b7.dir/src.c.o
+[2/2] Linking C executable cmTC_c75b7
 
 
 Source file was:
@@ -923,8 +923,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_SSIZE_T succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_c80f3 && [1/2] Building C object CMakeFiles/cmTC_c80f3.dir/src.c.o
-[2/2] Linking C executable cmTC_c80f3
+Run Build Command(s):/usr/bin/ninja cmTC_d9ef5 && [1/2] Building C object CMakeFiles/cmTC_d9ef5.dir/src.c.o
+[2/2] Linking C executable cmTC_d9ef5
 
 
 Source file was:
@@ -961,8 +961,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_LONGLONG succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_393e1 && [1/2] Building C object CMakeFiles/cmTC_393e1.dir/src.c.o
-[2/2] Linking C executable cmTC_393e1
+Run Build Command(s):/usr/bin/ninja cmTC_41388 && [1/2] Building C object CMakeFiles/cmTC_41388.dir/src.c.o
+[2/2] Linking C executable cmTC_41388
 
 
 Source file was:
@@ -999,8 +999,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_SIG_ATOMIC_T succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_080b8 && [1/2] Building C object CMakeFiles/cmTC_080b8.dir/src.c.o
-[2/2] Linking C executable cmTC_080b8
+Run Build Command(s):/usr/bin/ninja cmTC_cdbab && [1/2] Building C object CMakeFiles/cmTC_cdbab.dir/src.c.o
+[2/2] Linking C executable cmTC_cdbab
 
 
 Source file was:
@@ -1037,8 +1037,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_STRUCT_ADDRINFO succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_751fc && [1/2] Building C object CMakeFiles/cmTC_751fc.dir/src.c.o
-[2/2] Linking C executable cmTC_751fc
+Run Build Command(s):/usr/bin/ninja cmTC_bb508 && [1/2] Building C object CMakeFiles/cmTC_bb508.dir/src.c.o
+[2/2] Linking C executable cmTC_bb508
 
 
 Source file was:
@@ -1075,8 +1075,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_STRUCT_IN6_ADDR succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_9dc45 && [1/2] Building C object CMakeFiles/cmTC_9dc45.dir/src.c.o
-[2/2] Linking C executable cmTC_9dc45
+Run Build Command(s):/usr/bin/ninja cmTC_16976 && [1/2] Building C object CMakeFiles/cmTC_16976.dir/src.c.o
+[2/2] Linking C executable cmTC_16976
 
 
 Source file was:
@@ -1113,8 +1113,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_STRUCT_SOCKADDR_IN6 succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_6dc55 && [1/2] Building C object CMakeFiles/cmTC_6dc55.dir/src.c.o
-[2/2] Linking C executable cmTC_6dc55
+Run Build Command(s):/usr/bin/ninja cmTC_3a611 && [1/2] Building C object CMakeFiles/cmTC_3a611.dir/src.c.o
+[2/2] Linking C executable cmTC_3a611
 
 
 Source file was:
@@ -1151,8 +1151,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_STRUCT_SOCKADDR_STORAGE succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f3278 && [1/2] Building C object CMakeFiles/cmTC_f3278.dir/src.c.o
-[2/2] Linking C executable cmTC_f3278
+Run Build Command(s):/usr/bin/ninja cmTC_afd0b && [1/2] Building C object CMakeFiles/cmTC_afd0b.dir/src.c.o
+[2/2] Linking C executable cmTC_afd0b
 
 
 Source file was:
@@ -1189,8 +1189,8 @@ Source file was:
 Performing C SOURCE FILE Test HAVE_STRUCT_TIMEVAL succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_ba631 && [1/2] Building C object CMakeFiles/cmTC_ba631.dir/src.c.o
-[2/2] Linking C executable cmTC_ba631
+Run Build Command(s):/usr/bin/ninja cmTC_3dfd3 && [1/2] Building C object CMakeFiles/cmTC_3dfd3.dir/src.c.o
+[2/2] Linking C executable cmTC_3dfd3
 
 
 Source file was:
@@ -1227,8 +1227,8 @@ Source file was:
 Determining if the AF_INET6 exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_de0ba && [1/2] Building C object CMakeFiles/cmTC_de0ba.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_de0ba
+Run Build Command(s):/usr/bin/ninja cmTC_a8e89 && [1/2] Building C object CMakeFiles/cmTC_a8e89.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_a8e89
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1267,8 +1267,8 @@ int main(int argc, char** argv)
 Determining if the O_NONBLOCK exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_b4b87 && [1/2] Building C object CMakeFiles/cmTC_b4b87.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_b4b87
+Run Build Command(s):/usr/bin/ninja cmTC_4c67f && [1/2] Building C object CMakeFiles/cmTC_4c67f.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_4c67f
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1307,8 +1307,8 @@ int main(int argc, char** argv)
 Determining if the FIONBIO exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_3468a && [1/2] Building C object CMakeFiles/cmTC_3468a.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_3468a
+Run Build Command(s):/usr/bin/ninja cmTC_b61f9 && [1/2] Building C object CMakeFiles/cmTC_b61f9.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_b61f9
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1347,8 +1347,8 @@ int main(int argc, char** argv)
 Determining if the SIOCGIFADDR exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_14f92 && [1/2] Building C object CMakeFiles/cmTC_14f92.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_14f92
+Run Build Command(s):/usr/bin/ninja cmTC_76536 && [1/2] Building C object CMakeFiles/cmTC_76536.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_76536
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1387,8 +1387,8 @@ int main(int argc, char** argv)
 Determining if the MSG_NOSIGNAL exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_e66a8 && [1/2] Building C object CMakeFiles/cmTC_e66a8.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_e66a8
+Run Build Command(s):/usr/bin/ninja cmTC_bd511 && [1/2] Building C object CMakeFiles/cmTC_bd511.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_bd511
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1427,8 +1427,8 @@ int main(int argc, char** argv)
 Determining if the PF_INET6 exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_65e1a && [1/2] Building C object CMakeFiles/cmTC_65e1a.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_65e1a
+Run Build Command(s):/usr/bin/ninja cmTC_3b535 && [1/2] Building C object CMakeFiles/cmTC_3b535.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_3b535
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1467,8 +1467,8 @@ int main(int argc, char** argv)
 Determining if the CLOCK_MONOTONIC exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_5d8e9 && [1/2] Building C object CMakeFiles/cmTC_5d8e9.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_5d8e9
+Run Build Command(s):/usr/bin/ninja cmTC_46186 && [1/2] Building C object CMakeFiles/cmTC_46186.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_46186
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1507,8 +1507,8 @@ int main(int argc, char** argv)
 Performing C SOURCE FILE Test HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_222ab && [1/2] Building C object CMakeFiles/cmTC_222ab.dir/src.c.o
-[2/2] Linking C executable cmTC_222ab
+Run Build Command(s):/usr/bin/ninja cmTC_34c72 && [1/2] Building C object CMakeFiles/cmTC_34c72.dir/src.c.o
+[2/2] Linking C executable cmTC_34c72
 
 
 Source file was:
@@ -1543,8 +1543,8 @@ int main()
 Performing C SOURCE FILE Test HAVE_LL succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f44ae && [1/2] Building C object CMakeFiles/cmTC_f44ae.dir/src.c.o
-[2/2] Linking C executable cmTC_f44ae
+Run Build Command(s):/usr/bin/ninja cmTC_7a4e0 && [1/2] Building C object CMakeFiles/cmTC_7a4e0.dir/src.c.o
+[2/2] Linking C executable cmTC_7a4e0
 
 
 Source file was:
@@ -1552,8 +1552,8 @@ int main() { int n=1234LL; return 0; }
 Determining if the connect exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_d1a6a && [1/2] Building C object CMakeFiles/cmTC_d1a6a.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_d1a6a
+Run Build Command(s):/usr/bin/ninja cmTC_54746 && [1/2] Building C object CMakeFiles/cmTC_54746.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_54746
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1592,8 +1592,8 @@ int main(int argc, char** argv)
 Determining if the fcntl exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_0f11b && [1/2] Building C object CMakeFiles/cmTC_0f11b.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_0f11b
+Run Build Command(s):/usr/bin/ninja cmTC_d407e && [1/2] Building C object CMakeFiles/cmTC_d407e.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_d407e
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1632,8 +1632,8 @@ int main(int argc, char** argv)
 Determining if the freeaddrinfo exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_45e12 && [1/2] Building C object CMakeFiles/cmTC_45e12.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_45e12
+Run Build Command(s):/usr/bin/ninja cmTC_72e60 && [1/2] Building C object CMakeFiles/cmTC_72e60.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_72e60
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1672,8 +1672,8 @@ int main(int argc, char** argv)
 Determining if the getaddrinfo exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_b5650 && [1/2] Building C object CMakeFiles/cmTC_b5650.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_b5650
+Run Build Command(s):/usr/bin/ninja cmTC_4648b && [1/2] Building C object CMakeFiles/cmTC_4648b.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_4648b
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1712,8 +1712,8 @@ int main(int argc, char** argv)
 Determining if the getenv exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_108b8 && [1/2] Building C object CMakeFiles/cmTC_108b8.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_108b8
+Run Build Command(s):/usr/bin/ninja cmTC_eedab && [1/2] Building C object CMakeFiles/cmTC_eedab.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_eedab
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1752,8 +1752,8 @@ int main(int argc, char** argv)
 Determining if the gethostbyaddr exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_7f6f3 && [1/2] Building C object CMakeFiles/cmTC_7f6f3.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_7f6f3
+Run Build Command(s):/usr/bin/ninja cmTC_c900b && [1/2] Building C object CMakeFiles/cmTC_c900b.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_c900b
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1792,8 +1792,8 @@ int main(int argc, char** argv)
 Determining if the gethostbyname exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_620e6 && [1/2] Building C object CMakeFiles/cmTC_620e6.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_620e6
+Run Build Command(s):/usr/bin/ninja cmTC_9bd55 && [1/2] Building C object CMakeFiles/cmTC_9bd55.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_9bd55
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1832,8 +1832,8 @@ int main(int argc, char** argv)
 Determining if the gethostname exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f23f2 && [1/2] Building C object CMakeFiles/cmTC_f23f2.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_f23f2
+Run Build Command(s):/usr/bin/ninja cmTC_96fcb && [1/2] Building C object CMakeFiles/cmTC_96fcb.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_96fcb
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1872,8 +1872,8 @@ int main(int argc, char** argv)
 Determining if the getnameinfo exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_78897 && [1/2] Building C object CMakeFiles/cmTC_78897.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_78897
+Run Build Command(s):/usr/bin/ninja cmTC_4a64a && [1/2] Building C object CMakeFiles/cmTC_4a64a.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_4a64a
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1912,8 +1912,8 @@ int main(int argc, char** argv)
 Determining if the getservbyport_r exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_55a06 && [1/2] Building C object CMakeFiles/cmTC_55a06.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_55a06
+Run Build Command(s):/usr/bin/ninja cmTC_31575 && [1/2] Building C object CMakeFiles/cmTC_31575.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_31575
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1952,8 +1952,8 @@ int main(int argc, char** argv)
 Determining if the getservbyname_r exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_c9f79 && [1/2] Building C object CMakeFiles/cmTC_c9f79.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_c9f79
+Run Build Command(s):/usr/bin/ninja cmTC_0e51b && [1/2] Building C object CMakeFiles/cmTC_0e51b.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_0e51b
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -1992,8 +1992,8 @@ int main(int argc, char** argv)
 Determining if the gettimeofday exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_57f29 && [1/2] Building C object CMakeFiles/cmTC_57f29.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_57f29
+Run Build Command(s):/usr/bin/ninja cmTC_2463d && [1/2] Building C object CMakeFiles/cmTC_2463d.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_2463d
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2032,8 +2032,8 @@ int main(int argc, char** argv)
 Determining if the if_indextoname exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_3424f && [1/2] Building C object CMakeFiles/cmTC_3424f.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_3424f
+Run Build Command(s):/usr/bin/ninja cmTC_e0ab1 && [1/2] Building C object CMakeFiles/cmTC_e0ab1.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_e0ab1
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2072,8 +2072,8 @@ int main(int argc, char** argv)
 Determining if the inet_ntop exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_1f725 && [1/2] Building C object CMakeFiles/cmTC_1f725.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_1f725
+Run Build Command(s):/usr/bin/ninja cmTC_519c3 && [1/2] Building C object CMakeFiles/cmTC_519c3.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_519c3
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2112,8 +2112,8 @@ int main(int argc, char** argv)
 Determining if the inet_pton exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f5215 && [1/2] Building C object CMakeFiles/cmTC_f5215.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_f5215
+Run Build Command(s):/usr/bin/ninja cmTC_3e6a9 && [1/2] Building C object CMakeFiles/cmTC_3e6a9.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_3e6a9
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2152,8 +2152,8 @@ int main(int argc, char** argv)
 Determining if the ioctl exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_34c27 && [1/2] Building C object CMakeFiles/cmTC_34c27.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_34c27
+Run Build Command(s):/usr/bin/ninja cmTC_fddd3 && [1/2] Building C object CMakeFiles/cmTC_fddd3.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_fddd3
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2192,8 +2192,8 @@ int main(int argc, char** argv)
 Determining if the recv exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_af8e4 && [1/2] Building C object CMakeFiles/cmTC_af8e4.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_af8e4
+Run Build Command(s):/usr/bin/ninja cmTC_300d6 && [1/2] Building C object CMakeFiles/cmTC_300d6.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_300d6
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2232,8 +2232,8 @@ int main(int argc, char** argv)
 Determining if the recvfrom exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_b8159 && [1/2] Building C object CMakeFiles/cmTC_b8159.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_b8159
+Run Build Command(s):/usr/bin/ninja cmTC_6937b && [1/2] Building C object CMakeFiles/cmTC_6937b.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_6937b
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2272,8 +2272,8 @@ int main(int argc, char** argv)
 Determining if the send exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_cf8e4 && [1/2] Building C object CMakeFiles/cmTC_cf8e4.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_cf8e4
+Run Build Command(s):/usr/bin/ninja cmTC_0ca01 && [1/2] Building C object CMakeFiles/cmTC_0ca01.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_0ca01
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2312,8 +2312,8 @@ int main(int argc, char** argv)
 Determining if the setsockopt exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_ef051 && [1/2] Building C object CMakeFiles/cmTC_ef051.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_ef051
+Run Build Command(s):/usr/bin/ninja cmTC_8f40f && [1/2] Building C object CMakeFiles/cmTC_8f40f.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_8f40f
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2352,8 +2352,8 @@ int main(int argc, char** argv)
 Determining if the socket exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_f168f && [1/2] Building C object CMakeFiles/cmTC_f168f.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_f168f
+Run Build Command(s):/usr/bin/ninja cmTC_40101 && [1/2] Building C object CMakeFiles/cmTC_40101.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_40101
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2392,8 +2392,8 @@ int main(int argc, char** argv)
 Determining if the strcasecmp exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_a8838 && [1/2] Building C object CMakeFiles/cmTC_a8838.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_a8838
+Run Build Command(s):/usr/bin/ninja cmTC_57e20 && [1/2] Building C object CMakeFiles/cmTC_57e20.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_57e20
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2432,8 +2432,8 @@ int main(int argc, char** argv)
 Determining if the strdup exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_c668d && [1/2] Building C object CMakeFiles/cmTC_c668d.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_c668d
+Run Build Command(s):/usr/bin/ninja cmTC_68451 && [1/2] Building C object CMakeFiles/cmTC_68451.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_68451
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2472,8 +2472,8 @@ int main(int argc, char** argv)
 Determining if the strncasecmp exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_87734 && [1/2] Building C object CMakeFiles/cmTC_87734.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_87734
+Run Build Command(s):/usr/bin/ninja cmTC_d0e00 && [1/2] Building C object CMakeFiles/cmTC_d0e00.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_d0e00
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2512,8 +2512,8 @@ int main(int argc, char** argv)
 Determining if the writev exist passed with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_b8e8f && [1/2] Building C object CMakeFiles/cmTC_b8e8f.dir/CheckSymbolExists.c.o
-[2/2] Linking C executable cmTC_b8e8f
+Run Build Command(s):/usr/bin/ninja cmTC_922db && [1/2] Building C object CMakeFiles/cmTC_922db.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_922db
 
 
 File /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
@@ -2552,8 +2552,8 @@ int main(int argc, char** argv)
 Performing C++ SOURCE FILE Test protobuf_HAVE_LD_VERSION_SCRIPT succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_8ba3b && [1/2] Building CXX object CMakeFiles/cmTC_8ba3b.dir/src.cxx.o
-[2/2] Linking CXX executable cmTC_8ba3b
+Run Build Command(s):/usr/bin/ninja cmTC_224be && [1/2] Building CXX object CMakeFiles/cmTC_224be.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_224be
 
 
 Source file was:
@@ -2561,8 +2561,8 @@ int main() { return 0; }
 Performing C++ SOURCE FILE Test protobuf_HAVE_BUILTIN_ATOMICS succeeded with the following output:
 Change Dir: /Humanoid-MPC/mujoco_mpc/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/ninja cmTC_0c27c && [1/2] Building CXX object CMakeFiles/cmTC_0c27c.dir/src.cxx.o
-[2/2] Linking CXX executable cmTC_0c27c
+Run Build Command(s):/usr/bin/ninja cmTC_c7621 && [1/2] Building CXX object CMakeFiles/cmTC_c7621.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_c7621
 
 
 Source file was:

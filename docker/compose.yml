@@ -5,7 +5,7 @@ services:
       - DISPLAY=novnc:0.0 
       - XLA_FLAGS=--xla_gpu_triton_gemm_any=true
       - MUJOCO_GL=egl
-    image: "mcgillrobotics/humanoid-mpc:id"
+    image: "mcgillrobotics/humanoid-mpc:latest"
     build:
       context: ..
       dockerfile: docker/Dockerfile
