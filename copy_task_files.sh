@@ -1,1 +1,2 @@
+mkdir -p /usr/local/lib/python3.10/dist-packages/mujoco_mpc-0.1.0-py3.10-linux-x86_64.egg/mujoco_mpc/mjpc/../mjpc/tasks/humanoid_cap/stand/../../../../../../simulation/assets/
 cp -rf simulation/assets/* /usr/local/lib/python3.10/dist-packages/mujoco_mpc-0.1.0-py3.10-linux-x86_64.egg/mujoco_mpc/mjpc/../mjpc/tasks/humanoid_cap/stand/../../../../../../simulation/assets/

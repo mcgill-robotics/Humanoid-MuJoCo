@@ -375,4 +375,4 @@ def standupReward(
 
 
 SELECTED_REWARD_FUNCTION = standupReward
-SELECTED_REWARD_FUNCTION = controlInputReward
+# SELECTED_REWARD_FUNCTION = controlInputReward

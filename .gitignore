@@ -5,3 +5,8 @@ venv
 slurm/*.txt
 
 simulation.egg-info/*
+.eggs/*
+mujoco_mpc.egg-info/*
+mujoco_mpc/build/CMakeCache.txt
+mujoco_mpc/build/.ninja_log
+mujoco_mpc/build/.ninja_deps

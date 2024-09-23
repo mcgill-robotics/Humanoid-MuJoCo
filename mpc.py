@@ -1,12 +1,12 @@
 import mujoco
-import numpy as np
 from simulation.simulation_parameters import CONTROL_FREQUENCY
 import cv2
 import time
-import os
 import pathlib
 
 from mujoco_mpc import agent as agent_lib
+
+RENDER = False
 
 model_path = (
     pathlib.Path(__file__).parent
@@ -26,6 +26,7 @@ agent = agent_lib.Agent(task_id="Humanoid Cap Stand", model=model)
 # rollout
 mujoco.mj_resetData(model, data)
 while True:
+    start_time = time.time()
     # set planner state
     agent.set_state(
         time=data.time,
@@ -49,8 +50,12 @@ while True:
     mujoco.mj_step(model, data)
 
     # render
-    renderer.update_scene(data, camera="track", scene_option=scene_option)
-    frame = renderer.render()
-    # time.sleep(1 / CONTROL_FREQUENCY)
-    cv2.imshow("CPU Sim View", frame)
-    cv2.waitKey(1)
+    if RENDER:
+        renderer.update_scene(data, camera="track", scene_option=scene_option)
+        frame = renderer.render()
+        cv2.imshow("CPU Sim View", frame)
+        cv2.waitKey(1)
+    else:
+        end_time = time.time()
+        control_time = end_time - start_time
+        print(f"Control freq.: {1.0 / control_time}")
