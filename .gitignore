@@ -6,6 +6,7 @@ slurm/*.txt
 
 simulation.egg-info/*
 .eggs/*
+build/*
 mujoco_mpc.egg-info/*
 mujoco_mpc/build/CMakeCache.txt
 mujoco_mpc/build/.ninja_log

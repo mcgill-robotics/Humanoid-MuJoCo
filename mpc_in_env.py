@@ -69,7 +69,7 @@ def set_mujoco_state(state, mj_model, mj_data):
 
 
 if __name__ == "__main__":
-    RENDER = False # make False to calculate control frequency
+    RENDER = True # make False to calculate control frequency
     PLANNER_HORIZON = 10
     # ----------- SETUP MUJOCO MPC -----------
     model_path = (
@@ -133,6 +133,6 @@ if __name__ == "__main__":
         else:
             control_time = end_time - start_time
             print(f"Control freq.: {1.0 / control_time}")
-        # render(mj_data)
+        render(mj_data)
 
     renderer.close()
