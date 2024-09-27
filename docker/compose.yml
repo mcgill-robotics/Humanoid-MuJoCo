@@ -12,6 +12,8 @@ services:
     volumes:
       - ../.:/Humanoid-MPC
     command: bash -c "tail -f /dev/null"
+    container_name: humanoid_mujoco
+    network_mode: host
     deploy:
       resources:
         reservations:

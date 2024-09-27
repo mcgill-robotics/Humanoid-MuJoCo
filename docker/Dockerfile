@@ -32,7 +32,7 @@ RUN apt --fix-broken install; exit 0
 
 RUN pip3 install --upgrade "jax[cuda12]"
 RUN apt-get update && apt-get install -y cmake libgl1-mesa-dev libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev ninja-build zlib1g-dev clang-12
-RUN pip install --upgrade protobuf
+RUN pip install --upgrade protobuf pyzmq
 
 RUN echo "alias build='bash /Humanoid-MPC/build.sh'" >> ~/.bashrc
 
