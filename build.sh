@@ -7,3 +7,5 @@ cd /Humanoid-MPC/mujoco_mpc && \
     python3 setup.py install
 
 cd /Humanoid-MPC/ && pip install -e .
+
+./copy_task_files.sh
