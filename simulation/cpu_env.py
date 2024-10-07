@@ -56,8 +56,7 @@ class CPUEnv(gym.Env):
         self.action_space = spaces.Box(
             -1, 1, shape=(len(JOINT_NAMES),), dtype=np.float64
         )
-        # observation_size = len(JOINT_NAMES) + len(JOINT_NAMES) + 3 + 3 + 3 + 2 + 3 + 3
-        observation_size = len(JOINT_NAMES) * 2 + 3 + 3
+        observation_size = len(JOINT_NAMES) * 2 + 3 + 3 + 1
         self.observation_space = spaces.Box(
             -10, 10, shape=(observation_size,), dtype=np.float64
         )
@@ -156,6 +155,10 @@ class CPUEnv(gym.Env):
         self.torso_local_velocity_delay = round(
             self.torso_local_velocity_delay / actual_timestep
         )
+        self.torso_z_pos_delay = random.uniform(
+            MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
+        )
+        self.torso_z_pos_delay = round(self.torso_z_pos_delay / actual_timestep)
         self.local_gravity_vector_delay = random.uniform(
             MIN_DELAY * self.randomization_factor, MAX_DELAY * self.randomization_factor
         )
@@ -181,6 +184,7 @@ class CPUEnv(gym.Env):
         self.torso_local_velocity_buffer = [jp.array([0] * 3)] * (int)(
             self.torso_local_velocity_delay
         )
+        self.torso_z_buffer = [0] * (int)(self.torso_z_pos_delay)
         self.local_gravity_vector_buffer = [jp.array([0, 0, -1])] * (int)(
             self.local_gravity_vector_delay
         )
@@ -505,6 +509,12 @@ class CPUEnv(gym.Env):
         #     inverseRotateVectors(torso_quat, self._get_torso_velocity())
         #     + local_vel_noise
         # )
+        torso_z = self._get_torso_z_pos()
+        torso_z += (
+            MIN_Z_POS_SENSOR_NOISE_STDDEV
+            + self.randomization_factor
+            * (MAX_Z_POS_SENSOR_NOISE_STDDEV - MIN_Z_POS_SENSOR_NOISE_STDDEV)
+        ) * jax.random.normal(key=self.rng_key)
 
         # gravity direction (local)
         quaternion_noise = (
@@ -528,6 +538,7 @@ class CPUEnv(gym.Env):
         self.joint_velocities_buffer.append(joint_velocities)
         self.local_ang_vel_buffer.append(local_ang_vel)
         # self.torso_local_velocity_buffer.append(torso_local_velocity)
+        self.torso_z_buffer.append(torso_z)
         self.local_gravity_vector_buffer.append(local_gravity_vector)
         # self.contact_sensor_buffer.append(
         #     (binary_foot_contact_state_left, binary_foot_contact_state_right)
@@ -537,6 +548,7 @@ class CPUEnv(gym.Env):
         joint_velocities = self.joint_velocities_buffer.pop(0)
         local_ang_vel = self.local_ang_vel_buffer.pop(0)
         # torso_local_velocity = self.torso_local_velocity_buffer.pop(0)
+        torso_z = self.torso_z_buffer.pop(0)
         local_gravity_vector = self.local_gravity_vector_buffer.pop(0)
         # binary_foot_contact_state_left, binary_foot_contact_state_right = (
         #     self.contact_sensor_buffer.pop(0)
@@ -558,6 +570,7 @@ class CPUEnv(gym.Env):
                 local_ang_vel,  # rad/s
                 # torso_local_velocity,  # m/s
                 local_gravity_vector,  # unit vector
+                torso_z,  # m
                 # np.array([binary_foot_contact_state_left]),
                 # np.array([binary_foot_contact_state_right]),
                 # self.control_input_velocity,  # as defined in reset
