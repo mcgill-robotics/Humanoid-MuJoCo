@@ -48,7 +48,8 @@ def find_ideal_distance_to_ground(
     # Find the height-offset at which the vertical force is smallest.
     idx = np.argmin(np.abs(vertical_forces))
     best_offset = height_offsets[idx]
-    return best_offset + 0.01 # add a small offset so that the robot does not assume it can always push off the ground, makes for more robust policy
+    HOVER_DISTANCE = 0.0
+    return best_offset + HOVER_DISTANCE # add a small offset so that the robot does not assume it can always push off the ground, makes for more robust policy
 
 
 def set_mujoco_state(state, mj_model, mj_data, JOINT_QPOS_IDX, JOINT_DOF_IDX):

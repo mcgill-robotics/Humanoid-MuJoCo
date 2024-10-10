@@ -5,13 +5,18 @@
   <size memory="400K"/>
 
   <custom>
-    <numeric name="agent_planner" data="0" />
+    <!-- 0 = Sampling, 1 = Gradient, 2 = ILQG, 3 = ILQS, 4 = Robust Sampling, 5 = Cross Entropy, 6 = Sample Gradient -->
+    <numeric name="agent_planner" data="2" /> 
+    <!-- 0.35 seems good from emperical tests -->
     <numeric name="agent_horizon" data="0.35" />
-    <numeric name="agent_timestep" data="0.015" />
+    <!-- for 50Hz do 0.02 -->
+    <numeric name="agent_timestep" data="0.02" />
+    <!-- 0.4 is standing, 0.45 is like tiptoes -->
+    <numeric name="residual_Height Goal" data="0.425 -1.0 1.0" />
+    
     <numeric name="sampling_spline_points" data="3" />
     <numeric name="sampling_exploration" data="0.05" />
     <numeric name="gradient_spline_points" data="5" />
-    <numeric name="residual_Height Goal" data="1.4 0.0 1.5" />
   </custom>
 
   <sensor>
