@@ -14,7 +14,7 @@ from mujoco_mpc import agent as agent_lib
 
 
 # Function to render current state of mujoco (for debugging)
-def render(renderer, mj_data):
+def render(renderer, mj_data, display=True):
     scene_option = mujoco.MjvOption()
     mujoco.mjv_defaultOption(scene_option)
     scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
@@ -24,8 +24,11 @@ def render(renderer, mj_data):
     renderer.update_scene(mj_data, camera="track", scene_option=scene_option)
     frame = renderer.render()
     # time.sleep(1 / CONTROL_FREQUENCY)
-    cv2.imshow("CPU Sim View", frame)
-    cv2.waitKey(1)
+    if display:
+        cv2.imshow("CPU Sim View", frame)
+        cv2.waitKey(1)
+    else:
+        return frame
 
 
 # function to calculate the distance the robot should be offset vertically so it is touching the ground
