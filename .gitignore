@@ -13,3 +13,5 @@ mujoco_mpc/build/.ninja_log
 mujoco_mpc/build/.ninja_deps
 mujoco_mpc/build/CMakeFiles/CMakeError.log
 mujoco_mpc/build/CMakeFiles/CMakeOutput.log
+
+*.jpeg
