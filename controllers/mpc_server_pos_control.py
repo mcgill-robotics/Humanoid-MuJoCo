@@ -10,10 +10,10 @@ print("Server running...")
 
 mj_model, mj_data, renderer, JOINT_QPOS_IDX, JOINT_DOF_IDX, agent = get_mujoco_setup()
 
-PLANNER_HORIZON = 15
-DEBUG = True
+PLANNER_HORIZON = 1
+DEBUG = False
 
-TORQUE_TO_POSITION_MULTIPLIER = 0.6
+TORQUE_TO_POSITION_MULTIPLIER = 1.4
 
 while True:
     message = socket.recv_string()  # Receive a request
