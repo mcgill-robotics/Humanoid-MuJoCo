@@ -10,7 +10,7 @@ print("Server running...")
 
 mj_model, mj_data, renderer, JOINT_QPOS_IDX, JOINT_DOF_IDX, agent = get_mujoco_setup()
 
-PLANNER_HORIZON = 10
+PLANNER_HORIZON = 2
 DEBUG = True
 
 while True:
@@ -24,6 +24,7 @@ while True:
         decoded_json["quat"],
     )
     state = [np.array(s) for s in state]
+    state[2] = np.zeros(3)  # zero out angular velocity
 
     mj_model, mj_data = set_mujoco_state(
         state, mj_model, mj_data, JOINT_QPOS_IDX, JOINT_DOF_IDX

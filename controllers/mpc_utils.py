@@ -36,7 +36,7 @@ def render(renderer, mj_data, display=True):
 def find_ideal_distance_to_ground(
     mj_model, mj_data, joint_positions, torso_orientation, JOINT_QPOS_IDX
 ):
-    height_offsets = np.linspace(-0.2, 0.2, 100)
+    height_offsets = np.linspace(-0.1, 0.1, 200)
     vertical_forces = []
     for offset in height_offsets:
         mujoco.mj_resetDataKeyframe(mj_model, mj_data, 1)

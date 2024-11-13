@@ -5,7 +5,7 @@ import warnings
 
 from mujoco_mpc.proto import agent_pb2 as mujoco__mpc_dot_proto_dot_agent__pb2
 
-GRPC_GENERATED_VERSION = '1.66.1'
+GRPC_GENERATED_VERSION = '1.67.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 

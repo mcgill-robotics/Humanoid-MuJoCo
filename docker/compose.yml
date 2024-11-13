@@ -14,13 +14,13 @@ services:
     command: bash -c "tail -f /dev/null"
     container_name: humanoid_mujoco
     network_mode: host # NOTE: uncomment this line if you want to use the MPC server for ROS, keep it commented if you want to use the GUI
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
 # COMMENT OUT TO RUN SERVER, UNCOMMMENT TO RENDER ROBOT STATE
   # novnc:
